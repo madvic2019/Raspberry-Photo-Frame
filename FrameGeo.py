@@ -4,9 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 loading of images (so may show delay for v large images).
     Also has a minimal use of PointText and TextBlock system with reduced  codepoints
 and reduced grid_size to give better resolution for large characters.
-    Also shows a simple use of MQTT to control the slideshow parameters remotely
-see http://pi3d.github.io/html/FAQ.html and https://www.thedigitalpictureframe.com/control-your-digital-picture-frame-with-home-assistents-wifi-presence-detection-and-mqtt/
-and https://www.cloudmqtt.com/plans.html
+    
 
 USING exif info to rotate images
 
@@ -260,8 +258,8 @@ def get_files():
 
 
 
-############################################
-############# Main
+
+
 
 EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
 EXIF_ORIENTATION = None
