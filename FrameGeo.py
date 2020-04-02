@@ -137,10 +137,10 @@ def get_geo_name2(coords) :
   return geocoder
 
 
-def get_orientation(fname) :
+def get_orientation(im) :
   orientation = 1 
   try:
-    im = Image.open(fname) # lazy operation so shouldn't load (better test though)
+    #im = Image.open(fname) # lazy operation so shouldn't load (better test though)
     exif_data = im._getexif()
     dt = time.mktime(time.strptime(exif_data[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
     orientation = int(exif_data[EXIF_ORIENTATION])
@@ -165,9 +165,9 @@ def get_orientation2(exif) :
 
 
   
-def tex_load(fname, orientation, size=None):
+def tex_load(im, orientation, size=None):
   try:
-    im = Image.open(fname)
+    #im = Image.open(fname)
     im.putalpha(255) # this will convert to RGBA and set alpha to opaque
     if orientation == 2:
         im = im.transpose(Image.FLIP_LEFT_RIGHT)
@@ -361,7 +361,8 @@ while DISPLAY.loop_running():
           print('Error a la vuelta de geoname', e)
           location = None
        
-        sfg = tex_load(iFiles[pic_num][0], orientation, (DISPLAY.width, DISPLAY.height))
+        #sfg = tex_load(iFiles[pic_num][0], orientation, (DISPLAY.width, DISPLAY.height))
+		sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
         
       if sbg is None: # first time through
         sbg = sfg
