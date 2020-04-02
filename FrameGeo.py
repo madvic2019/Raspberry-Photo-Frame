@@ -362,7 +362,7 @@ while DISPLAY.loop_running():
           location = None
        
         #sfg = tex_load(iFiles[pic_num][0], orientation, (DISPLAY.width, DISPLAY.height))
-		sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
+	sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
         
       if sbg is None: # first time through
         sbg = sfg
