@@ -16,15 +16,14 @@ USING exif info to rotate images
 import os
 import time
 import random
-#import demo
 import pi3d
-
-from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
-from PIL.ExifTags import GPSTAGS,TAGS
-from geopy.geocoders import GeoNames
 #import json
 #import os
 #import requests
+from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
+from PIL.ExifTags import GPSTAGS,TAGS
+from geopy.geocoders import GeoNames
+
 
 #####################################################
 # these variables are constants
@@ -244,15 +243,9 @@ def get_files():
         print(len(file_list)) 
         
   if shuffle:
-#    file_list.sort(key=lambda x: x[1]) # will be later files last
-#    temp_list_first = file_list[-RECENT_N:]
-#    temp_list_last = file_list[:-RECENT_N]
-#    random.shuffle(temp_list_first)
-#    random.shuffle(temp_list_last)
-#    file_list = temp_list_first + temp_list_last
-     random.shuffle(file_list)
+    random.shuffle(file_list)
   else:
-    file_list.sort() # if not suffled; sort by name
+    file_list.sort() # if not shuffled; sort by name
   print(len(file_list))
   return file_list, len(file_list) # tuple of file list, number of pictures
 
