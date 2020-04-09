@@ -165,9 +165,8 @@ def get_orientation2(exif) :
 
 
   
-def tex_load(fname, orientation, size=None):
+def tex_load(im, orientation, size=None):
   try:
-    im = Image.open(fname)
     im.putalpha(255) # this will convert to RGBA and set alpha to opaque
     if orientation == 2:
         im = im.transpose(Image.FLIP_LEFT_RIGHT)
@@ -329,33 +328,35 @@ while DISPLAY.loop_running():
         include=False
         try:
           im = Image.open(iFiles[pic_num][0])
-          try:
-            exif_data = im._getexif()
-            try:        
-              orientation = int(exif_data[EXIF_ORIENTATION])
-            except:
-              orientation = 1
-            try: 
-              dt = time.mktime(time.strptime(exif_data[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
-
-            except:
-              dt = os.path.getmtime(iFiles[pic_num][0]) # so use file last modified date
-            try:
-              coordinates=get_coordinates(get_geotagging(exif_data))
-            except:
-              coordinates=None
-          except:
-            exif_data=None
-          datestruct=time.localtime(dt)        
         except:
           print("Error Opening File",iFiles[pic_num][0])
+          continue
+        try:
+          exif_data = im._getexif()
+        except:
+          exif_data=None
+        try:        
+          orientation = int(exif_data[EXIF_ORIENTATION])
+        except:
+          orientation = 1
+        try: 
+          dt = time.mktime(time.strptime(exif_data[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
+        except:
+          
+        try:
+          coordinates=get_coordinates(get_geotagging(exif_data))
+        except:
+          coordinates=None
+        except:
+        if dt is not None:    
+          datestruct=time.localtime(dt)        
         try:
           location = get_geo_name2(coordinates)
         except Exception as e: # NB should really check error
           print('Error a la vuelta de geoname', e)
           location = None
        
-        sfg = tex_load(iFiles[pic_num][0], orientation, (DISPLAY.width, DISPLAY.height))
+        sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
         
       if sbg is None: # first time through
         sbg = sfg
