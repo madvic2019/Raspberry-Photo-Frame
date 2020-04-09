@@ -342,14 +342,14 @@ while DISPLAY.loop_running():
           orientation = 1
         try: 
           dt = time.mktime(time.strptime(exif_data[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
+          datestruct=time.localtime(dt)
         except:
-          dt=None
+          datestruct=None
+          print("No date in EXIF")
         try:
           coordinates=get_coordinates(get_geotagging(exif_data))
         except:
           coordinates=None
-        if dt is not None:    
-          datestruct=time.localtime(dt)        
         try:
           location = get_geo_name2(coordinates)
         except Exception as e: # NB should really check error
