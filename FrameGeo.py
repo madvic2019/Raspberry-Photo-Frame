@@ -31,8 +31,8 @@ from geopy.geocoders import GeoNames
 #####################################################
 
 #PIC_DIR = '/home/pi/pi3d_demos/textures' #'textures'
-PIC_DIR = '/home/pi/frododrive/photo/Fotos'
-#PIC_DIR='/home/pi/photos/'
+#PIC_DIR = '/home/pi/frododrive/photo/Fotos'
+PIC_DIR='/home/pi/photos/'
 #PIC_DIR = '/home/pi/frododrive/photo/iphone de Marivi'
 FPS = 20
 FIT = True
