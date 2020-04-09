@@ -350,10 +350,6 @@ while DISPLAY.loop_running():
           coordinates=None
         if dt is not None:    
           datestruct=time.localtime(dt)        
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
->>>>>>> bdb9be8d2e226e1b272d9da7f647fa5a2e5eeb0a
         try:
           location = get_geo_name2(coordinates)
         except Exception as e: # NB should really check error
