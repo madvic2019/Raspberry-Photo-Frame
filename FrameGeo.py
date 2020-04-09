@@ -327,6 +327,7 @@ while DISPLAY.loop_running():
         coordinates = None
         dt=None
         include=False
+        datestruct=None
         try:
           im = Image.open(iFiles[pic_num][0])
           try:
@@ -349,6 +350,29 @@ while DISPLAY.loop_running():
           datestruct=time.localtime(dt)        
         except:
           print("Error Opening File",iFiles[pic_num][0])
+<<<<<<< Updated upstream
+=======
+          continue
+        try:
+          exif_data = im._getexif()
+        except:
+          exif_data=None
+        try:        
+          orientation = int(exif_data[EXIF_ORIENTATION])
+        except:
+          orientation = 1
+        try: 
+          dt = time.mktime(time.strptime(exif_data[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
+        except:
+          dt=None
+        try:
+          coordinates=get_coordinates(get_geotagging(exif_data))
+        except:
+          coordinates=None
+        except:
+        if dt is not None:    
+          datestruct=time.localtime(dt)        
+>>>>>>> Stashed changes
         try:
           location = get_geo_name2(coordinates)
         except Exception as e: # NB should really check error
