@@ -402,7 +402,7 @@ while DISPLAY.loop_running():
     if a < 1.0: # transition is happening
       a += delta_alpha
       slide.unif[44] = a
-      print("Picture number ",pic_num,"alpha ",a, "Text ",overlay_text)  
+      print("Picture number ",pic_num,"alpha ",a," time ", tm,"Text ",overlay_text)  
       
     else: # no transition effect safe to resuffle etc
       if shuffle and num_run_through >= RESHUFFLE_NUM :
