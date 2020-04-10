@@ -312,7 +312,7 @@ while DISPLAY.loop_running():
       sbg = sfg
       sfg = None
       while sfg is None: # keep going through until a usable picture is found TODO break out how?
-        print("Elapsed since last file load ",nexttm)
+        print("Elapsed since last file load ",nexttm-time.time())
         print("Time out, fetch new image ",next_pic_num)
         pic_num = next_pic_num
         next_pic_num += 1
