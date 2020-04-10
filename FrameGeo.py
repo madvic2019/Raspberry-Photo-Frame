@@ -382,14 +382,14 @@ while DISPLAY.loop_running():
       if SHOW_LOCATION: #(and/or month-year)
         if location is not None:
           overlay_text += tidy_name(str(location))
-     #     print(overlay_text)
+          print(overlay_text)
         if datestruct is not None :
           overlay_text += " " + str(datestruct.tm_mday) + "/" + str(datestruct.tm_mon) + "/" + str(datestruct.tm_year)
-     #     print(overlay_text)
+          print(overlay_text)
         try:
           textblock.set_text(text_format="{}".format(overlay_text))
-        except e:
-          print("Wrong Overlay_text Format",e)
+        except :
+          print("Wrong Overlay_text Format")
     text.regen()		
     if KENBURNS:
       t_factor = nexttm - tm
