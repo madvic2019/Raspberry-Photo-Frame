@@ -407,18 +407,17 @@ while DISPLAY.loop_running():
       if shuffle and num_run_through >= RESHUFFLE_NUM :
         num_run_through = 0
         random.shuffle(iFiles)
-    
+    print("Picture number ",pic_num, "Text ",overlay_text)  
     slide.draw()
-    #text.regen()
+    text.regen()
+    text.draw()
     
   else:
     textblock.set_text("NO IMAGES SELECTED")
     textblock.colouring.set_colour(alpha=1.0)
-    #text.regen()
-  text.regen()
-  text.draw()
-
-
+    text.regen()
+    text.draw()
+  
   if KEYBOARD:
     k = kbd.read()
     if k != -1:
