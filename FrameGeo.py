@@ -390,7 +390,7 @@ while DISPLAY.loop_running():
           textblock.set_text(text_format="{}".format(overlay_text))
         except :
           print("Wrong Overlay_text Format")
-          textblock.set_text("")
+          textblock.set_text(" ")
           
     text.regen()		
     if KENBURNS:
