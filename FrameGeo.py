@@ -333,11 +333,15 @@ while DISPLAY.loop_running():
           print("Error Opening File",iFiles[pic_num][0])
           continue
         try:
+          elapsed=time.time()
           exif_data = im._getexif()
+          print("time for exif ",time.time()-elapsed)
         except:
           exif_data=None
         try:        
+          elapsed=time.time()
           orientation = int(exif_data[EXIF_ORIENTATION])
+          print("time for orientation ",time.time()-elapsed)
         except:
           orientation = 1
         try: 
@@ -347,16 +351,21 @@ while DISPLAY.loop_running():
           datestruct=None
           print("No date in EXIF")
         try:
+          elapsed=time.time()
           coordinates=get_coordinates(get_geotagging(exif_data))
+          print("time for coordinates ",time.time()-elapsed)
         except:
           coordinates=None
         try:
+          elapsed=time.time()
           location = get_geo_name2(coordinates)
+          print("time for getting location ",time.time()-elapsed)
         except Exception as e: # NB should really check error
           print('Error a la vuelta de geoname', e)
           location = None
-       
+        elapsed=time.time()
         sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
+        print("time to load texture ",time.time()-elapsed)
         
       if sbg is None: # first time through
         sbg = sfg
