@@ -30,9 +30,8 @@ from geopy.geocoders import GeoNames
 # these variables are constants
 #####################################################
 
-#PIC_DIR = '/home/pi/pi3d_demos/textures' #'textures'
-#PIC_DIR = '/home/pi/frododrive/photo/Fotos'
-PIC_DIR='/home/pi/photos/'
+PIC_DIR = '/home/pi/frododrive/photo/Fotos'
+#PIC_DIR='/home/pi/photos/'
 #PIC_DIR = '/home/pi/frododrive/photo/iphone de Marivi'
 FPS = 20
 FIT = True
@@ -392,7 +391,7 @@ while DISPLAY.loop_running():
           print("Wrong Overlay_text Format")
           textblock.set_text(" ")
           
-    text.regen()		
+    #text.regen()		
     if KENBURNS:
       t_factor = nexttm - tm
       if kb_up:
@@ -408,13 +407,15 @@ while DISPLAY.loop_running():
       if shuffle and num_run_through >= RESHUFFLE_NUM :
         num_run_through = 0
         random.shuffle(iFiles)
+    
     slide.draw()
-    text.regen()
+    #text.regen()
     
   else:
     textblock.set_text("NO IMAGES SELECTED")
     textblock.colouring.set_colour(alpha=1.0)
-    text.regen()
+    #text.regen()
+  text.regen()
   text.draw()
 
 
