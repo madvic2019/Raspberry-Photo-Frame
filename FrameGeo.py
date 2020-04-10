@@ -308,11 +308,12 @@ while DISPLAY.loop_running():
     
     if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
       nexttm = tm + time_delay
-    
+      
       a = 0.0 # alpha - proportion front image to back
       sbg = sfg
       sfg = None
       while sfg is None: # keep going through until a usable picture is found TODO break out how?
+        print("Time out, fetch new image ",next_pic_num)
         pic_num = next_pic_num
         next_pic_num += 1
         if next_pic_num >= nFi:
@@ -402,13 +403,13 @@ while DISPLAY.loop_running():
       a += delta_alpha
       slide.unif[44] = a
       print("Picture number ",pic_num,"alpha ",a, "Text ",overlay_text)  
-      slide.draw()
-      text.draw()
+      
     else: # no transition effect safe to resuffle etc
       if shuffle and num_run_through >= RESHUFFLE_NUM :
         num_run_through = 0
         random.shuffle(iFiles)
-      
+    slide.draw()
+    text.draw()  
     
     
   else:
