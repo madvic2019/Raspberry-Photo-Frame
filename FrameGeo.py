@@ -308,7 +308,7 @@ while DISPLAY.loop_running():
     
     if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
       nexttm = tm + time_delay
-      
+      print("Elapsed since last file load ",time.time()-tm)
       a = 0.0 # alpha - proportion front image to back
       sbg = sfg
       sfg = None
