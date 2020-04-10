@@ -326,7 +326,9 @@ while DISPLAY.loop_running():
         include=False
         datestruct=None
         try:
+          elapsed=time.time()
           im = Image.open(iFiles[pic_num][0])
+          print("Time for opening ",time.time()-elapsed)
         except:
           print("Error Opening File",iFiles[pic_num][0])
           continue
