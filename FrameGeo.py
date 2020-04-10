@@ -51,8 +51,8 @@ CHECK_DIR_TM = 6000.0 # seconds to wait between checking if directory has change
 BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
 BLUR_ZOOM = 1.0 # must be >= 1.0 which expands the backgorund to just fill the space around the image
-KENBURNS = True # will set FIT->False and BLUR_EDGES->False
-KEYBOARD = False  # set to False when running headless to avoid curses error. True for debugging
+KENBURNS = False # will set FIT->False and BLUR_EDGES->False
+KEYBOARD = True  # set to False when running headless to avoid curses error. True for debugging
 #####################################################
 # these variables can be altered using MQTT messaging
 #####################################################
