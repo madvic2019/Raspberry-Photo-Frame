@@ -407,7 +407,7 @@ while DISPLAY.loop_running():
       if shuffle and num_run_through >= RESHUFFLE_NUM :
         num_run_through = 0
         random.shuffle(iFiles)
-    print("Picture number ",pic_num, "Text ",overlay_text)  
+    print("Picture number ",pic_num,"alpha ",a, "Text ",overlay_text)  
     slide.draw()
     text.regen()
     text.draw()
