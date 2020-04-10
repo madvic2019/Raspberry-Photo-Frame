@@ -165,7 +165,7 @@ def get_orientation2(exif) :
 
   
 def tex_load(im, orientation, size=None):
-  try:
+
     im.putalpha(255) # this will convert to RGBA and set alpha to opaque
     if orientation == 2:
         im = im.transpose(Image.FLIP_LEFT_RIGHT)
@@ -204,10 +204,8 @@ def tex_load(im, orientation, size=None):
       do_resize = True
     tex = pi3d.Texture(im, blend=True, m_repeat=True, automatic_resize=do_resize,
                        free_after_load=True)
-  except Exception as e:
-    print('''Couldn't load file {} giving error: {}'''.format(fname, e))
-    tex = None
-  return tex
+
+    return tex
 
 def tidy_name(path_name):
     name = os.path.basename(path_name).upper()
@@ -387,6 +385,7 @@ while DISPLAY.loop_running():
           #print(overlay_text)
         try:
           textblock.set_text(text_format="{}".format(overlay_text))
+          text.regen()
         except :
           print("Wrong Overlay_text Format")
           textblock.set_text(" ")
@@ -409,7 +408,7 @@ while DISPLAY.loop_running():
         random.shuffle(iFiles)
     print("Picture number ",pic_num,"alpha ",a, "Text ",overlay_text)  
     slide.draw()
-    text.regen()
+    
     text.draw()
     
   else:
