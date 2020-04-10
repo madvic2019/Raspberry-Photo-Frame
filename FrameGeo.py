@@ -366,6 +366,7 @@ while DISPLAY.loop_running():
         elapsed=time.time()
         sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
         print("time to load texture ",time.time()-elapsed)
+        tm=time.time() #reset timer to cope with texture delays
         
       if sbg is None: # first time through
         sbg = sfg
