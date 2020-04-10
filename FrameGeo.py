@@ -297,9 +297,9 @@ if nFi == 0:
 font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,
                 shadow=(0,0,0,128))
 text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
-textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 50, y=-DISPLAY.height * 0.4,
+textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 10, y=-DISPLAY.height * 0.4,
                           z=0.1, rot=0.0, char_count=199,
-                          text_format="{}".format(" "), size=0.99, 
+                          text_format="{}".format(" "), size=0.50, 
                           spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
 text.add_text_block(textblock)
 
@@ -382,14 +382,16 @@ while DISPLAY.loop_running():
       if SHOW_LOCATION: #(and/or month-year)
         if location is not None:
           overlay_text += tidy_name(str(location))
-          print(overlay_text)
+          #print(overlay_text)
         if datestruct is not None :
-          overlay_text += " " + str(datestruct.tm_mday) + "/" + str(datestruct.tm_mon) + "/" + str(datestruct.tm_year)
-          print(overlay_text)
+          overlay_text += " " + str(datestruct.tm_mon) + "/" + str(datestruct.tm_year)
+          #print(overlay_text)
         try:
           textblock.set_text(text_format="{}".format(overlay_text))
         except :
           print("Wrong Overlay_text Format")
+          textblock.set_text("")
+          
     text.regen()		
     if KENBURNS:
       t_factor = nexttm - tm
