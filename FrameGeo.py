@@ -41,7 +41,7 @@ RESHUFFLE_NUM = 5 # times through before reshuffling
 FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeSans.ttf'
 #FONT_FILE = '/home/pi/pi3d_demos/fonts/NotoSans-Regular.ttf'
 #FONT_FILE = '/home/patrick/python/pi3d_demos/fonts/NotoSans-Regular.ttf'
-CODEPOINTS = '1234567890ABCDEFGHIJKLMNÑOPQRSTUVWXYZ., _-/ÁÉÍÓÚabcdefghijklmnñopqrstuwxyzáéíóú' # limit to 49 ie 7x7 grid_size
+CODEPOINTS = '1234567890ABCDEFGHIJKLMNÑOPQRSTUVWXYZ., _-/ÁÉÍÓÚ' # limit to 49 ie 7x7 grid_size
 MES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 RECENT_N = 4 # shuffle the most recent ones to play before the rest
 #SHOW_NAMES = False
@@ -391,7 +391,7 @@ while DISPLAY.loop_running():
       overlay_text= "" #this will host the text on screen 
       if SHOW_LOCATION: #(and/or month-year)
         if location is not None:
-          overlay_text += str(location)
+          overlay_text += tidy_name(str(location))
           #print(overlay_text)
         if datestruct is not None :
           overlay_text += " " + MES[datestruct.tm_mon - 1] + "-" + str(datestruct.tm_year)
