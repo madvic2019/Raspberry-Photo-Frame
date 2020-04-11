@@ -297,7 +297,7 @@ text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
 textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 20, y=-DISPLAY.height * 0.4,
                           z=0.1, rot=0.0, char_count=199,
                           text_format="{}".format(" "), size=0.65, 
-                          spacing="F", space=0.02, colour=(0.8, 0.8, 0.8, 0.8))
+                          spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
 text.add_text_block(textblock)
 
 num_run_through = 0
