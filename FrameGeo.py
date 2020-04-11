@@ -1,4 +1,4 @@
-
+#--coding: utf-8 --
 #!/usr/bin/python
 from __future__ import absolute_import, division, print_function, unicode_literals
 ''' Simplified slideshow system using ImageSprite and without threading for background
@@ -41,7 +41,7 @@ RESHUFFLE_NUM = 5 # times through before reshuffling
 FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeSans.ttf'
 #FONT_FILE = '/home/pi/pi3d_demos/fonts/NotoSans-Regular.ttf'
 #FONT_FILE = '/home/patrick/python/pi3d_demos/fonts/NotoSans-Regular.ttf'
-CODEPOINTS = '1234567890ABCDEFGHIJKLMNÑOPQRSTUVWXYZ., _-/ÁÉÍÓÚ' # limit to 49 ie 7x7 grid_size
+CODEPOINTS = '1234567890ABCDEFGHIJKLMNÑOPQRSTUVWXYZ., _-/ÁÉÍÓÚabcdefghijklmnñopqrstuvwxyzáéíóú' # limit to 49 ie 7x7 grid_size
 MES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 RECENT_N = 4 # shuffle the most recent ones to play before the rest
 #SHOW_NAMES = False
@@ -291,8 +291,8 @@ if nFi == 0:
   exit()
 
 # PointText and TextBlock. If SHOW_NAMES is False then this is just used for no images message
-#font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(0,0,0,128))
-font = pi3d.Font(FONT_FILE,  grid_size=7, shadow_radius=4.0,shadow=(0,0,0,128))
+font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(0,0,0,128))
+#font = pi3d.Font(FONT_FILE,  grid_size=7, shadow_radius=4.0,shadow=(0,0,0,128))
 text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
 textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 20, y=-DISPLAY.height * 0.4,
                           z=0.1, rot=0.0, char_count=199,
