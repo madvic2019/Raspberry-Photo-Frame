@@ -395,7 +395,7 @@ while DISPLAY.loop_running():
           #print(overlay_text)
         if datestruct is not None :
           overlay_text += " " + MES[datestruct.tm_mon - 1] + "-" + str(datestruct.tm_year)
-          #print(overlay_text)
+          print(overlay_text)
         try:
           textblock.set_text(text_format="{}".format(overlay_text))
           text.regen()
