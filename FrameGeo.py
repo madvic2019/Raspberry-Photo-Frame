@@ -214,22 +214,22 @@ def tidy_name(path_name):
     name = ''.join([c for c in name if c in CODEPOINTS])
     return name
 
-def check_changes():
-  global last_file_change
-  update = False
-  for root, _, _ in os.walk(PIC_DIR):
-      mod_tm = os.stat(root).st_mtime
-      if mod_tm > last_file_change:
-        last_file_change = mod_tm
-        update = True
-  return update
+# def check_changes():
+  # global last_file_change
+  # update = False
+  # for root, _, _ in os.walk(PIC_DIR):
+      # mod_tm = os.stat(root).st_mtime
+      # if mod_tm > last_file_change:
+        # last_file_change = mod_tm
+        # update = True
+  # return update
 
 def get_files(dir=PIC_DIR):
   
   global shuffle, EXIF_DATID, last_file_change
   file_list = []
   extensions = ['.png','.jpg','.jpeg','.bmp'] # can add to these
-  for root, _dirnames, filenames in os.walk(PIC_DIR):
+  for root, _dirnames, filenames in os.walk(dir):
     mod_tm = os.stat(root).st_mtime # time of alteration in a directory
     if mod_tm > last_file_change:
       last_file_change = mod_tm
