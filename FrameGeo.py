@@ -224,7 +224,7 @@ def tidy_name(path_name):
         # update = True
   # return update
 
-def get_files(dir=PIC_DIR):
+def get_files(dir):
   
   global shuffle, EXIF_DATID, last_file_change
   file_list = []
@@ -252,7 +252,7 @@ def get_files(dir=PIC_DIR):
 
 
 def main(startdir=PIC_DIR,interval=time_delay) :
-
+    print("Dir ",startdir,"time ",intweval)
     global paused,geoloc
     EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
     EXIF_ORIENTATION = None
