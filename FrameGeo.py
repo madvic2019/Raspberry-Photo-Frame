@@ -251,7 +251,7 @@ def get_files(dir):
 
 
 
-def main(startdir=PIC_DIR,interval=time_delay) :
+def main(startdir,interval) :
     print("Dir ",startdir,"time ",interval)
     global paused,geoloc
     EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
@@ -463,7 +463,7 @@ if __name__ == '__main__':
         'path',
         metavar='ImagePath',
         type=str,
-        default='.',
+        default=PIC_DIR,
         nargs="?",
         help='Path to a directory that contains images'
         )
@@ -472,7 +472,7 @@ if __name__ == '__main__':
         type=int,
         dest='waittime',
         action='store',
-        default=1,
+        default=time_delay,
         help='Amount of time to wait before showing the next image.'
         )
 
