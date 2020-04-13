@@ -476,7 +476,7 @@ if __name__ == '__main__':
         )
 
     args = parser.parse_args()
-
+    paused=False
     main(startdir=args.path,interval=args.waittime)
 
 
