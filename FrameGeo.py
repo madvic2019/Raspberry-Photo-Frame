@@ -252,7 +252,7 @@ def get_files(dir):
 
 
 def main(startdir=PIC_DIR,interval=time_delay) :
-    print("Dir ",startdir,"time ",intweval)
+    print("Dir ",startdir,"time ",interval)
     global paused,geoloc
     EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
     EXIF_ORIENTATION = None
