@@ -453,30 +453,30 @@ def main(startdir=PIC_DIR,interval=time_delay) :
     DISPLAY.destroy()
     
 if __name__ == '__main__':
-parser = argparse.ArgumentParser(
-    description='Recursively loads images '
-    'from a directory, then displays them in a Slidshow.'
-    )
+    parser = argparse.ArgumentParser(
+        description='Recursively loads images '
+        'from a directory, then displays them in a Slidshow.'
+        )
 
-parser.add_argument(
-    'path',
-    metavar='ImagePath',
-    type=str,
-    default='.',
-    nargs="?",
-    help='Path to a directory that contains images'
-    )
-parser.add_argument(
-    '--waittime',
-    type=int,
-    dest='waittime',
-    action='store',
-    default=1,
-    help='Amount of time to wait before showing the next image.'
-    )
+    parser.add_argument(
+        'path',
+        metavar='ImagePath',
+        type=str,
+        default='.',
+        nargs="?",
+        help='Path to a directory that contains images'
+        )
+    parser.add_argument(
+        '--waittime',
+        type=int,
+        dest='waittime',
+        action='store',
+        default=1,
+        help='Amount of time to wait before showing the next image.'
+        )
 
-args = parser.parse_args()
+    args = parser.parse_args()
 
-main(startdir=args.path,interval=args.waittime)
+    main(startdir=args.path,interval=args.waittime)
 
 
