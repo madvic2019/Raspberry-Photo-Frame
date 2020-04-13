@@ -18,6 +18,8 @@ import os
 import time
 import random
 import pi3d
+import argparse
+import stat
 #import json
 #import os
 #import requests
@@ -222,9 +224,9 @@ def check_changes():
         update = True
   return update
 
-def get_files():
+def get_files(dir=PIC_DIR):
   
-  global shuffle, PIC_DIR, EXIF_DATID, last_file_change
+  global shuffle, EXIF_DATID, last_file_change
   file_list = []
   extensions = ['.png','.jpg','.jpeg','.bmp'] # can add to these
   for root, _dirnames, filenames in os.walk(PIC_DIR):
@@ -249,203 +251,232 @@ def get_files():
 
 
 
+def main(startdir=PIC_DIR,interval=time_delay)
 
+    EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
+    EXIF_ORIENTATION = None
+    EXIF_GPS = None
+    for k in ExifTags.TAGS:
+      if ExifTags.TAGS[k] == 'DateTimeOriginal':
+        EXIF_DATID = k
+      if ExifTags.TAGS[k] == 'Orientation':
+        EXIF_ORIENTATION = k
+      if ExifTags.TAGS[k] == 'GPSInfo' :
+        EXIF_GPS = k
+    ##############################################
+    # Create GeoNames locator object
 
-EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
-EXIF_ORIENTATION = None
-EXIF_GPS = None
-for k in ExifTags.TAGS:
-  if ExifTags.TAGS[k] == 'DateTimeOriginal':
-    EXIF_DATID = k
-  if ExifTags.TAGS[k] == 'Orientation':
-    EXIF_ORIENTATION = k
-  if ExifTags.TAGS[k] == 'GPSInfo' :
-    EXIF_GPS = k
-##############################################
-# Create GeoNames locator object
+    geoloc=GeoNames(username='madvic')
 
-geoloc=GeoNames(username='madvic')
+    print("Setting up display")
+    DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,
+                  display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
+    CAMERA = pi3d.Camera(is_3d=False)
+    print(DISPLAY.opengl.gl_id)
+    shader = pi3d.Shader("/home/pi/pi3d_demos/shaders/blend_new")
+    #shader = pi3d.Shader("/home/patrick/python/pi3d_demos/shaders/blend_new")
+    slide = pi3d.Sprite(camera=CAMERA, w=DISPLAY.width, h=DISPLAY.height, z=5.0)
+    slide.set_shader(shader)
+    slide.unif[47] = EDGE_ALPHA
 
-print("Setting up display")
-DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,
-              display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
-CAMERA = pi3d.Camera(is_3d=False)
-print(DISPLAY.opengl.gl_id)
-shader = pi3d.Shader("/home/pi/pi3d_demos/shaders/blend_new")
-#shader = pi3d.Shader("/home/patrick/python/pi3d_demos/shaders/blend_new")
-slide = pi3d.Sprite(camera=CAMERA, w=DISPLAY.width, h=DISPLAY.height, z=5.0)
-slide.set_shader(shader)
-slide.unif[47] = EDGE_ALPHA
+    if KEYBOARD:
+      kbd = pi3d.Keyboard()
 
-if KEYBOARD:
-  kbd = pi3d.Keyboard()
+    # images in iFiles list
+    nexttm = 0.0
+    iFiles, nFi = get_files(startdir)
+    next_pic_num = 0
+    sfg = None # slide for background
+    sbg = None # slide for foreground
+    if nFi == 0:
+      print('No files selected!')
+      exit()
 
-# images in iFiles list
-nexttm = 0.0
-iFiles, nFi = get_files()
-next_pic_num = 0
-sfg = None # slide for background
-sbg = None # slide for foreground
-if nFi == 0:
-  print('No files selected!')
-  exit()
+    # PointText and TextBlock. If SHOW_NAMES is False then this is just used for no images message
+    font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=8, shadow_radius=4.0,shadow=(0,0,0,128))
+    #font = pi3d.Font(FONT_FILE,  grid_size=7, shadow_radius=4.0,shadow=(0,0,0,128))
+    text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
+    textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 20, y=-DISPLAY.height * 0.4,
+                              z=0.1, rot=0.0, char_count=199,
+                              text_format="{}".format(" "), size=0.65, 
+                              spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
+    text.add_text_block(textblock)
 
-# PointText and TextBlock. If SHOW_NAMES is False then this is just used for no images message
-font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=8, shadow_radius=4.0,shadow=(0,0,0,128))
-#font = pi3d.Font(FONT_FILE,  grid_size=7, shadow_radius=4.0,shadow=(0,0,0,128))
-text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
-textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 20, y=-DISPLAY.height * 0.4,
-                          z=0.1, rot=0.0, char_count=199,
-                          text_format="{}".format(" "), size=0.65, 
-                          spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
-text.add_text_block(textblock)
-
-num_run_through = 0
-while DISPLAY.loop_running():
-  tm = time.time()
-  
-  if nFi > 0:
-    
-    if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
-      nexttm = tm + time_delay
-      a = 0.0 # alpha - proportion front image to back
-      sbg = sfg
-      sfg = None
-      while sfg is None: # keep going through until a usable picture is found TODO break out how?
-        print("Elapsed since last file load ",nexttm-time.time())
-        print("Time out, fetch new image ",next_pic_num)
-        pic_num = next_pic_num
-        next_pic_num += 1
-        if next_pic_num >= nFi:
-          num_run_through += 1
-          next_pic_num = 0
-        
-        orientation = 1 # this is default - unrotated
-        coordinates = None
-        dt=None
-        include=False
-        datestruct=None
-        try:
-          elapsed=time.time()
-          im = Image.open(iFiles[pic_num][0])
-          print("Time for opening ",time.time()-elapsed)
-        except:
-          print("Error Opening File",iFiles[pic_num][0])
-          continue
-        try:
-          elapsed=time.time()
-          exif_data = im._getexif()
-          print("time for exif ",time.time()-elapsed)
-        except:
-          exif_data=None
-        try:        
-          elapsed=time.time()
-          orientation = int(exif_data[EXIF_ORIENTATION])
-          print("time for orientation ",time.time()-elapsed)
-        except:
-          orientation = 1
-        try: 
-          dt = time.mktime(time.strptime(exif_data[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
-          datestruct=time.localtime(dt)
-        except:
-          datestruct=None
-          print("No date in EXIF")
-        try:
-          elapsed=time.time()
-          coordinates=get_coordinates(get_geotagging(exif_data))
-          print("time for coordinates ",time.time()-elapsed)
-        except:
-          coordinates=None
-        try:
-          elapsed=time.time()
-          location = get_geo_name2(coordinates)
-          print("time for getting location ",time.time()-elapsed)
-        except Exception as e: # NB should really check error
-          print('Error a la vuelta de geoname', e)
-          location = None
-        elapsed=time.time()
-        sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-        print("time to load texture ",time.time()-elapsed)
-        nexttm = time.time()+time_delay #reset timer to cope with texture delays
-        
-      if sbg is None: # first time through
-        sbg = sfg
-      slide.set_textures([sfg, sbg])
-      slide.unif[45:47] = slide.unif[42:44] # transfer front width and height factors to back
-      slide.unif[51:53] = slide.unif[48:50] # transfer front width and height offsets
-      wh_rat = (DISPLAY.width * sfg.iy) / (DISPLAY.height * sfg.ix)
-      if (wh_rat > 1.0 and FIT) or (wh_rat <= 1.0 and not FIT):
-        sz1, sz2, os1, os2 = 42, 43, 48, 49
-      else:
-        sz1, sz2, os1, os2 = 43, 42, 49, 48
-        wh_rat = 1.0 / wh_rat
-      slide.unif[sz1] = wh_rat
-      slide.unif[sz2] = 1.0
-      slide.unif[os1] = (wh_rat - 1.0) * 0.5
-      slide.unif[os2] = 0.0
-      if KENBURNS:
-          xstep, ystep = (slide.unif[i] * 2.0 / time_delay for i in (48, 49))
-          slide.unif[48] = 0.0
-          slide.unif[49] = 0.0
-          kb_up = not kb_up
-      overlay_text= "" #this will host the text on screen 
-      if SHOW_LOCATION: #(and/or month-year)
-        if location is not None:
-          overlay_text += tidy_name(str(location))
-          #print(overlay_text)
-        if datestruct is not None :
-          overlay_text += " " + tidy_name(MES[datestruct.tm_mon - 1]) + "-" + str(datestruct.tm_year)
-          print(overlay_text)
-        try:
-          textblock.set_text(text_format="{}".format(overlay_text))
-          text.regen()
-        except :
-          print("Wrong Overlay_text Format")
-          textblock.set_text(" ")
-          
-    #text.regen()		
-    if KENBURNS:
-      t_factor = nexttm - tm
-      if kb_up:
-        t_factor = time_delay - t_factor
-      slide.unif[48] = xstep * t_factor
-      slide.unif[49] = ystep * t_factor
-
-    if a < 1.0: # transition is happening
-      a += delta_alpha
-      slide.unif[44] = a
-      #print("Picture number ",pic_num,"alpha ",a," time ", tm,"Text ",overlay_text)  
+    num_run_through = 0
+    while DISPLAY.loop_running():
+      tm = time.time()
       
-    else: # no transition effect safe to resuffle etc
-      if shuffle and num_run_through >= RESHUFFLE_NUM :
-        num_run_through = 0
-        random.shuffle(iFiles)
-    slide.draw()
-    text.draw()  
+      if nFi > 0:
+        
+        if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
+          nexttm = tm + interval
+          a = 0.0 # alpha - proportion front image to back
+          sbg = sfg
+          sfg = None
+          while sfg is None: # keep going through until a usable picture is found TODO break out how?
+            print("Elapsed since last file load ",nexttm-time.time())
+            print("Time out, fetch new image ",next_pic_num)
+            pic_num = next_pic_num
+            next_pic_num += 1
+            if next_pic_num >= nFi:
+              num_run_through += 1
+              next_pic_num = 0
+            
+            orientation = 1 # this is default - unrotated
+            coordinates = None
+            dt=None
+            include=False
+            datestruct=None
+            try:
+              elapsed=time.time()
+              im = Image.open(iFiles[pic_num][0])
+              print("Time for opening ",time.time()-elapsed)
+            except:
+              print("Error Opening File",iFiles[pic_num][0])
+              continue
+            try:
+              elapsed=time.time()
+              exif_data = im._getexif()
+              print("time for exif ",time.time()-elapsed)
+            except:
+              exif_data=None
+            try:        
+              elapsed=time.time()
+              orientation = int(exif_data[EXIF_ORIENTATION])
+              print("time for orientation ",time.time()-elapsed)
+            except:
+              orientation = 1
+            try: 
+              dt = time.mktime(time.strptime(exif_data[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
+              datestruct=time.localtime(dt)
+            except:
+              datestruct=None
+              print("No date in EXIF")
+            try:
+              elapsed=time.time()
+              coordinates=get_coordinates(get_geotagging(exif_data))
+              print("time for coordinates ",time.time()-elapsed)
+            except:
+              coordinates=None
+            try:
+              elapsed=time.time()
+              location = get_geo_name2(coordinates)
+              print("time for getting location ",time.time()-elapsed)
+            except Exception as e: # NB should really check error
+              print('Error a la vuelta de geoname', e)
+              location = None
+            elapsed=time.time()
+            sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
+            print("time to load texture ",time.time()-elapsed)
+            nexttm = time.time()+time_delay #reset timer to cope with texture delays
+            
+          if sbg is None: # first time through
+            sbg = sfg
+          slide.set_textures([sfg, sbg])
+          slide.unif[45:47] = slide.unif[42:44] # transfer front width and height factors to back
+          slide.unif[51:53] = slide.unif[48:50] # transfer front width and height offsets
+          wh_rat = (DISPLAY.width * sfg.iy) / (DISPLAY.height * sfg.ix)
+          if (wh_rat > 1.0 and FIT) or (wh_rat <= 1.0 and not FIT):
+            sz1, sz2, os1, os2 = 42, 43, 48, 49
+          else:
+            sz1, sz2, os1, os2 = 43, 42, 49, 48
+            wh_rat = 1.0 / wh_rat
+          slide.unif[sz1] = wh_rat
+          slide.unif[sz2] = 1.0
+          slide.unif[os1] = (wh_rat - 1.0) * 0.5
+          slide.unif[os2] = 0.0
+          if KENBURNS:
+              xstep, ystep = (slide.unif[i] * 2.0 / time_delay for i in (48, 49))
+              slide.unif[48] = 0.0
+              slide.unif[49] = 0.0
+              kb_up = not kb_up
+          overlay_text= "" #this will host the text on screen 
+          if SHOW_LOCATION: #(and/or month-year)
+            if location is not None:
+              overlay_text += tidy_name(str(location))
+              #print(overlay_text)
+            if datestruct is not None :
+              overlay_text += " " + tidy_name(MES[datestruct.tm_mon - 1]) + "-" + str(datestruct.tm_year)
+              print(overlay_text)
+            try:
+              textblock.set_text(text_format="{}".format(overlay_text))
+              text.regen()
+            except :
+              print("Wrong Overlay_text Format")
+              textblock.set_text(" ")
+              
+        #text.regen()		
+        if KENBURNS:
+          t_factor = nexttm - tm
+          if kb_up:
+            t_factor = time_delay - t_factor
+          slide.unif[48] = xstep * t_factor
+          slide.unif[49] = ystep * t_factor
+
+        if a < 1.0: # transition is happening
+          a += delta_alpha
+          slide.unif[44] = a
+          #print("Picture number ",pic_num,"alpha ",a," time ", tm,"Text ",overlay_text)  
+          
+        else: # no transition effect safe to resuffle etc
+          if shuffle and num_run_through >= RESHUFFLE_NUM :
+            num_run_through = 0
+            random.shuffle(iFiles)
+        slide.draw()
+        text.draw()  
+        
+        
+      else:
+        textblock.set_text("NO IMAGES SELECTED")
+        textblock.colouring.set_colour(alpha=1.0)
+        text.regen()
+        text.draw()
+      
+      if KEYBOARD:
+        k = kbd.read()
+        if k != -1:
+          nexttm = time.time() - 86400.0
+        if k==27 or quit: #ESC
+          break
+        if k==ord(' '):
+          paused = not paused
+        if k==ord('s'): # go back a picture
+          next_pic_num -= 2
+          if next_pic_num < -1:
+            next_pic_num = -1
+    try:
+      client.loop_stop()
+    except Exception as e:
+      print("this was going to fail if previous try failed!")
+    if KEYBOARD:
+      kbd.close()
+    DISPLAY.destroy()
     
-    
-  else:
-    textblock.set_text("NO IMAGES SELECTED")
-    textblock.colouring.set_colour(alpha=1.0)
-    text.regen()
-    text.draw()
-  
-  if KEYBOARD:
-    k = kbd.read()
-    if k != -1:
-      nexttm = time.time() - 86400.0
-    if k==27 or quit: #ESC
-      break
-    if k==ord(' '):
-      paused = not paused
-    if k==ord('s'): # go back a picture
-      next_pic_num -= 2
-      if next_pic_num < -1:
-        next_pic_num = -1
-try:
-  client.loop_stop()
-except Exception as e:
-  print("this was going to fail if previous try failed!")
-if KEYBOARD:
-  kbd.close()
-DISPLAY.destroy()
+if __name__ == '__main__':
+parser = argparse.ArgumentParser(
+    description='Recursively loads images '
+    'from a directory, then displays them in a Slidshow.'
+    )
+
+parser.add_argument(
+    'path',
+    metavar='ImagePath',
+    type=str,
+    default='.',
+    nargs="?",
+    help='Path to a directory that contains images'
+    )
+parser.add_argument(
+    '--waittime',
+    type=int,
+    dest='waittime',
+    action='store',
+    default=1,
+    help='Amount of time to wait before showing the next image.'
+    )
+
+args = parser.parse_args()
+
+main(startdir=args.path,interval=args.waittime)
+
+
