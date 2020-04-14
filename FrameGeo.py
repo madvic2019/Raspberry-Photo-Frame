@@ -48,7 +48,7 @@ MES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septie
 RECENT_N = 4 # shuffle the most recent ones to play before the rest
 #SHOW_NAMES = False
 SHOW_LOCATION = True
-CHECK_DIR_TM = 6000.0 # seconds to wait between checking if directory has changed
+CHECK_DIR_TM = 3600.0 # seconds to wait between checking if directory has changed
 #####################################################
 BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
@@ -214,17 +214,17 @@ def tidy_name(path_name):
     name = ''.join([c for c in name if c in CODEPOINTS])
     return name
 
-# def check_changes():
-  # global last_file_change
-  # update = False
-  # for root, _, _ in os.walk(PIC_DIR):
-      # mod_tm = os.stat(root).st_mtime
-      # if mod_tm > last_file_change:
-        # last_file_change = mod_tm
-        # update = True
-  # return update
+def check_changes(dir):
+  global last_file_change
+  update = False
+  for root, _, _ in os.walk(dir):
+      mod_tm = os.stat(root).st_mtime
+      if mod_tm > last_file_change:
+        last_file_change = mod_tm
+        update = True
+  return update
 
-def get_files(dir=PIC_DIR):
+def get_files(dir):
   
   global shuffle, EXIF_DATID, last_file_change
   file_list = []
@@ -420,9 +420,13 @@ def main(startdir=PIC_DIR,interval=time_delay) :
           #print("Picture number ",pic_num,"alpha ",a," time ", tm,"Text ",overlay_text)  
           
         else: # no transition effect safe to resuffle etc
-          if shuffle and num_run_through >= RESHUFFLE_NUM :
-            num_run_through = 0
-            random.shuffle(iFiles)
+			if tm > next_check_tm:
+				if check_changes(startdir):
+				  iFiles, nFi = get_files(startdir)
+				  num_run_through = 0
+				  next_pic_num = 0
+				next_check_tm = tm + CHECK_DIR_TM # once per hour
+        
         slide.draw()
         text.draw()  
         
