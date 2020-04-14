@@ -218,10 +218,10 @@ def check_changes(dir):
   global last_file_change
   update = False
   for root, _, _ in os.walk(dir):
-      mod_tm = os.stat(root).st_mtime
-      if mod_tm > last_file_change:
-        last_file_change = mod_tm
-        update = True
+    mod_tm = os.stat(root).st_mtime
+    if mod_tm > last_file_change:
+      last_file_change = mod_tm
+      update = True
   return update
 
 def get_files(dir):
