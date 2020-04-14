@@ -420,12 +420,12 @@ def main(startdir=PIC_DIR,interval=time_delay) :
           #print("Picture number ",pic_num,"alpha ",a," time ", tm,"Text ",overlay_text)  
           
         else: # no transition effect safe to resuffle etc
-			if tm > next_check_tm:
-				if check_changes(startdir):
-				  iFiles, nFi = get_files(startdir)
-				  num_run_through = 0
-				  next_pic_num = 0
-				next_check_tm = tm + CHECK_DIR_TM # once per hour
+          if tm > next_check_tm :
+            if check_changes(startdir):
+              iFiles, nFi = get_files(startdir)
+              num_run_through = 0
+              next_pic_num = 0
+              next_check_tm = tm + CHECK_DIR_TM # once per hour
         
         slide.draw()
         text.draw()  
