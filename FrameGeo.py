@@ -20,6 +20,10 @@ import random
 import pi3d
 import argparse
 import stat
+import signal
+
+# Set the signal handler and a 5-second alarm
+signal.signal(signal.SIGALRM, handler)
 #import json
 #import os
 #import requests
@@ -75,9 +79,10 @@ if BLUR_ZOOM < 1.0:
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 last_file_change = 0.0 # holds last change time in directory structure
 next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
-#####################################################
-# some functions to tidy subsequent code
-#####################################################
+
+def handler(signum, frame):
+    print('Signal handler called with signal', signum)
+
 
 
 def get_geotagging(exif):
@@ -476,12 +481,13 @@ if __name__ == '__main__':
         type=int,
         dest='waittime',
         action='store',
-        default=1,
+        default=time_delay,
         help='Amount of time to wait before showing the next image.'
         )
 
     args = parser.parse_args()
-    print(args.path,args.waittime)    
+    print(args.path,args.waittime)
+    signal.signal(signal.SIGUSR1, handler)
     main(startdir=args.path,interval=args.waittime)
 
 
