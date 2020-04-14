@@ -76,10 +76,15 @@ delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 last_file_change = 0.0 # holds last change time in directory structure
 next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
 
-def handler(signum, frame):
+def handler1(signum, frame):
     print('Signal handler called with signal', signum)
+    print('Going to sleep')
+    signal.pause()
     return
 
+def handler2(signum,frame):
+    print('Wake up call: signal',signum)
+    return
 
 
 def get_geotagging(exif):
@@ -484,7 +489,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     print(args.path,args.waittime)
-    signal.signal(signal.SIGUSR1, handler)
+    signal.signal(signal.SIGUSR2,handler2)
+    signal.signal(signal.SIGUSR1, handler1)
     main(startdir=args.path,interval=args.waittime)
 
 
