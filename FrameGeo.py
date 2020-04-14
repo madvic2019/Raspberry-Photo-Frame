@@ -22,11 +22,7 @@ import argparse
 import stat
 import signal
 
-# Set the signal handler and a 5-second alarm
-signal.signal(signal.SIGALRM, handler)
-#import json
-#import os
-#import requests
+
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 from geopy.geocoders import GeoNames
@@ -82,6 +78,7 @@ next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory ever
 
 def handler(signum, frame):
     print('Signal handler called with signal', signum)
+    return
 
 
 
