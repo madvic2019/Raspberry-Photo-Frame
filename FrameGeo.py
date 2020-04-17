@@ -474,7 +474,7 @@ if __name__ == '__main__':
         'path',
         metavar='ImagePath',
         type=str,
-        default='.',
+        default=PIC_DIR,
         nargs="?",
         help='Path to a directory that contains images'
         )
