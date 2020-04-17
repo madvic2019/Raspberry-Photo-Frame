@@ -242,8 +242,8 @@ def get_files(dir):
       if ext in extensions and not '.AppleDouble' in root and not filename.startswith('.'):
         file_path_name = os.path.join(root, filename)
         file_list.append((file_path_name, os.path.getmtime(file_path_name))) 
-      # if (len(file_list) % 1000 == 0) :
-        # print(len(file_list)) 
+      if (len(file_list) % 1000 == 0) :
+        print(len(file_list)) 
         
   if shuffle:
     random.shuffle(file_list)
