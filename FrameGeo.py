@@ -298,7 +298,7 @@ def main(startdir=PIC_DIR,interval=time_delay) :
       exit()
 
     # PointText and TextBlock. If SHOW_NAMES is False then this is just used for no images message
-    font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=8, shadow_radius=4.0,shadow=(0,0,0,128))
+    font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=8, shadow_radius=4.0,shadow=(128,128,128,12))
     #font = pi3d.Font(FONT_FILE,  grid_size=7, shadow_radius=4.0,shadow=(0,0,0,128))
     text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
     textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 20, y=-DISPLAY.height * 0.4,
