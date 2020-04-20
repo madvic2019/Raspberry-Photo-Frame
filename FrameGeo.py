@@ -20,9 +20,9 @@ import random
 import pi3d
 import argparse
 import stat
-#import json
-#import os
-#import requests
+import signal
+
+
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 from geopy.geocoders import GeoNames
@@ -48,7 +48,7 @@ MES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septie
 RECENT_N = 4 # shuffle the most recent ones to play before the rest
 #SHOW_NAMES = False
 SHOW_LOCATION = True
-CHECK_DIR_TM = 6000.0 # seconds to wait between checking if directory has changed
+CHECK_DIR_TM = 3600.0 # seconds to wait between checking if directory has changed
 #####################################################
 BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
@@ -75,9 +75,13 @@ if BLUR_ZOOM < 1.0:
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 last_file_change = 0.0 # holds last change time in directory structure
 next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
-#####################################################
-# some functions to tidy subsequent code
-#####################################################
+
+def handler1(signum, frame):
+    signal.pause()
+    return
+
+def handler2(signum,frame):
+    return
 
 
 def get_geotagging(exif):
@@ -121,9 +125,9 @@ def get_geo_name(exif) :
   geotags=get_geotagging(exif)
   coords=get_coordinates(geotags)
 #  geoloc=GeoNames(username='madvic') done in main()
-  print("Retrieving Location from Geonames")
+  #print("Retrieving Location from Geonames")
   geocoder=geoloc.reverse(coords,10)
-  print("Location Name received",geocoder)
+  #print("Location Name received",geocoder)
 #  print(geocoder)
   return geocoder
 
@@ -131,9 +135,9 @@ def get_geo_name2(coords) :
   geocoder=None
   if coords is not None:
 #  geoloc=GeoNames(username='madvic')
-    print("Retrieving Location from Geonames")
+    #print("Retrieving Location from Geonames")
     geocoder=geoloc.reverse(coords,10)
-    print("Location Name received",geocoder)
+    #print("Location Name received",geocoder)
 #  print(geocoder)
   return geocoder
 
@@ -145,10 +149,10 @@ def get_orientation(fname) :
     exif_data = im._getexif()
     dt = time.mktime(time.strptime(exif_data[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
     orientation = int(exif_data[EXIF_ORIENTATION])
-    print("Orientation is ",orientation)
-    print("Date is ",dt)
+    #print("Orientation is ",orientation)
+    #print("Date is ",dt)
   except Exception as e:  
-    print('error trying to read exif', e)
+    #print('error trying to read exif', e)
     dt = os.path.getmtime(fname) # so use file last modified date
   return orientation,dt
 
@@ -157,8 +161,8 @@ def get_orientation2(exif) :
   try:
     dt = time.mktime(time.strptime(exif[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
     orientation = int(exif[EXIF_ORIENTATION])
-    print("Orientation is ",orientation)
-    print("Date is ",dt)
+    #print("Orientation is ",orientation)
+    #print("Date is ",dt)
   except Exception as e:  
     print('error trying to read exif', e)
     dt = None
@@ -214,15 +218,17 @@ def tidy_name(path_name):
     name = ''.join([c for c in name if c in CODEPOINTS])
     return name
 
-# def check_changes():
-  # global last_file_change
-  # update = False
-  # for root, _, _ in os.walk(PIC_DIR):
-      # mod_tm = os.stat(root).st_mtime
-      # if mod_tm > last_file_change:
-        # last_file_change = mod_tm
-        # update = True
-  # return update
+
+def check_changes(dir):
+  global last_file_change
+  update = False
+  for root, _, _ in os.walk(dir):
+    mod_tm = os.stat(root).st_mtime
+    if mod_tm > last_file_change:
+      last_file_change = mod_tm
+      update = True
+  return update
+
 
 def get_files(dir):
   
@@ -245,15 +251,17 @@ def get_files(dir):
     random.shuffle(file_list)
   else:
     file_list.sort() # if not shuffled; sort by name
-  print(len(file_list))
+  print("Num fotos: ", len(file_list))
   return file_list, len(file_list) # tuple of file list, number of pictures
 
 
 
 
-def main(startdir,interval) :
-    
-    global paused,geoloc
+
+def main(startdir=PIC_DIR,interval=time_delay) :
+
+    global paused,geoloc,next_check_tm
+
     EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
     EXIF_ORIENTATION = None
     EXIF_GPS = None
@@ -294,7 +302,7 @@ def main(startdir,interval) :
       exit()
 
     # PointText and TextBlock. If SHOW_NAMES is False then this is just used for no images message
-    font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=8, shadow_radius=4.0,shadow=(0,0,0,128))
+    font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=8, shadow_radius=4.0,shadow=(128,128,128,12))
     #font = pi3d.Font(FONT_FILE,  grid_size=7, shadow_radius=4.0,shadow=(0,0,0,128))
     text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
     textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 20, y=-DISPLAY.height * 0.4,
@@ -315,7 +323,7 @@ def main(startdir,interval) :
           sbg = sfg
           sfg = None
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
-            print("Elapsed since last file load ",nexttm-time.time())
+            #print("Elapsed since last file load ",nexttm-time.time())
             print("Time out, fetch new image ",next_pic_num)
             pic_num = next_pic_num
             next_pic_num += 1
@@ -328,23 +336,24 @@ def main(startdir,interval) :
             dt=None
             include=False
             datestruct=None
+            elapsed=time.time()
             try:
-              elapsed=time.time()
+              #elapsed=time.time()
               im = Image.open(iFiles[pic_num][0])
-              print("Time for opening ",time.time()-elapsed)
+              #print("Time for opening ",time.time()-elapsed)
             except:
               print("Error Opening File",iFiles[pic_num][0])
               continue
             try:
-              elapsed=time.time()
+              #elapsed=time.time()
               exif_data = im._getexif()
-              print("time for exif ",time.time()-elapsed)
+              #print("time for exif ",time.time()-elapsed)
             except:
               exif_data=None
             try:        
-              elapsed=time.time()
+              #elapsed=time.time()
               orientation = int(exif_data[EXIF_ORIENTATION])
-              print("time for orientation ",time.time()-elapsed)
+              #print("time for orientation ",time.time()-elapsed)
             except:
               orientation = 1
             try: 
@@ -354,21 +363,22 @@ def main(startdir,interval) :
               datestruct=None
               print("No date in EXIF")
             try:
-              elapsed=time.time()
+              #elapsed=time.time()
               coordinates=get_coordinates(get_geotagging(exif_data))
-              print("time for coordinates ",time.time()-elapsed)
+              #print("time for coordinates ",time.time()-elapsed)
             except:
               coordinates=None
             try:
-              elapsed=time.time()
+              #elapsed=time.time()
               location = get_geo_name2(coordinates)
-              print("time for getting location ",time.time()-elapsed)
+              #print("time for getting location ",time.time()-elapsed)
             except Exception as e: # NB should really check error
               print('Error a la vuelta de geoname', e)
               location = None
-            elapsed=time.time()
+            #elapsed=time.time()
             sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-            print("time to load texture ",time.time()-elapsed)
+            #print("time to load texture ",time.time()-elapsed)
+            print("Time to prepare and load image into Texture: ",time.time()-elapsed)
             nexttm = time.time()+time_delay #reset timer to cope with texture delays
             
           if sbg is None: # first time through
@@ -420,9 +430,14 @@ def main(startdir,interval) :
           #print("Picture number ",pic_num,"alpha ",a," time ", tm,"Text ",overlay_text)  
           
         else: # no transition effect safe to resuffle etc
-          if shuffle and num_run_through >= RESHUFFLE_NUM :
-            num_run_through = 0
-            random.shuffle(iFiles)
+          if tm > next_check_tm :
+            if check_changes(startdir):
+              print("Re-Fetching images files")
+              iFiles, nFi = get_files(startdir)
+              num_run_through = 0
+              next_pic_num = 0
+              next_check_tm = tm + CHECK_DIR_TM # once per hour
+        
         slide.draw()
         text.draw()  
         
@@ -477,7 +492,9 @@ if __name__ == '__main__':
         )
 
     args = parser.parse_args()
-    print(args.path,args.waittime)    
+    print(args.path,args.waittime)
+    signal.signal(signal.SIGUSR2,handler2)
+    signal.signal(signal.SIGUSR1, handler1)
     main(startdir=args.path,interval=args.waittime)
 
 
