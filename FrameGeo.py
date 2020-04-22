@@ -32,7 +32,7 @@ from geopy.geocoders import GeoNames
 # these variables are constants
 #####################################################
 
-PIC_DIR = '/home/pi/frododrive/photo/Fotos'
+PIC_DIR = '/home/pi/bilbodrive/media/photo/Fotos'
 #PIC_DIR='/home/pi/photos/'
 #PIC_DIR = '/home/pi/frododrive/photo/iphone de Marivi'
 FPS = 20
