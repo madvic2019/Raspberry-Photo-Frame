@@ -435,6 +435,7 @@ def main(startdir=PIC_DIR,interval=time_delay) :
           
         else: # no transition effect safe to resuffle etc
           if num_run_through > 1 : #re-load images after running through them 2 times
+            random.shuffle(iFiles)
             if check_changes(startdir):
               print("Re-Fetching images files")
               iFiles, nFi = get_files(startdir)
