@@ -299,8 +299,8 @@ def main(startdir=PIC_DIR,interval=time_delay) :
     nexttm = 0.0
     iFiles, nFi = get_files(startdir)
     next_pic_num = 0
-    sfg = None # slide for background
-    sbg = None # slide for foreground
+    sfg = None # slide for foreground
+    sbg = None # slide for background
     if nFi == 0:
       print('No files selected!')
       exit()
@@ -434,13 +434,13 @@ def main(startdir=PIC_DIR,interval=time_delay) :
           #print("Picture number ",pic_num,"alpha ",a," time ", tm,"Text ",overlay_text)  
           
         else: # no transition effect safe to resuffle etc
-          if tm > next_check_tm :
+          if num_run_through > 1 : #re-load images after running through them 2 times
             if check_changes(startdir):
               print("Re-Fetching images files")
               iFiles, nFi = get_files(startdir)
               num_run_through = 0
               next_pic_num = 0
-              next_check_tm = tm + CHECK_DIR_TM # once per hour
+              
         
         slide.draw()
         text.draw()  
