@@ -336,14 +336,14 @@ def main(startdir,config_file,interval,shuffle) :
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
     numeros=(0,0)
-    try:
-      with open(config_file+".bis",'r') :
-        numeros=json.load(f)
-        num_run_through=numeros[0]
-        next_pic_num=numeros[1]
-    except:
-      num_run_through=0
-      next_pic_num=0      
+    #try:
+    with open(config_file+".bis",'r') :
+      numeros=json.load(f)
+      num_run_through=numeros[0]
+      next_pic_num=numeros[1]
+    #except:
+    #  num_run_through=0
+    #  next_pic_num=0      
     
     print("Starting with round number ",num_run_through)
     print("Starting with picture number ",next_pic_num)
