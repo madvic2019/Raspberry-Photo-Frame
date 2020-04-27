@@ -260,10 +260,10 @@ def get_files(dir,config_file,shuffle):
           file_list.append((file_path_name, os.path.getmtime(file_path_name))) 
         if (len(file_list) % 1000 == 0) :
           print(len(file_list))
-      print("Config file does not exist or is corrupt, creating a new one",config_file)
-      with open(config_file,'w') as f:
-        json.dump(file_list, f, sort_keys=True)
-        print("List written to ",config_file) 
+    print("Config file does not exist or is corrupt, creating a new one",config_file)
+    with open(config_file,'w') as f:
+      json.dump(file_list, f, sort_keys=True)
+      print("List written to ",config_file) 
         
   if shuffle:
     random.shuffle(file_list)
