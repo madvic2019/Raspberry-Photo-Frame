@@ -335,11 +335,12 @@ def main(startdir,config_file,interval,shuffle) :
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
-
+    numeros=(0,0)
     try:
       with open(config_file+".bis",'r') :
-        num_run_through=json.load(f,separators=(',',':'))
-        next_pic_num=json.load(f,separators=(',',':'))
+        numeros=json.load(f)
+        num_run_through=numerso[0]
+        next_pic_num=numeros[1]
     except:
       num_run_through=0
       next_pic_num=0      
@@ -348,10 +349,10 @@ def main(startdir,config_file,interval,shuffle) :
     print("Starting with picture number ",next_pic_num)
     
     while DISPLAY.loop_running():
+      numeros=(num_run_through,next_pic_num)
       with open(config_file+".num","w") as f:
-        json.dump(num_run_through,f,separators=(',',':'))
-        json.dump(next_pic_num,f,separators=(',',':'))
-        
+        json.dump(numeros,f)
+                
       tm = time.time()
       
       if nFi > 0:
