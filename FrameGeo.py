@@ -247,7 +247,7 @@ def get_files(dir,config_file,shuffle):
           print('Retrieved list from config file',config_file, len(file_list)," Files")
         except:
           print(config_file , 'File is not correct')
-    if (os.path.split(file_list[0][0])[0]) != dir :
+    if os.path.dirname(file_list[0][0]) != dir :
         print("Directory is different from config file ",dir," reloading")
         filelist=None
             
