@@ -336,8 +336,19 @@ def main(startdir,config_file,interval,shuffle) :
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
 
+    try:
+      with open(config_file+".bis",'r') :
+        num_run_through=json.load(f)
+        next_pic_num=json.load(f)
+    except:
+      num_run_through=0
+      next_pic_num=0      
     num_run_through = 0
     while DISPLAY.loop_running():
+      with open(config_file+".num","w") as f:
+        json.dump(num_run_through,f)
+        json.dump(next_pic_num,f)
+        
       tm = time.time()
       
       if nFi > 0:
