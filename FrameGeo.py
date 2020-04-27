@@ -242,14 +242,14 @@ def get_files(dir,config_file,shuffle):
   if os.path.exists(config_file) :
     print("Config file exists, open for reading",config_file)
     with open(config_file, 'r') as f:
-        #try:
+        try:
           file_list=json.load(f)
           print('Retrieved list from config file',config_file, len(file_list)," Files")
-          if len(os.path.commonpath((file_list[0][0],dir))) < len(dir) :
+          if len(os.path.commonprefix((file_list[0][0],dir))) < len(dir) :
             print("Directory is different from config file ",os.path.dirname(file_list[0][0]), " -- ",dir," reloading")
             file_list=None
-        #except:
-        #  print(config_file , 'File is not correct')
+        except:
+          print(config_file , 'File is not correct')
     
             
   if file_list is None :
