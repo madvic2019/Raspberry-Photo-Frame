@@ -15,12 +15,13 @@ USING exif info to rotate images
     ESC to quit, 's' to reverse, any other key to move on one.
 '''
 import os
-import time
+import time 
 import random
 import pi3d
 import argparse
 import stat
 import signal
+import json
 
 
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
@@ -234,22 +235,35 @@ def check_changes(dir):
   return update
 
 
-def get_files(dir):
+def get_files(dir,config_file):
   
   global shuffle, EXIF_DATID, last_file_change
-  file_list = []
+  file_list = None
   extensions = ['.png','.jpg','.jpeg','.bmp'] # can add to these
-  for root, _dirnames, filenames in os.walk(dir):
-    mod_tm = os.stat(root).st_mtime # time of alteration in a directory
-    if mod_tm > last_file_change:
-      last_file_change = mod_tm
-    for filename in filenames:
-      ext = os.path.splitext(filename)[1].lower()
-      if ext in extensions and not '.AppleDouble' in root and not filename.startswith('.'):
-        file_path_name = os.path.join(root, filename)
-        file_list.append((file_path_name, os.path.getmtime(file_path_name))) 
-      if (len(file_list) % 1000 == 0) :
-        print(len(file_list)) 
+  if os.path.exists(config) :
+    print("Config file exists, open for reading,config")
+    with open(config, 'r') as f:
+        try:
+          file_list=json.load(f)
+          print('Retrieved list from config file',config,' : ',file_list)
+        except:
+          print(config , 'File is not correct')
+  if file_list is None :
+    for root, _dirnames, filenames in os.walk(dir):
+      mod_tm = os.stat(root).st_mtime # time of alteration in a directory
+      if mod_tm > last_file_change:
+        last_file_change = mod_tm
+      for filename in filenames:
+        ext = os.path.splitext(filename)[1].lower()
+        if ext in extensions and not '.AppleDouble' in root and not filename.startswith('.'):
+          file_path_name = os.path.join(root, filename)
+          file_list.append((file_path_name, os.path.getmtime(file_path_name))) 
+        if (len(file_list) % 1000 == 0) :
+          print(len(file_list))
+      print("Config file does not exist or is corrupt, creating a new one",config)
+      with open(config,'w') as f:
+        json.dump(file_list, f, sort_keys=True)
+        print("List written to ",config) 
         
   if shuffle:
     random.shuffle(file_list)
@@ -262,7 +276,7 @@ def get_files(dir):
 
 
 
-def main(startdir=PIC_DIR,interval=time_delay) :
+def main(startdir=PIC_DIR,config_file=config,interval=time_delay) :
 
     global paused,geoloc,next_check_tm
 
@@ -297,7 +311,7 @@ def main(startdir=PIC_DIR,interval=time_delay) :
 
     # images in iFiles list
     nexttm = 0.0
-    iFiles, nFi = get_files(startdir)
+    iFiles, nFi = get_files(startdir,config_file)
     next_pic_num = 0
     sfg = None # slide for foreground
     sbg = None # slide for background
@@ -488,6 +502,14 @@ if __name__ == '__main__':
         help='Path to a directory that contains images'
         )
     parser.add_argument(
+        'config',
+        metavar='ConfigFile',
+        type=str,
+        default='.config.json',
+        nargs="?",
+        help='Configuration file holding list of image files'
+        )
+    parser.add_argument(
         '--waittime',
         type=int,
         dest='waittime',
@@ -497,9 +519,9 @@ if __name__ == '__main__':
         )
 
     args = parser.parse_args()
-    print(args.path,args.waittime)
+    print(args.path,args.config,args.waittime)
     signal.signal(signal.SIGUSR2,handler2)
     signal.signal(signal.SIGUSR1, handler1)
-    main(startdir=args.path,interval=args.waittime)
+    main(startdir=args.path,config_file=config,interval=args.waittime)
 
 
