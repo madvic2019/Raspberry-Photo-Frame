@@ -260,15 +260,17 @@ def get_files(dir,config_file,shuffle):
           file_list.append((file_path_name, os.path.getmtime(file_path_name))) 
         if (len(file_list) % 1000 == 0) :
           print(len(file_list))
+    if shuffle:
+      random.shuffle(file_list)
+    else:
+      file_list.sort() # if not shuffled; sort by name
     print("Config file does not exist or is corrupt, creating a new one",config_file)
     with open(config_file,'w') as f:
+      num_
       json.dump(file_list, f, sort_keys=True)
       print("List written to ",config_file) 
         
-  if shuffle:
-    random.shuffle(file_list)
-  else:
-    file_list.sort() # if not shuffled; sort by name
+
   print("Num fotos: ", len(file_list))
   return file_list, len(file_list) # tuple of file list, number of pictures
 
@@ -449,10 +451,12 @@ def main(startdir,config_file,interval,shuffle) :
           
         else: # no transition effect safe to resuffle etc
           if num_run_through > 1 : #re-load images after running through them 2 times
-            random.shuffle(iFiles)
+            #random.shuffle(iFiles)
             if check_changes(startdir):
-              print("Re-Fetching images files")
-              iFiles, nFi = get_files(startdir)
+              print("Re-Fetching images files, erase config file")
+              with open(config_file,'w') as f :
+                json.dump('',f) # creates an empty config file
+              iFiles, nFi = get_files(startdir,config_file,shuffle)
               num_run_through = 0
               next_pic_num = 0
               
