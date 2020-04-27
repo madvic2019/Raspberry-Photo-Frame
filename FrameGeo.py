@@ -338,7 +338,7 @@ def main(startdir,config_file,interval,shuffle) :
     numeros=(0,0)
     try:
       with open(config_file+".num",'r') :
-        numeros=json.load(f)
+        numeros=json.loads(f)
         num_run_through=numeros[0]
         next_pic_num=numeros[1]
     except:
@@ -351,7 +351,7 @@ def main(startdir,config_file,interval,shuffle) :
     while DISPLAY.loop_running():
       numeros=(num_run_through,next_pic_num)
       with open(config_file+".num","w") as f:
-        json.dump(numeros,f)
+        json.dumps(numeros,f)
                 
       tm = time.time()
       
