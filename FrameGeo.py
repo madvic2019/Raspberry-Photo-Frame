@@ -256,7 +256,8 @@ def get_files(dir,config_file,shuffle):
   if file_list is None :
     print("Config File is not existing or corrupt")
     print("Clean config file for numbers")
-    f=open(config_file+".num",'x')
+    if os.path.exists(config_file+".num"):
+      os.remove(config_file+".num")
     file_list=[]
     for root, _dirnames, filenames in os.walk(dir):
       mod_tm = os.stat(root).st_mtime # time of alteration in a directory
