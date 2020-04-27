@@ -244,13 +244,16 @@ def get_files(dir,config_file,shuffle):
     with open(config_file, 'r') as f:
         try:
           file_list=json.load(f)
-          print('Retrieved list from config file',config_file, len(file_list)," Files")
-          print("Path from Json file",file_list[0][0])
-          print("Path from parameter",dir)
-          print("Common path ",os.path.commonprefix((file_list[0][0],dir)))
+          if len(file_list)>0:
+            print('Retrieved list from config file',config_file, len(file_list)," Files")
+            print("Path from Json file",file_list[0][0])
+            print("Path from parameter",dir)
+            print("Common path ",os.path.commonprefix((file_list[0][0],dir)))
           
-          if len(os.path.commonprefix((file_list[0][0],dir))) < len(dir) :
-            print("Directory is different from config file ",os.path.dirname(file_list[0][0]), " -- ",dir," reloading")
+            if len(os.path.commonprefix((file_list[0][0],dir))) < len(dir) :
+              print("Directory is different from config file ",os.path.dirname(file_list[0][0]), " -- ",dir," reloading")
+              file_list=None
+          else:
             file_list=None
         except:
           print(config_file , 'File is not correct')
