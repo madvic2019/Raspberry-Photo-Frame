@@ -248,6 +248,7 @@ def get_files(dir,config_file,shuffle):
         except:
           print(config_file , 'File is not correct')
   if file_list is None :
+    file_list=[]
     for root, _dirnames, filenames in os.walk(dir):
       mod_tm = os.stat(root).st_mtime # time of alteration in a directory
       if mod_tm > last_file_change:
