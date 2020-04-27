@@ -268,12 +268,10 @@ def get_files(dir,config_file,shuffle):
       random.shuffle(file_list)
     else:
       file_list.sort() # if not shuffled; sort by name
-    print("Config file does not exist or is corrupt, creating a new one",config_file)
+    
     with open(config_file,'w') as f:
-      num_
       json.dump(file_list, f, sort_keys=True)
       print("List written to ",config_file) 
-        
 
   print("Num fotos: ", len(file_list))
   return file_list, len(file_list) # tuple of file list, number of pictures
