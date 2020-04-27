@@ -339,7 +339,7 @@ def main(startdir,config_file,interval,shuffle) :
     try:
       with open(config_file+".bis",'r') :
         numeros=json.load(f)
-        num_run_through=numerso[0]
+        num_run_through=numeros[0]
         next_pic_num=numeros[1]
     except:
       num_run_through=0
