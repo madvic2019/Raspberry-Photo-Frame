@@ -338,8 +338,8 @@ def main(startdir,config_file,interval,shuffle) :
 
     try:
       with open(config_file+".bis",'r') :
-        num_run_through=json.load(f)
-        next_pic_num=json.load(f)
+        num_run_through=json.load(f,separators=(',',':'))
+        next_pic_num=json.load(f,separators=(',',':'))
     except:
       num_run_through=0
       next_pic_num=0      
@@ -349,8 +349,8 @@ def main(startdir,config_file,interval,shuffle) :
     
     while DISPLAY.loop_running():
       with open(config_file+".num","w") as f:
-        json.dump(num_run_through,f)
-        json.dump(next_pic_num,f)
+        json.dump(num_run_through,f,separators=(',',':'))
+        json.dump(next_pic_num,f,separators=(',',':'))
         
       tm = time.time()
       
