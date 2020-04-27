@@ -351,7 +351,7 @@ def main(startdir,config_file,interval,shuffle) :
     while DISPLAY.loop_running():
       numeros=(num_run_through,next_pic_num)
       with open(config_file+".num","w") as f:
-        json.dump(numeros,f,separators=(',',':')
+        json.dump(numeros,f,separators=(',',':'))
                 
       tm = time.time()
       
