@@ -244,7 +244,7 @@ def get_files(dir,config_file,shuffle):
     with open(config_file, 'r') as f:
         try:
           file_list=json.load(f)
-          print('Retrieved list from config file',config_file,' : ',file_list)
+          print('Retrieved list from config file',config_file, len(file_list)," Files")
         except:
           print(config_file , 'File is not correct')
   if file_list is None :
