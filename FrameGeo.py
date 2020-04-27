@@ -61,7 +61,6 @@ KEYBOARD = True  # set to False when running headless to avoid curses error. Tru
 #####################################################
 time_delay = 15.0 # between slides
 fade_time = 2.0
-shuffle = True # shuffle on reloading
 quit = False
 paused = False # NB must be set to True after the first iteration of the show!
 #####################################################
@@ -235,19 +234,19 @@ def check_changes(dir):
   return update
 
 
-def get_files(dir,config_file):
+def get_files(dir,config_file,shuffle):
   
-  global shuffle, EXIF_DATID, last_file_change
+  global EXIF_DATID, last_file_change
   file_list = None
   extensions = ['.png','.jpg','.jpeg','.bmp'] # can add to these
-  if os.path.exists(config) :
+  if os.path.exists(config_file) :
     print("Config file exists, open for reading,config")
-    with open(config, 'r') as f:
+    with open(config_file, 'r') as f:
         try:
           file_list=json.load(f)
-          print('Retrieved list from config file',config,' : ',file_list)
+          print('Retrieved list from config file',config_file,' : ',file_list)
         except:
-          print(config , 'File is not correct')
+          print(config_file , 'File is not correct')
   if file_list is None :
     for root, _dirnames, filenames in os.walk(dir):
       mod_tm = os.stat(root).st_mtime # time of alteration in a directory
@@ -260,10 +259,10 @@ def get_files(dir,config_file):
           file_list.append((file_path_name, os.path.getmtime(file_path_name))) 
         if (len(file_list) % 1000 == 0) :
           print(len(file_list))
-      print("Config file does not exist or is corrupt, creating a new one",config)
-      with open(config,'w') as f:
+      print("Config file does not exist or is corrupt, creating a new one",config_file)
+      with open(config_file,'w') as f:
         json.dump(file_list, f, sort_keys=True)
-        print("List written to ",config) 
+        print("List written to ",config_file) 
         
   if shuffle:
     random.shuffle(file_list)
@@ -276,7 +275,7 @@ def get_files(dir,config_file):
 
 
 
-def main(startdir=PIC_DIR,config_file=config,interval=time_delay) :
+def main(startdir=PIC_DIR,config_file=config,interval=time_delay,shuffle=True) :
 
     global paused,geoloc,next_check_tm
 
@@ -311,7 +310,7 @@ def main(startdir=PIC_DIR,config_file=config,interval=time_delay) :
 
     # images in iFiles list
     nexttm = 0.0
-    iFiles, nFi = get_files(startdir,config_file)
+    iFiles, nFi = get_files(startdir,config_file,shuffle)
     next_pic_num = 0
     sfg = None # slide for foreground
     sbg = None # slide for background
@@ -517,11 +516,19 @@ if __name__ == '__main__':
         default=time_delay,
         help='Amount of time to wait before showing the next image.'
         )
+    parser.add_argument(
+        '--shuffle',
+        type=bool,
+        dest='shuffle',
+        action='store',
+        default=True,
+        help='Shuffle pictures list'
+        )
 
     args = parser.parse_args()
-    print(args.path,args.config,args.waittime)
+    print(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
     signal.signal(signal.SIGUSR2,handler2)
     signal.signal(signal.SIGUSR1, handler1)
-    main(startdir=args.path,config_file=config,interval=args.waittime)
+    main(startdir=args.path,config_file=config,interval=args.waittime,shuffle=args.shuffle)
 
 
