@@ -343,7 +343,10 @@ def main(startdir,config_file,interval,shuffle) :
     except:
       num_run_through=0
       next_pic_num=0      
-    num_run_through = 0
+    
+    print("Starting with round number ",num_run_through)
+    print("Starting with picture number ",next_pic_num)
+    
     while DISPLAY.loop_running():
       with open(config_file+".num","w") as f:
         json.dump(num_run_through,f)
