@@ -275,7 +275,7 @@ def get_files(dir,config_file,shuffle):
 
 
 
-def main(startdir=PIC_DIR,config_file=config,interval=time_delay,shuffle=True) :
+def main(startdir,config_file,interval,shuffle) :
 
     global paused,geoloc,next_check_tm
 
