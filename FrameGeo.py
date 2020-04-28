@@ -419,9 +419,13 @@ def main(startdir,config_file,interval,shuffle) :
               print('Error a la vuelta de geoname', e)
               location = None
             #elapsed=time.time()
-            sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-            #print("time to load texture ",time.time()-elapsed)
-            print("Time to prepare and load image into Texture: ",time.time()-elapsed)
+            try:
+              sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
+              #print("time to load texture ",time.time()-elapsed)
+              print("Time to prepare and load image into Texture: ",time.time()-elapsed)
+            except:
+              next_pic_num += 1
+              continue
             nexttm = time.time()+time_delay #reset timer to cope with texture delays
             
           if sbg is None: # first time through
