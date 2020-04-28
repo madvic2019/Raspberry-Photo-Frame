@@ -32,7 +32,7 @@ from geopy.geocoders import GeoNames
 #####################################################
 # these variables are constants
 #####################################################
-
+DEFAULT_CONFIG_FILE = '/home/pi/.photo-frame'
 PIC_DIR = '/home/pi/bilbodrive/media/photo/Fotos'
 #PIC_DIR='/home/pi/photos/'
 #PIC_DIR = '/home/pi/frododrive/photo/iphone de Marivi'
@@ -122,20 +122,11 @@ def get_coordinates(geotags):
       return None
 
 def get_geo_name(exif) :
-  # geotags=get_geotagging(exif)
-  # coords=get_coordinates(geotags)
+
   geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),10)
   return geocoder
 
-# def get_geo_name2(coords) :
-  # geocoder=None
-  # if coords is not None:
-# #  geoloc=GeoNames(username='madvic')
-    # #print("Retrieving Location from Geonames")
-    # geocoder=geoloc.reverse(coords,10)
-    # #print("Location Name received",geocoder)
-# #  print(geocoder)
-  # return geocoder
+
 
 
 def get_orientation(fname) :
@@ -145,10 +136,9 @@ def get_orientation(fname) :
     exif_data = im._getexif()
     dt = time.mktime(time.strptime(exif_data[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
     orientation = int(exif_data[EXIF_ORIENTATION])
-    #print("Orientation is ",orientation)
-    #print("Date is ",dt)
+
   except Exception as e:  
-    #print('error trying to read exif', e)
+
     dt = os.path.getmtime(fname) # so use file last modified date
   return orientation,dt
 
@@ -157,8 +147,7 @@ def get_orientation2(exif) :
   try:
     dt = time.mktime(time.strptime(exif[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
     orientation = int(exif[EXIF_ORIENTATION])
-    #print("Orientation is ",orientation)
-    #print("Date is ",dt)
+
   except Exception as e:  
     print('error trying to read exif', e)
     dt = None
@@ -362,7 +351,6 @@ def main(startdir,config_file,interval,shuffle) :
           sbg = sfg
           sfg = None
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
-            #print("Elapsed since last file load ",nexttm-time.time())
             print("Time out, fetch new image ",next_pic_num)
             pic_num = next_pic_num
             next_pic_num += 1
@@ -377,22 +365,16 @@ def main(startdir,config_file,interval,shuffle) :
             datestruct=None
             elapsed=time.time()
             try:
-              #elapsed=time.time()
               im = Image.open(iFiles[pic_num][0])
-              #print("Time for opening ",time.time()-elapsed)
             except:
               print("Error Opening File",iFiles[pic_num][0])
               continue
             try:
-              #elapsed=time.time()
               exif_data = im._getexif()
-              #print("time for exif ",time.time()-elapsed)
             except:
               exif_data=None
             try:        
-              #elapsed=time.time()
               orientation = int(exif_data[EXIF_ORIENTATION])
-              #print("time for orientation ",time.time()-elapsed)
             except:
               orientation = 1
             try: 
@@ -401,23 +383,13 @@ def main(startdir,config_file,interval,shuffle) :
             except:
               datestruct=None
               print("No date in EXIF")
-            # try:
-              # #elapsed=time.time()
-              # coordinates=get_coordinates(get_geotagging(exif_data))
-              # #print("time for coordinates ",time.time()-elapsed)
-            # except:
-              # coordinates=None
             try:
-              #elapsed=time.time()
               location = get_geo_name(exif_data)
-              #print("time for getting location ",time.time()-elapsed)
             except Exception as e: # NB should really check error
               print('Error a la vuelta de geoname', e)
               location = None
-            #elapsed=time.time()
             try:
               sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-              #print("time to load texture ",time.time()-elapsed)
               print("Time to prepare and load image into Texture: ",time.time()-elapsed)
             except:
               next_pic_num += 1
@@ -470,8 +442,6 @@ def main(startdir,config_file,interval,shuffle) :
         if a < 1.0: # transition is happening
           a += delta_alpha
           slide.unif[44] = a
-          #print("Picture number ",pic_num,"alpha ",a," time ", tm,"Text ",overlay_text)  
-          
         else: # no transition effect safe to resuffle etc
           if num_run_through > 1 : #re-load images after running through them 2 times
             #random.shuffle(iFiles)
@@ -532,7 +502,7 @@ if __name__ == '__main__':
         'config',
         metavar='ConfigFile',
         type=str,
-        default='.config.json',
+        default=DEFAULT_CONFIG_FILE,
         nargs="?",
         help='Configuration file holding list of image files'
         )
