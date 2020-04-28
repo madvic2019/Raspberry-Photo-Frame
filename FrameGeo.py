@@ -122,24 +122,20 @@ def get_coordinates(geotags):
       return None
 
 def get_geo_name(exif) :
-  geotags=get_geotagging(exif)
-  coords=get_coordinates(geotags)
-#  geoloc=GeoNames(username='madvic') done in main()
-  #print("Retrieving Location from Geonames")
-  geocoder=geoloc.reverse(coords,10)
-  #print("Location Name received",geocoder)
-#  print(geocoder)
+  # geotags=get_geotagging(exif)
+  # coords=get_coordinates(geotags)
+  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),10)
   return geocoder
 
-def get_geo_name2(coords) :
-  geocoder=None
-  if coords is not None:
-#  geoloc=GeoNames(username='madvic')
-    #print("Retrieving Location from Geonames")
-    geocoder=geoloc.reverse(coords,10)
-    #print("Location Name received",geocoder)
-#  print(geocoder)
-  return geocoder
+# def get_geo_name2(coords) :
+  # geocoder=None
+  # if coords is not None:
+# #  geoloc=GeoNames(username='madvic')
+    # #print("Retrieving Location from Geonames")
+    # geocoder=geoloc.reverse(coords,10)
+    # #print("Location Name received",geocoder)
+# #  print(geocoder)
+  # return geocoder
 
 
 def get_orientation(fname) :
@@ -405,15 +401,15 @@ def main(startdir,config_file,interval,shuffle) :
             except:
               datestruct=None
               print("No date in EXIF")
+            # try:
+              # #elapsed=time.time()
+              # coordinates=get_coordinates(get_geotagging(exif_data))
+              # #print("time for coordinates ",time.time()-elapsed)
+            # except:
+              # coordinates=None
             try:
               #elapsed=time.time()
-              coordinates=get_coordinates(get_geotagging(exif_data))
-              #print("time for coordinates ",time.time()-elapsed)
-            except:
-              coordinates=None
-            try:
-              #elapsed=time.time()
-              location = get_geo_name2(coordinates)
+              location = get_geo_name(exif_data)
               #print("time for getting location ",time.time()-elapsed)
             except Exception as e: # NB should really check error
               print('Error a la vuelta de geoname', e)
