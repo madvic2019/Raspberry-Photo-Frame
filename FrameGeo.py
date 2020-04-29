@@ -252,7 +252,8 @@ def get_files(dir,config_file,shuffle):
         ext = os.path.splitext(filename)[1].lower()
         if ext in extensions and not '.AppleDouble' in root and not filename.startswith('.'):
           file_path_name = os.path.join(root, filename)
-          file_list.append((file_path_name, os.path.getmtime(file_path_name))) 
+          #file_list.append((file_path_name, os.path.getmtime(file_path_name)))
+          file_list.append(file_path_name) 
         if (len(file_list) % 1000 == 0) :
           print(len(file_list))
     if shuffle:
@@ -337,7 +338,7 @@ def main(startdir,config_file,interval,shuffle) :
     print("Starting with picture number ",next_pic_num)
     
     while DISPLAY.loop_running():
-      numeros=(num_run_through,next_pic_num)
+      numeros=(num_run_through,next_pic_num,iFiles[pic_num])
       with open(config_file+".num","w") as f:
         json.dump(numeros,f,separators=(',',':'))
                 
