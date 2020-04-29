@@ -324,7 +324,7 @@ def main(startdir,config_file,interval,shuffle) :
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
-    numeros=(0,0)
+    numeros=(0,0,'')
     try:
       with open(config_file+".num",'r') as f:
         numeros=json.load(f)
@@ -336,7 +336,7 @@ def main(startdir,config_file,interval,shuffle) :
     
     print("Starting with round number ",num_run_through)
     print("Starting with picture number ",next_pic_num)
-    
+    pic_num=next_pic_num
     while DISPLAY.loop_running():
       numeros=(num_run_through,next_pic_num,iFiles[pic_num])
       with open(config_file+".num","w") as f:
@@ -366,9 +366,9 @@ def main(startdir,config_file,interval,shuffle) :
             datestruct=None
             elapsed=time.time()
             try:
-              im = Image.open(iFiles[pic_num][0])
+              im = Image.open(iFiles[pic_num])
             except:
-              print("Error Opening File",iFiles[pic_num][0])
+              print("Error Opening File",iFiles[pic_num])
               continue
             try:
               exif_data = im._getexif()
