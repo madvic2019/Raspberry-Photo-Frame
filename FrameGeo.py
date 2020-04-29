@@ -230,8 +230,8 @@ def get_files(dir,config_file,shuffle):
         try:
           file_list=json.load(f)
           if len(file_list)>0:
-            if len(os.path.commonprefix((file_list[0][0],dir))) < len(dir) :
-              print("Directory is different from config file ",os.path.dirname(file_list[0][0]), " -- ",dir," reloading")
+            if len(os.path.commonprefix((file_list[0],dir))) < len(dir) :
+              print("Directory is different from config file ",os.path.dirname(file_list[0]), " -- ",dir," reloading")
               file_list=None
           else:
             file_list=None
