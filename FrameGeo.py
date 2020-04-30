@@ -503,7 +503,7 @@ if __name__ == '__main__':
         )
     parser.add_argument(
         '--config-file',
-        dest='config'
+        dest='config',
         type=str,
         default=DEFAULT_CONFIG_FILE,
         help='Configuration file holding list of image files'
