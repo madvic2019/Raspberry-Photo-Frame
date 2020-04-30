@@ -444,15 +444,17 @@ def main(startdir,config_file,interval,shuffle) :
           a += delta_alpha
           slide.unif[44] = a
         else: # no transition effect safe to resuffle etc
-          if num_run_through > 1 : #re-load images after running through them 2 times
-            #random.shuffle(iFiles)
-            if check_changes(startdir):
-              print("Re-Fetching images files, erase config file")
-              with open(config_file,'w') as f :
-                json.dump('',f) # creates an empty config file
-              iFiles, nFi = get_files(startdir,config_file,shuffle)
-              num_run_through = 0
-              next_pic_num = 0
+          if num_run_through > 0 : #re-load images after running through them 
+            try:
+              if check_changes(startdir):
+                print("Re-Fetching images files, erase config file")
+                with open(config_file,'w') as f :
+                  json.dump('',f) # creates an empty config file
+                iFiles, nFi = get_files(startdir,config_file,shuffle)
+            except:
+                print("Error refreshing file list, keep old one")
+            num_run_through = 0
+            next_pic_num = 0
               
         
         slide.draw()
@@ -500,11 +502,10 @@ if __name__ == '__main__':
         help='Path to a directory that contains images'
         )
     parser.add_argument(
-        'config',
-        metavar='ConfigFile',
+        '--config-file',
+        dest='config'
         type=str,
         default=DEFAULT_CONFIG_FILE,
-        nargs="?",
         help='Configuration file holding list of image files'
         )
     parser.add_argument(
