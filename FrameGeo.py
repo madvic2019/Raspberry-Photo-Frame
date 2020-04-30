@@ -123,7 +123,7 @@ def get_coordinates(geotags):
 
 def get_geo_name(exif) :
 
-  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),10,lang="es")
+  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),10,find_nearby_type='FindNearby')
   return geocoder
 
 
