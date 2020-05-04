@@ -288,10 +288,11 @@ def get_files(dir,config_file,shuffle):
 
 
 
-def main(startdir,config_file,interval,shuffle,geonamesuser) :
+def main(startdir,config_file,interval,shuffle,geonamesuser,check_dirs) :
 
     global paused,geoloc,last_file_change, next_check_tm
-
+    next_check_tm=check_dirs
+    
     EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
     EXIF_ORIENTATION = None
     EXIF_GPS = None
@@ -577,7 +578,7 @@ if __name__ == '__main__':
     print(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
     #signal.signal(signal.SIGUSR2,handler2)
     #signal.signal(signal.SIGUSR1, handler1)
-    CHECK_DIR_TM=args.dirchecktm
-    main(startdir=args.path,config_file=args.config,interval=args.waittime,shuffle=args.shuffle,geonamesuser=args.geouser)
+    
+    main(startdir=args.path,config_file=args.config,interval=args.waittime,shuffle=args.shuffle,geonamesuser=args.geouser,check_dirs=args.dirchecktm)
 
 
