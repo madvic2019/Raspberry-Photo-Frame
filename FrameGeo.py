@@ -45,6 +45,7 @@ from geopy.geocoders import GeoNames
 GEONAMESUSER = ''
 DEFAULT_CONFIG_FILE = '/home/pi/.photo-frame' 
 PIC_DIR = '/home/pi/photo' #change this to your images location folder
+CHECK_DIR_TM = 36000.0 # Time to check for directory changes
 ########################
 # Original constants
 FPS = 20
@@ -64,7 +65,7 @@ MES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septie
 RECENT_N = 4 # shuffle the most recent ones to play before the rest
 
 SHOW_LOCATION = True
-CHECK_DIR_TM = 36000.0 # seconds to wait between checking if directory has changed Note high value!
+
 #####################################################
 BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
@@ -465,14 +466,17 @@ def main(startdir,config_file,interval,shuffle,geonamesuser) :
           a += delta_alpha
           slide.unif[44] = a
         else: # no transition effect safe to resuffle etc
-          if (num_run_through > 0) or ((time.time() - last_file_change) > CHECK_DIR_TM) : #re-load images after running through them or exceeded time
-            print("Refreshing Files list, number of cycles ",num_run_through," Time since last Directory change ", time.time() - last_file_change)
+          if (num_run_through > 0) or (next_check_tm - time.time() < 0) : #re-load images after running through them or exceeded time
+            print("Refreshing Files list")
+            next_check_tm += CHECK_DIR_TM 
             try:
               if check_changes(startdir): #rebuild files list if changes happened
                 print("Re-Fetching images files, erase config file")
                 with open(config_file,'w') as f :
                   json.dump('',f) # creates an empty config file, forces directory reload
                 iFiles, nFi = get_files(startdir,config_file,shuffle)
+              else :
+                print("No directory changes: do nothing")
             except:
                 print("Error refreshing file list, keep old one")
             num_run_through = 0
