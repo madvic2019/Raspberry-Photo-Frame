@@ -15,7 +15,7 @@ USING exif info to rotate images
     ESC to quit, 's' to reverse, any other key to move on one.
     
 ADDED by V. Diaz:
-Commandline arguments defined, use:
+Commandline arguments defined:
 python3 FrameGeo [Image Path] [--config-file configfilename] [--waittime delaybetweenslides] [--shuffle True|False] [--geonamesuser username]
 
 Support of geo tagging in EXIF to show location of photo in slide show (using GeoNames service)
@@ -55,6 +55,7 @@ RESHUFFLE_NUM = 5 # times through before reshuffling
 FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeSans.ttf'
 #FONT_FILE = '/home/pi/pi3d_demos/fonts/NotoSans-Regular.ttf'
 #FONT_FILE = '/home/patrick/python/pi3d_demos/fonts/NotoSans-Regular.ttf'
+
 # Use your Locale for these:
 CODEPOINTS = '1234567890ABCDEFGHIJKLMNÑOPQRSTUVWXYZ., _-/ÁÉÍÓÚabcdefghijklmnñopqrstuvwxyzáéíóú' # limit to 49 ie 7x7 grid_size
 MES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
@@ -464,7 +465,7 @@ def main(startdir,config_file,interval,shuffle,geonamesuser) :
           a += delta_alpha
           slide.unif[44] = a
         else: # no transition effect safe to resuffle etc
-          if num_run_through > 0 || (last_file_change - time.time()) > CHECK_DIR_TM : #re-load images after running through them or exceeded time
+          if (num_run_through > 0) or ((last_file_change - time.time()) > CHECK_DIR_TM) : #re-load images after running through them or exceeded time
             try:
               if check_changes(startdir): #rebuild files list if changes happened
                 print("Re-Fetching images files, erase config file")
