@@ -474,7 +474,7 @@ def main(startdir,config_file,interval,shuffle,geonamesuser,check_dirs) :
         else: # no transition effect safe to resuffle etc
           if (num_run_through > 0) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             print("Refreshing Files list")
-            next_check_tm += CHECK_DIR_TM 
+            next_check_tm += check_dirs 
             try:
               if check_changes(startdir): #rebuild files list if changes happened
                 print("Re-Fetching images files, erase config file")
