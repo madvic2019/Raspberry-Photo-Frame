@@ -38,14 +38,16 @@ from PIL.ExifTags import GPSTAGS,TAGS
 from geopy.geocoders import GeoNames
 
 
+
 #####################################################
 # these variables are constants
 #####################################################
-#defaults for command line arguments:
+# Default values
 GEONAMESUSER = ''
 DEFAULT_CONFIG_FILE = '/home/pi/.photo-frame' 
 PIC_DIR = '/home/pi/photo' #change this to your images location folder
 CHECK_DIR_TM = 3600.0 # Time to check for directory changes
+NUMBEROFROUNDS = 0 # number of rounds before re-fetching images 0 means after one pass
 ########################
 # Original constants
 FPS = 20
@@ -269,10 +271,9 @@ def get_files(dir,config_file,shuffle):
         ext = os.path.splitext(filename)[1].lower()
         if ext in extensions and not '.AppleDouble' in root and not filename.startswith('.'):
           file_path_name = os.path.join(root, filename)
-          #file_list.append((file_path_name, os.path.getmtime(file_path_name)))
           file_list.append(file_path_name) 
-        if (len(file_list) % 1000 == 0) :
-          print(len(file_list))
+        if (len(file_list) % 1000 == 0) : # print every 1000 files detected
+          print(len(file_list)) 
     if shuffle:
       random.shuffle(file_list)
     else:
@@ -481,8 +482,8 @@ def main(
         if a < 1.0: # transition is happening
           a += delta_alpha
           slide.unif[44] = a
-        else: # no transition effect safe to resuffle etc
-          if (num_run_through > 0) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
+        else: # Check if images have to be re-fetched (no transition on going, so no harm to image
+          if (num_run_through > NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             print("Refreshing Files list")
             next_check_tm = time.time() + check_dirs 
             try:
