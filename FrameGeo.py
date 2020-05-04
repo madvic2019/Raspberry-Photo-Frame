@@ -466,7 +466,7 @@ def main(startdir,config_file,interval,shuffle,geonamesuser) :
           slide.unif[44] = a
         else: # no transition effect safe to resuffle etc
           if (num_run_through > 0) or ((time.time() - last_file_change) > CHECK_DIR_TM) : #re-load images after running through them or exceeded time
-            print("Refreshing Files list, number of cycles ",num_run_through," Time since last Directory change ",last_file_change - time.time())
+            print("Refreshing Files list, number of cycles ",num_run_through," Time since last Directory change ", time.time() - last_file_change)
             try:
               if check_changes(startdir): #rebuild files list if changes happened
                 print("Re-Fetching images files, erase config file")
