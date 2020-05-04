@@ -91,7 +91,7 @@ if BLUR_ZOOM < 1.0:
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 last_file_change = 0.0 # holds last change time in directory structure
 next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
-
+global main
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Recursively loads images '
