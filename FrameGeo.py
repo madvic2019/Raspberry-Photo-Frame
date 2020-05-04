@@ -374,6 +374,7 @@ def main(
     while DISPLAY.loop_running():
       numeros=(num_run_through,next_pic_num,iFiles[pic_num],last_file_change)
       with open(config_file+".num","w") as f:
+        print("Write to config.num file ", json.dumps(numeros))
         json.dump(numeros,f,separators=(',',':'))
                 
       tm = time.time()
