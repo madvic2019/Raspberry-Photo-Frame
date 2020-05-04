@@ -466,7 +466,7 @@ def main(startdir,config_file,interval,shuffle,geonamesuser) :
           a += delta_alpha
           slide.unif[44] = a
         else: # no transition effect safe to resuffle etc
-          if (num_run_through > 0) or (next_check_tm - time.time() < 0) : #re-load images after running through them or exceeded time
+          if (num_run_through > 0) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             print("Refreshing Files list")
             next_check_tm += CHECK_DIR_TM 
             try:
@@ -572,7 +572,7 @@ if __name__ == '__main__':
     print(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
     #signal.signal(signal.SIGUSR2,handler2)
     #signal.signal(signal.SIGUSR1, handler1)
-    CHECK_DIR_TM = args.dirchecktm
+    CHECK_DIR_TM = args.dirchecktm #Overwrite default!
     main(startdir=args.path,config_file=args.config,interval=args.waittime,shuffle=args.shuffle,geonamesuser=args.geouser)
 
 
