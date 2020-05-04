@@ -372,10 +372,7 @@ def main(
     
     pic_num=next_pic_num
     while DISPLAY.loop_running():
-      numeros=(num_run_through,next_pic_num,iFiles[pic_num],last_file_change)
-      with open(config_file+".num","w") as f:
-        print("Write to config.num file ", json.dumps(numeros))
-        json.dump(numeros,f,separators=(',',':'))
+      
                 
       tm = time.time()
       
@@ -389,6 +386,10 @@ def main(
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
             print("Time out, fetch new image ",next_pic_num)
             print(" Time to next directory check ",next_check_tm - time.time())
+            numeros=(num_run_through,next_pic_num,iFiles[pic_num],last_file_change)
+            with open(config_file+".num","w") as f:
+              print("Write to config.num file ", json.dumps(numeros))
+              json.dump(numeros,f,separators=(',',':'))
             pic_num = next_pic_num
             next_pic_num += 1
             if next_pic_num >= nFi:
