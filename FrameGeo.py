@@ -291,7 +291,7 @@ def get_files(dir,config_file,shuffle):
 def main(startdir,config_file,interval,shuffle,geonamesuser,check_dirs) :
 
     global paused,geoloc,last_file_change, next_check_tm
-    next_check_tm=check_dirs
+    next_check_tm=time.time()+check_dirs
     
     EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
     EXIF_ORIENTATION = None
