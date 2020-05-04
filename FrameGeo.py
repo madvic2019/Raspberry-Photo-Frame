@@ -385,8 +385,8 @@ def main(
           sbg = sfg
           sfg = None
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
-            print("Time out, fetch new image ",next_pic_num)
-            print(" Time to next directory check ",next_check_tm - time.time())
+            #print("Time out, fetch new image ",next_pic_num)
+            #print(" Time to next directory check ",next_check_tm - time.time())
             pic_num = next_pic_num
             next_pic_num += 1
             if next_pic_num >= nFi:
@@ -394,7 +394,7 @@ def main(
               next_pic_num = 0
             numeros=(num_run_through,pic_num,iFiles[pic_num],last_file_change)
             with open(config_file+".num","w") as f:
-              print("Write to config.num file ", json.dumps(numeros))
+              #print("Write to config.num file ", json.dumps(numeros))
               json.dump(numeros,f,separators=(',',':'))
             
             orientation = 1 # this is default - unrotated
@@ -425,7 +425,7 @@ def main(
             try:
               location = get_geo_name(exif_data)
             except Exception as e: # NB should really check error
-              print('Error found preparing geoname: ', e)
+              #print('Error preparing geoname: ', e)
               location = None
             try:
               sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
