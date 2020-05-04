@@ -484,7 +484,7 @@ def main(
         else: # no transition effect safe to resuffle etc
           if (num_run_through > 0) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             print("Refreshing Files list")
-            next_check_tm += check_dirs 
+            next_check_tm = time.time() + check_dirs 
             try:
               if check_changes(startdir): #rebuild files list if changes happened
                 print("Re-Fetching images files, erase config file")
