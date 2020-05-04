@@ -561,7 +561,7 @@ if __name__ == '__main__':
         )
     parser.add_argument(
         '--dir-check',
-        type=int,
+        type=float,
         dest='dirchecktm',
         action='store',
         default=CHECK_DIR_TM,
