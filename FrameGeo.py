@@ -577,7 +577,7 @@ if __name__ == '__main__':
     print(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
     #signal.signal(signal.SIGUSR2,handler2)
     #signal.signal(signal.SIGUSR1, handler1)
-    CHECK_DIR_TM = args.dirchecktm #Overwrite default!
+    next_check_tm = time.time() + args.dirchecktm
     main(startdir=args.path,config_file=args.config,interval=args.waittime,shuffle=args.shuffle,geonamesuser=args.geouser)
 
 
