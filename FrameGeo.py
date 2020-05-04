@@ -355,9 +355,13 @@ def main(startdir,config_file,interval,shuffle,geonamesuser) :
       num_run_through=0
       next_pic_num=0      
     
+    print("Start time ",time.time())
+    print("Next Check time ",next_check_tm)
+    print("Last File Changed",last_file_change)
+    
     print("Starting with round number ",num_run_through)
     print("Starting with picture number ",next_pic_num)
-    #print("Last File Changed",time.localtime(last_file_change))
+    
     pic_num=next_pic_num
     while DISPLAY.loop_running():
       numeros=(num_run_through,next_pic_num,iFiles[pic_num],last_file_change)
