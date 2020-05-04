@@ -91,73 +91,6 @@ if BLUR_ZOOM < 1.0:
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 last_file_change = 0.0 # holds last change time in directory structure
 next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
-global main
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Recursively loads images '
-        'from a directory, then displays them in a Slidshow.'
-        )
-
-    parser.add_argument(
-        'path',
-        metavar='ImagePath',
-        type=str,
-        default=PIC_DIR,
-        nargs="?",
-        help='Path to a directory that contains images'
-        )
-    parser.add_argument(
-        '--config-file',
-        dest='config',
-        type=str,
-        default=DEFAULT_CONFIG_FILE,
-        help='Configuration file holding list of image files'
-        )
-    parser.add_argument(
-        '--waittime',
-        type=int,
-        dest='waittime',
-        action='store',
-        default=time_delay,
-        help='Amount of time to wait before showing the next image.'
-        )
-    parser.add_argument(
-        '--shuffle',
-        type=bool,
-        dest='shuffle',
-        action='store',
-        default=True,
-        help='Shuffle pictures list'
-        )
-    parser.add_argument(
-        '--geouser',
-        type=str,
-        dest='geouser',
-        action='store',
-        default=GEONAMESUSER,
-        help='User Name for GeoNames server'
-        )
-    parser.add_argument(
-        '--dir-check',
-        type=float,
-        dest='dirchecktm',
-        action='store',
-        default=CHECK_DIR_TM,
-        help='Interval between check directories'
-        )
-
-    args = parser.parse_args()
-    print(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
-    #signal.signal(signal.SIGUSR2,handler2)
-    #signal.signal(signal.SIGUSR1, handler1)
-    
-    main(startdir=args.path,
-      config_file=args.config,
-      interval=args.waittime,
-      shuffle=args.shuffle,
-      geonamesuser=args.geouser,
-      check_dirs=args.dirchecktm
-      )
 
 
 def handler1(signum, frame):
@@ -564,20 +497,13 @@ def main(
             except:
                 print("Error refreshing file list, keep old one")
             num_run_through = 0
-            
-            
-              
-        
         slide.draw()
         text.draw()  
-        
-        
       else:
         textblock.set_text("NO IMAGES SELECTED")
         textblock.colouring.set_colour(alpha=1.0)
         text.regen()
         text.draw()
-      
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
@@ -598,5 +524,72 @@ def main(
       kbd.close()
     DISPLAY.destroy()
     
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Recursively loads images '
+        'from a directory, then displays them in a Slidshow.'
+        )
+
+    parser.add_argument(
+        'path',
+        metavar='ImagePath',
+        type=str,
+        default=PIC_DIR,
+        nargs="?",
+        help='Path to a directory that contains images'
+        )
+    parser.add_argument(
+        '--config-file',
+        dest='config',
+        type=str,
+        default=DEFAULT_CONFIG_FILE,
+        help='Configuration file holding list of image files'
+        )
+    parser.add_argument(
+        '--waittime',
+        type=int,
+        dest='waittime',
+        action='store',
+        default=time_delay,
+        help='Amount of time to wait before showing the next image.'
+        )
+    parser.add_argument(
+        '--shuffle',
+        type=bool,
+        dest='shuffle',
+        action='store',
+        default=True,
+        help='Shuffle pictures list'
+        )
+    parser.add_argument(
+        '--geouser',
+        type=str,
+        dest='geouser',
+        action='store',
+        default=GEONAMESUSER,
+        help='User Name for GeoNames server'
+        )
+    parser.add_argument(
+        '--dir-check',
+        type=float,
+        dest='dirchecktm',
+        action='store',
+        default=CHECK_DIR_TM,
+        help='Interval between check directories'
+        )
+
+    args = parser.parse_args()
+    print(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
+    #signal.signal(signal.SIGUSR2,handler2)
+    #signal.signal(signal.SIGUSR1, handler1)
+    
+    main(startdir=args.path,
+      config_file=args.config,
+      interval=args.waittime,
+      shuffle=args.shuffle,
+      geonamesuser=args.geouser,
+      check_dirs=args.dirchecktm
+      )
 
 
