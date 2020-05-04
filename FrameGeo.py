@@ -349,7 +349,7 @@ def main(startdir,config_file,interval,shuffle,geonamesuser) :
         numeros=json.load(f)
         num_run_through=numeros[0]
         next_pic_num=numeros[1]
-        last_file_change=numeros[2]
+        last_file_change=numeros[3]
     except:
       num_run_through=0
       next_pic_num=0      
@@ -554,11 +554,20 @@ if __name__ == '__main__':
         default=GEONAMESUSER,
         help='User Name for GeoNames server'
         )
+     parser.add_argument(
+        '--dir-check',
+        type=int,
+        dest='dirchecktm',
+        action='store',
+        default=CHECK_DIR_TM,
+        help='Interval between check directories'
+        )
 
     args = parser.parse_args()
     print(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
-    signal.signal(signal.SIGUSR2,handler2)
-    signal.signal(signal.SIGUSR1, handler1)
+    #signal.signal(signal.SIGUSR2,handler2)
+    #signal.signal(signal.SIGUSR1, handler1)
+    CHECK_DIR_TM = args.dirchecktm
     main(startdir=args.path,config_file=args.config,interval=args.waittime,shuffle=args.shuffle,geonamesuser=args.geouser)
 
 
