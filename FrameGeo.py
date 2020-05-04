@@ -490,12 +490,13 @@ def main(
                 with open(config_file,'w') as f :
                   json.dump('',f) # creates an empty config file, forces directory reload
                 iFiles, nFi = get_files(startdir,config_file,shuffle)
+                next_pic_num = 0
               else :
                 print("No directory changes: do nothing")
             except:
                 print("Error refreshing file list, keep old one")
             num_run_through = 0
-            next_pic_num = 0
+            
             
               
         
