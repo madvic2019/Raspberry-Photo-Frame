@@ -379,6 +379,7 @@ def main(startdir,config_file,interval,shuffle,geonamesuser) :
           sfg = None
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
             print("Time out, fetch new image ",next_pic_num)
+            print(" Time to next directory check ",next_check_tm - time.time())
             pic_num = next_pic_num
             next_pic_num += 1
             if next_pic_num >= nFi:
