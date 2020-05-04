@@ -549,7 +549,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--geouser',
         type=str,
-        dest='username',
+        dest='geouser',
         action='store',
         default=GEONAMESUSER,
         help='User Name for GeoNames server'
