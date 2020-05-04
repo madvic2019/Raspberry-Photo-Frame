@@ -13,6 +13,15 @@ USING exif info to rotate images
     probram is Alt-F4 or reboot. If you intend to test from command line set
     KEYBOARD True. After that:
     ESC to quit, 's' to reverse, any other key to move on one.
+    
+ADDED by V. Diaz:
+Commandline arguments defined, use:
+python3 FrameGeo [Image Path] [--config-file configfilename] [--waittime delaybetweenslides] [--shuffle True|False] [--geonamesuser username]
+
+Support of geo tagging in EXIF to show location of photo in slide show (using GeoNames service)
+Persistent images list: enables restart with same images list and resume from last shown image.
+Optimized file list creation to enable (very) large images catalog
+
 '''
 import os
 import time 
@@ -32,10 +41,12 @@ from geopy.geocoders import GeoNames
 #####################################################
 # these variables are constants
 #####################################################
-DEFAULT_CONFIG_FILE = '/home/pi/.photo-frame'
-PIC_DIR = '/home/pi/bilbodrive/media/photo/Fotos'
-#PIC_DIR='/home/pi/photos/'
-#PIC_DIR = '/home/pi/frododrive/photo/iphone de Marivi'
+#defaults for command line arguments:
+GEONAMESUSER = ''
+DEFAULT_CONFIG_FILE = '/home/pi/.photo-frame' 
+PIC_DIR = '/home/pi/photo' #change this to your images location folder
+########################
+# Original constants
 FPS = 20
 FIT = True
 EDGE_ALPHA = 0.5 # see background colour at edge. 1.0 would show reflection of image
@@ -44,12 +55,15 @@ RESHUFFLE_NUM = 5 # times through before reshuffling
 FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeSans.ttf'
 #FONT_FILE = '/home/pi/pi3d_demos/fonts/NotoSans-Regular.ttf'
 #FONT_FILE = '/home/patrick/python/pi3d_demos/fonts/NotoSans-Regular.ttf'
+# Use your Locale for these:
 CODEPOINTS = '1234567890ABCDEFGHIJKLMNÑOPQRSTUVWXYZ., _-/ÁÉÍÓÚabcdefghijklmnñopqrstuvwxyzáéíóú' # limit to 49 ie 7x7 grid_size
 MES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+#############################
+
 RECENT_N = 4 # shuffle the most recent ones to play before the rest
-#SHOW_NAMES = False
+
 SHOW_LOCATION = True
-CHECK_DIR_TM = 3600.0 # seconds to wait between checking if directory has changed
+CHECK_DIR_TM = 36000.0 # seconds to wait between checking if directory has changed Note high value!
 #####################################################
 BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
@@ -272,9 +286,9 @@ def get_files(dir,config_file,shuffle):
 
 
 
-def main(startdir,config_file,interval,shuffle) :
+def main(startdir,config_file,interval,shuffle,geonamesuser) :
 
-    global paused,geoloc,next_check_tm
+    global paused,geoloc,last_file_change
 
     EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
     EXIF_ORIENTATION = None
@@ -288,8 +302,12 @@ def main(startdir,config_file,interval,shuffle) :
         EXIF_GPS = k
     ##############################################
     # Create GeoNames locator object
-
-    geoloc=GeoNames(username='madvic')
+    geoloc=None
+    try:
+      geoloc=GeoNames(username=geonamesuser)
+    except:
+      print("Geographic information server not available")
+      
 
     print("Setting up display")
     DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,
@@ -324,21 +342,23 @@ def main(startdir,config_file,interval,shuffle) :
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
-    numeros=(0,0,'')
+    numeros=(0,0,'',last_file_change)
     try:
       with open(config_file+".num",'r') as f:
         numeros=json.load(f)
         num_run_through=numeros[0]
         next_pic_num=numeros[1]
+        last_file_change=numeros[2]
     except:
       num_run_through=0
       next_pic_num=0      
     
     print("Starting with round number ",num_run_through)
     print("Starting with picture number ",next_pic_num)
+    print("Last File Changed",time.localtime(last_file_change))
     pic_num=next_pic_num
     while DISPLAY.loop_running():
-      numeros=(num_run_through,next_pic_num,iFiles[pic_num])
+      numeros=(num_run_through,next_pic_num,iFiles[pic_num],last_file_change)
       with open(config_file+".num","w") as f:
         json.dump(numeros,f,separators=(',',':'))
                 
@@ -444,17 +464,18 @@ def main(startdir,config_file,interval,shuffle) :
           a += delta_alpha
           slide.unif[44] = a
         else: # no transition effect safe to resuffle etc
-          if num_run_through > 0 : #re-load images after running through them 
+          if num_run_through > 0 || (last_file_change - time.time()) > CHECK_DIR_TM : #re-load images after running through them or exceeded time
             try:
-              if check_changes(startdir):
+              if check_changes(startdir): #rebuild files list if changes happened
                 print("Re-Fetching images files, erase config file")
                 with open(config_file,'w') as f :
-                  json.dump('',f) # creates an empty config file
+                  json.dump('',f) # creates an empty config file, forces directory reload
                 iFiles, nFi = get_files(startdir,config_file,shuffle)
             except:
                 print("Error refreshing file list, keep old one")
             num_run_through = 0
             next_pic_num = 0
+            
               
         
         slide.draw()
@@ -524,11 +545,19 @@ if __name__ == '__main__':
         default=True,
         help='Shuffle pictures list'
         )
+    parser.add_argument(
+        '--geouser',
+        type=str,
+        dest='geouser',
+        action='store',
+        default=GEONAMESUSER,
+        help='User Name for GeoNames server'
+        )
 
     args = parser.parse_args()
     print(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
     signal.signal(signal.SIGUSR2,handler2)
     signal.signal(signal.SIGUSR1, handler1)
-    main(startdir=args.path,config_file=args.config,interval=args.waittime,shuffle=args.shuffle)
+    main(startdir=args.path,config_file=args.config,interval=args.waittime,shuffle=args.shuffle,geoname=geouser)
 
 
