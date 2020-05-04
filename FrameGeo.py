@@ -45,7 +45,7 @@ from geopy.geocoders import GeoNames
 GEONAMESUSER = ''
 DEFAULT_CONFIG_FILE = '/home/pi/.photo-frame' 
 PIC_DIR = '/home/pi/photo' #change this to your images location folder
-CHECK_DIR_TM = 36000.0 # Time to check for directory changes
+CHECK_DIR_TM = 3600.0 # Time to check for directory changes
 ########################
 # Original constants
 FPS = 20
@@ -288,7 +288,14 @@ def get_files(dir,config_file,shuffle):
 
 
 
-def main(startdir,config_file,interval,shuffle,geonamesuser,check_dirs) :
+def main(
+    startdir,
+    config_file,
+    interval,
+    shuffle,
+    geonamesuser,
+    check_dirs
+    ) :
 
     global paused,geoloc,last_file_change, next_check_tm
     next_check_tm=time.time()+check_dirs
@@ -579,6 +586,12 @@ if __name__ == '__main__':
     #signal.signal(signal.SIGUSR2,handler2)
     #signal.signal(signal.SIGUSR1, handler1)
     
-    main(startdir=args.path,config_file=args.config,interval=args.waittime,shuffle=args.shuffle,geonamesuser=args.geouser,check_dirs=args.dirchecktm)
+    main(startdir=args.path,
+      config_file=args.config,
+      interval=args.waittime,
+      shuffle=args.shuffle,
+      geonamesuser=args.geouser,
+      check_dirs=args.dirchecktm
+      )
 
 
