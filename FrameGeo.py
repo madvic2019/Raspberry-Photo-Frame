@@ -281,7 +281,7 @@ def get_files(dir,config_file,shuffle):
       json.dump(file_list, f, sort_keys=True)
       print("List written to ",config_file) 
 
-  print("Num fotos: ", len(file_list))
+  print(len(file_list)," image files found")
   return file_list, len(file_list) # tuple of file list, number of pictures
 
 
@@ -357,7 +357,7 @@ def main(startdir,config_file,interval,shuffle,geonamesuser) :
     
     print("Starting with round number ",num_run_through)
     print("Starting with picture number ",next_pic_num)
-    print("Last File Changed",time.localtime(last_file_change))
+    #print("Last File Changed",time.localtime(last_file_change))
     pic_num=next_pic_num
     while DISPLAY.loop_running():
       numeros=(num_run_through,next_pic_num,iFiles[pic_num],last_file_change)
@@ -405,15 +405,15 @@ def main(startdir,config_file,interval,shuffle,geonamesuser) :
               datestruct=time.localtime(dt)
             except:
               datestruct=None
-              print("No date in EXIF")
+              #print("No date in EXIF")
             try:
               location = get_geo_name(exif_data)
             except Exception as e: # NB should really check error
-              print('Error a la vuelta de geoname', e)
+              print('Error found preparing geoname: ', e)
               location = None
             try:
               sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-              print("Time to prepare and load image into Texture: ",time.time()-elapsed)
+              #print("Time to prepare and load image into Texture: ",time.time()-elapsed)
             except:
               next_pic_num += 1
               continue
@@ -446,12 +446,12 @@ def main(startdir,config_file,interval,shuffle,geonamesuser) :
               #print(overlay_text)
             if datestruct is not None :
               overlay_text += " " + tidy_name(MES[datestruct.tm_mon - 1]) + "-" + str(datestruct.tm_year)
-              print(overlay_text)
+              #print(overlay_text)
             try:
               textblock.set_text(text_format="{}".format(overlay_text))
               text.regen()
             except :
-              print("Wrong Overlay_text Format")
+              #print("Wrong Overlay_text Format")
               textblock.set_text(" ")
               
         #text.regen()		
