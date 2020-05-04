@@ -554,7 +554,7 @@ if __name__ == '__main__':
         default=GEONAMESUSER,
         help='User Name for GeoNames server'
         )
-     parser.add_argument(
+    parser.add_argument(
         '--dir-check',
         type=int,
         dest='dirchecktm',
