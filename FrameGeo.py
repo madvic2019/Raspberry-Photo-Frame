@@ -344,6 +344,8 @@ def main(
       num_run_through=0
       next_pic_num=0      
     
+    if (next_check_tm < time.time()) :  #if stored check time is in the past, refresh check timer
+      next_check_tm = time.time() + check_dirs
     print("Start time ",time.time())
     print("Next Check time ",next_check_tm)
     
