@@ -331,12 +331,13 @@ def main(
     #Retrieve last image number to restart the slideshow from config.num file
     #Retrieve next directory check time
     
-    cacheddata=(0,0,'',next_check_tm)
+    cacheddata=(0,0,last_file_change,next_check_tm)
     try:
       with open(config_file+".num",'r') as f:
         cacheddata=json.load(f)
         num_run_through=cacheddata[0]
         next_pic_num=cacheddata[1]
+        last_file_change=cacheddata[2]
         next_check_tm=cacheddata[3]
     except:
       num_run_through=0
@@ -369,7 +370,7 @@ def main(
               next_pic_num = 0
             
             #update persistent cached data for restart
-            cacheddata=(num_run_through,pic_num,iFiles[pic_num],next_check_tm)
+            cacheddata=(num_run_through,pic_num,last_file_change,next_check_tm)
             with open(config_file+".num","w") as f:
               #print("Write to config.num file ", json.dumps(cachedddata))
               json.dump(cacheddata,f,separators=(',',':'))
