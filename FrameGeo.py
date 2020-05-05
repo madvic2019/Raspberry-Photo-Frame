@@ -202,7 +202,6 @@ def check_changes(dir): #walk the folder structure to check if there are changes
   update = False
   for root, _, _ in os.walk(dir):
     try:
-        print('.',end=" ")
         mod_tm = os.stat(root).st_mtime
         if mod_tm > last_file_change:
           last_file_change = mod_tm
