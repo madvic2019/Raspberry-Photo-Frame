@@ -29,7 +29,6 @@ import random
 import pi3d
 import argparse
 import stat
-import signal
 import json
 
 
@@ -45,7 +44,7 @@ from geopy.geocoders import GeoNames
 # Default values
 GEONAMESUSER = ''
 DEFAULT_CONFIG_FILE = '/home/pi/.photo-frame' 
-PIC_DIR = '/home/pi/photo' #change this to your images location folder
+PIC_DIR = '/home/pi/photo' #change this to your images default location folder
 CHECK_DIR_TM = 3600.0 # Time to check for directory changes
 NUMBEROFROUNDS = 0 # number of rounds before re-fetching images 0 means after one pass
 ########################
@@ -509,7 +508,7 @@ def main(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Recursively loads images '
-        'from a directory, then displays them in a Slidshow.'
+        'from a directory, then displays them in a Slideshow.'
         )
 
     parser.add_argument(
