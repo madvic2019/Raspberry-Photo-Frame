@@ -64,8 +64,6 @@ CODEPOINTS = '1234567890ABCDEFGHIJKLMNÑOPQRSTUVWXYZ., _-/ÁÉÍÓÚabcdefghijkl
 MES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 #############################
 
-RECENT_N = 4 # shuffle the most recent ones to play before the rest
-
 SHOW_LOCATION = True
 
 #####################################################
@@ -77,7 +75,7 @@ KEYBOARD = True  # set to False when running headless to avoid curses error. Tru
 #####################################################
 # these variables can be altered using MQTT messaging
 #####################################################
-time_delay = 15.0 # between slides
+TIME_DELAY = 15.0 # default timer between slides
 fade_time = 2.0
 quit = False
 paused = False # NB must be set to True after the first iteration of the show!
@@ -94,16 +92,7 @@ delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 last_file_change = 0.0 # holds last change time in directory structure
 next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
 
-
-def handler1(signum, frame):
-    signal.pause()
-    return
-
-def handler2(signum,frame):
-    return
-
-
-def get_geotagging(exif):
+def get_geotagging(exif): # extract EXIF geographical information
     if not exif:
         #return None
         raise ValueError("Get Geotag: No EXIF metadata found")
@@ -119,7 +108,8 @@ def get_geotagging(exif):
                     geotagging[val] = exif[idx][key]
 
     return geotagging
-def get_decimal_from_dms(dms, ref):
+    
+def get_decimal_from_dms(dms, ref): 
 
     degrees = dms[0][0] / dms[0][1]
     minutes = dms[1][0] / dms[1][1] / 60.0
@@ -140,15 +130,11 @@ def get_coordinates(geotags):
     else :
       return None
 
-def get_geo_name(exif) :
-
+def get_geo_name(exif) : #Obtain geographic names from service provider
   geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),10,lang='es')
   return geocoder
 
-
-
-
-def get_orientation(fname) :
+def get_orientation(fname) : #extract orientation and capture date from EXIF data
   orientation = 1 
   try:
     im = Image.open(fname) # lazy operation so shouldn't load (better test though)
@@ -160,18 +146,6 @@ def get_orientation(fname) :
 
     dt = os.path.getmtime(fname) # so use file last modified date
   return orientation,dt
-
-def get_orientation2(exif) :
-  orientation = 1 
-  try:
-    dt = time.mktime(time.strptime(exif[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
-    orientation = int(exif[EXIF_ORIENTATION])
-
-  except Exception as e:  
-    print('error trying to read exif', e)
-    dt = None
-  return orientation,dt
-
 
   
 def tex_load(im, orientation, size=None):
@@ -223,7 +197,7 @@ def tidy_name(path_name):
     return name
 
 
-def check_changes(dir):
+def check_changes(dir): #walk the folder structure to check if there are changes
   global last_file_change
   update = False
   for root, _, _ in os.walk(dir):
@@ -238,12 +212,12 @@ def check_changes(dir):
   return update
 
 
-def get_files(dir,config_file,shuffle):
+def get_files(dir,config_file,shuffle): # Get image files names to show
   
   global EXIF_DATID, last_file_change
   file_list = None
   extensions = ['.png','.jpg','.jpeg','.bmp'] # can add to these
-  if os.path.exists(config_file) :
+  if os.path.exists(config_file) : # If there is a previous file list stored, just use it
     print("Config file exists, open for reading",config_file)
     with open(config_file, 'r') as f:
         try:
@@ -255,7 +229,7 @@ def get_files(dir,config_file,shuffle):
           else:
             file_list=None
         except:
-          print(config_file , 'File is not correct')   
+          print(config_file , 'Config File is not correct')   
             
   if file_list is None :
     print("Config File is not existing or corrupt")
@@ -279,7 +253,7 @@ def get_files(dir,config_file,shuffle):
     else:
       file_list.sort() # if not shuffled; sort by name
     
-    with open(config_file,'w') as f:
+    with open(config_file,'w') as f: #Store list in config file
       json.dump(file_list, f, sort_keys=True)
       print("List written to ",config_file) 
 
@@ -291,12 +265,12 @@ def get_files(dir,config_file,shuffle):
 
 
 def main(
-    startdir,
-    config_file,
-    interval,
-    shuffle,
-    geonamesuser,
-    check_dirs
+    startdir,                      # Root folder for images, with recursive search
+    config_file,                   # File with list of file names (for fast restart)  
+    interval,                      # Seconds between images
+    shuffle,                       # True or False
+    geonamesuser,                  # User name for GeoNames server www.geonames.org
+    check_dirs                     # Interval between checking folders in seconds
     ) :
 
     global paused,geoloc,last_file_change, next_check_tm
@@ -313,14 +287,13 @@ def main(
       if ExifTags.TAGS[k] == 'GPSInfo' :
         EXIF_GPS = k
     ##############################################
-    # Create GeoNames locator object
+    # Create GeoNames locator object www.geonames.org
     geoloc=None
     try:
       geoloc=GeoNames(username=geonamesuser)
     except:
       print("Geographic information server not available")
-      
-
+   
     print("Setting up display")
     DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,
                   display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
@@ -345,9 +318,9 @@ def main(
       print('No files selected!')
       exit()
 
-    # PointText and TextBlock. If SHOW_NAMES is False then this is just used for no images message
-    font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=8, shadow_radius=4.0,shadow=(128,128,128,12))
-    #font = pi3d.Font(FONT_FILE,  grid_size=7, shadow_radius=4.0,shadow=(0,0,0,128))
+    # PointText and TextBlock. 
+    font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(128,128,128,12))
+    
     text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
     textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 20, y=-DISPLAY.height * 0.4,
                               z=0.1, rot=0.0, char_count=199,
@@ -355,8 +328,9 @@ def main(
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
     
-    #Retrieve last image number to restart the slideshow
+    #Retrieve last image number to restart the slideshow from config.num file
     #Retrieve next directory check time
+    
     cacheddata=(0,0,'',next_check_tm)
     try:
       with open(config_file+".num",'r') as f:
@@ -370,15 +344,12 @@ def main(
     
     print("Start time ",time.time())
     print("Next Check time ",next_check_tm)
-    print("Last File Changed",last_file_change)
     
     print("Starting with round number ",num_run_through)
     print("Starting with picture number ",next_pic_num)
     
     pic_num=next_pic_num
     while DISPLAY.loop_running():
-      
-                
       tm = time.time()
       
       if nFi > 0:
@@ -389,8 +360,8 @@ def main(
           sbg = sfg
           sfg = None
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
-            #print("Time out, fetch new image ",next_pic_num)
-            #print(" Time to next directory check ",next_check_tm - time.time())
+            #print("Fetch new image ",next_pic_num)
+            print("Time until next directory check ",next_check_tm - time.time())
             pic_num = next_pic_num
             next_pic_num += 1
             if next_pic_num >= nFi:
@@ -400,7 +371,7 @@ def main(
             #update persistent cached data for restart
             cacheddata=(num_run_through,pic_num,iFiles[pic_num],next_check_tm)
             with open(config_file+".num","w") as f:
-              #print("Write to config.num file ", json.dumps(numeros))
+              #print("Write to config.num file ", json.dumps(cachedddata))
               json.dump(cacheddata,f,separators=(',',':'))
             
             orientation = 1 # this is default - unrotated
@@ -439,7 +410,7 @@ def main(
             except:
               next_pic_num += 1
               continue
-            nexttm = time.time()+time_delay #reset timer to cope with texture delays
+            nexttm = time.time()+interval #reset timer to cope with texture delays
             
           if sbg is None: # first time through
             sbg = sfg
@@ -457,7 +428,7 @@ def main(
           slide.unif[os1] = (wh_rat - 1.0) * 0.5
           slide.unif[os2] = 0.0
           if KENBURNS:
-              xstep, ystep = (slide.unif[i] * 2.0 / time_delay for i in (48, 49))
+              xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
               slide.unif[48] = 0.0
               slide.unif[49] = 0.0
               kb_up = not kb_up
@@ -480,7 +451,7 @@ def main(
         if KENBURNS:
           t_factor = nexttm - tm
           if kb_up:
-            t_factor = time_delay - t_factor
+            t_factor = interval - t_factor
           slide.unif[48] = xstep * t_factor
           slide.unif[49] = ystep * t_factor
 
@@ -557,7 +528,7 @@ if __name__ == '__main__':
         type=int,
         dest='waittime',
         action='store',
-        default=time_delay,
+        default=TIME_DELAY,
         help='Amount of time to wait before showing the next image.'
         )
     parser.add_argument(
@@ -587,9 +558,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     print(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
-    #signal.signal(signal.SIGUSR2,handler2)
-    #signal.signal(signal.SIGUSR1, handler1)
-    
+
     main(startdir=args.path,
       config_file=args.config,
       interval=args.waittime,
