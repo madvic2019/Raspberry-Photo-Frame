@@ -354,13 +354,16 @@ def main(
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
-    numeros=(0,0,'',last_file_change)
+    
+    #Retrieve last image number to restart the slideshow
+    #Retrieve next directory check time
+    cacheddata=(0,0,'',next_check_tm)
     try:
       with open(config_file+".num",'r') as f:
-        numeros=json.load(f)
-        num_run_through=numeros[0]
-        next_pic_num=numeros[1]
-        last_file_change=numeros[3]
+        cacheddata=json.load(f)
+        num_run_through=cacheddata[0]
+        next_pic_num=cacheddata[1]
+        next_check_tm=cacheddata[3]
     except:
       num_run_through=0
       next_pic_num=0      
@@ -393,10 +396,12 @@ def main(
             if next_pic_num >= nFi:
               num_run_through += 1
               next_pic_num = 0
-            numeros=(num_run_through,pic_num,iFiles[pic_num],last_file_change)
+            
+            #update persistent cached data for restart
+            cacheddata=(num_run_through,pic_num,iFiles[pic_num],next_check_tm)
             with open(config_file+".num","w") as f:
               #print("Write to config.num file ", json.dumps(numeros))
-              json.dump(numeros,f,separators=(',',':'))
+              json.dump(cacheddata,f,separators=(',',':'))
             
             orientation = 1 # this is default - unrotated
             coordinates = None
