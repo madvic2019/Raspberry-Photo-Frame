@@ -75,7 +75,7 @@ KEYBOARD = True  # set to False when running headless to avoid curses error. Tru
 #####################################################
 # these variables can be altered using MQTT messaging
 #####################################################
-TIME_DELAY = 15.0 # default timer between slides
+TIME_DELAY = 15 # default timer between slides
 fade_time = 2.0
 quit = False
 paused = False # NB must be set to True after the first iteration of the show!
