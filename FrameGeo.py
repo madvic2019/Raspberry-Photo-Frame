@@ -90,7 +90,7 @@ if BLUR_ZOOM < 1.0:
   BLUR_ZOOM = 1.0
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 last_file_change = 0.0 # holds last change time in directory structure
-next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
+#next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
 
 def get_geotagging(exif): # extract EXIF geographical information
     if not exif:
@@ -273,7 +273,7 @@ def main(
     check_dirs                     # Interval between checking folders in seconds
     ) :
 
-    global paused,geoloc,last_file_change, next_check_tm
+    global paused,geoloc,last_file_change
     next_check_tm=time.time()+check_dirs
     
     EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
