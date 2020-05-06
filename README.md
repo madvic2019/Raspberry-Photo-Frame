@@ -1,6 +1,6 @@
 # Photo Frame for the Raspberry Pi
 
-I took the PictureFrame program from pi3d demos (and added geo tagging support. The images are shown with 
+I took the PictureFrame program from pi3d demos (https://github.com/pi3d/pi3d_demos) and added geo tagging support. The images are shown with 
 text information: Location and Date of capture, if available.
 
 The GPS coordinates are extracted from EXIF metadata, and converted to location name using online service
@@ -19,10 +19,6 @@ usage: FrameGeo.py [-h] [--config-file CONFIG] [--waittime WAITTIME]
                    [--dir-check DIRCHECKTM]
                    [ImagePath]
 
-Recursively loads images from a directory, then displays them in a Slidshow.
-
-positional arguments:
-  ImagePath             Path to a directory that contains images
 
 optional arguments:
   -h, --help            show this help message and exit
