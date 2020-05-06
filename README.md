@@ -14,18 +14,27 @@ The images list is persistent, that enables restart with same images list and re
 
 The program stores the list of files to be shown in "configfilename" and the last index used in  "configfilename".num
 
+Finally, I added command line options that override the defaults embedded in the code.
+
 usage: python3 FrameGeo.py [-h] [--config-file CONFIG] [--waittime WAITTIME]
-                   [--shuffle SHUFFLE] [--geouser GEOUSER]
+                   [--shuffle True|False] [--geouser GEOUSER]
                    [--dir-check DIRCHECKTM]
                    [ImagePath]
 
 
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
-  --config-file CONFIG  Configuration file holding list of image files
-  --waittime WAITTIME   Amount of time to wait before showing the next image.
-  --shuffle SHUFFLE     Shuffle pictures list
-  --geouser GEOUSER     User Name for GeoNames server
-  --dir-check DIRCHECKTM
-                        Interval between check directories
+  
+  --config-file CONFIG  Configuration file holding list of image files (default /home/pi/.photo-frame)
+  
+  --waittime WAITTIME   Amount of time to wait before showing the next image. (default 15 seconds)
+  
+  --shuffle SHUFFLE     Shuffle pictures list (Default True)
+  
+  --geouser GEOUSER     User Name for GeoNames server (Default '', it won't retrieve geo names)
+  
+  --dir-check DIRCHECKTM Interval between check directories (Default 3600 seconds)
+  
+  ImagePath    Root directory where images will be found (default /home/pi/photos)
+  
 
