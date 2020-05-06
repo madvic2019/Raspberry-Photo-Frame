@@ -1,5 +1,6 @@
-# MarcoFotos
-I took the PictureFrame program from pi3d demos and added geotaggin support. The images are shown with 
+# Photo Frame for the Raspberry Pi
+
+I took the PictureFrame program from pi3d demos (and added geo tagging support. The images are shown with 
 text information: Location and Date of capture, if available.
 
 The GPS coordinates are extracted from EXIF metadata, and converted to location name using online service
