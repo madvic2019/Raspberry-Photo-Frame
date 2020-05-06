@@ -4,19 +4,17 @@ I took the PictureFrame program from pi3d demos (https://github.com/pi3d/pi3d_de
 
 The images are shown with text information: Location and Date of capture, if available.
 
-GPS coordinates are extracted from EXIF metadata, then converted to location name using online service GeoNames (using geopy wrapper)
+GPS coordinates are extracted from EXIF metadata, then converted to location name using online service GeoNames (using https://github.com/geopy/geopy)
+
 You need to set up an account (free) in www.geonames.org
-
-
-
  
-Optimized file list creation to enable (very) large images catalog. On creation of ifle list, only file name is checked, 
+I also optimized the file list creation in order to manage large images catalogues. On creation of file list, only file name is checked, postpone costly operations (like EXIF data extraction) to the rendering phase.
 
-Persistent images list: enables restart with same images list and resume from last shown image.
-    The program stores the list of files to be shown in {configfilename} and the last index used in  {configfilename}.num
-    This way when program is stopped (or Raspberry rebooted, crashed, etc), it will retain the last status for next run, speeding up start up. This is helpful for very large number of images.
+The images list is persistent, that enables restart with same images list and resume from last shown image. This is handy if you want to turn off the display and come back where you left (e.g. using crontab). You can even reboot the Raspberry and the Picture Frame resumes where it was before.
 
-usage: FrameGeo.py [-h] [--config-file CONFIG] [--waittime WAITTIME]
+The program stores the list of files to be shown in "configfilename" and the last index used in  "configfilename".num
+
+usage: python3 FrameGeo.py [-h] [--config-file CONFIG] [--waittime WAITTIME]
                    [--shuffle SHUFFLE] [--geouser GEOUSER]
                    [--dir-check DIRCHECKTM]
                    [ImagePath]
