@@ -22,6 +22,8 @@ Support of geo tagging in EXIF to show location of photo in slide show (using Ge
 Persistent images list: enables restart with same images list and resume from last shown image.
 Optimized file list creation to enable (very) large images catalog
 
+This program is provided WITH ABSOLUTELY NO WARRANTY
+
 '''
 import os
 import time 
