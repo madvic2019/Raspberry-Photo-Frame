@@ -25,7 +25,7 @@ usage: python3 FrameGeo.py [-h] [--config-file CONFIG] [--waittime WAITTIME]
 arguments:
   -h, --help            show this help message and exit
   
-  --config-file CONFIG  Configuration file holding list of image files (default /home/pi/.photo-frame)
+  --config-file CONFIG  Configuration file holding list of image files (default ./.photo-frame)
   
   --waittime WAITTIME   Amount of time to wait before showing the next image. (default 15 seconds)
   
@@ -35,7 +35,7 @@ arguments:
   
   --dir-check DIRCHECKTM Interval between check directories (Default 3600 seconds)
   
-  ImagePath    Root directory where images will be found (default /home/pi/photos)
+  ImagePath    Root directory where images will be found (default ./examples)
   
 For testing, just use the default values, plus your username for GeoNames:
 python3 FrameGeo.py --geouser <yout_user_name>
