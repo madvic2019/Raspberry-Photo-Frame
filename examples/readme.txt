@@ -1,1 +1,1 @@
-Image files with GPS information as examples
+Image files with and without GPS information as examples
