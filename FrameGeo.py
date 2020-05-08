@@ -573,7 +573,7 @@ if __name__ == '__main__':
         )
     parser.add_argument(
         '--debug',
-        dest='debugprint'
+        dest='debugprint',
         help='Print Debug Information'
         )
 
