@@ -20,7 +20,8 @@ python3 FrameGeo [Image Path] [--config-file configfilename] [--waittime delaybe
 
 Support of geo tagging in EXIF to show location of photo in slide show (using GeoNames service)
 Persistent images list: enables restart with same images list and resume from last shown image.
-Optimized file list creation to enable (very) large images catalog
+Optimized file list creation to enable (very) large images catalog.
+Use logging Module instead of print
 
 
 Copyright (c) Victor Diaz  2020
@@ -104,22 +105,29 @@ delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 last_file_change = 0.0 # holds last change time in directory structure
 #next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
 
+#####################################################
+# Prepare EXIF data extraction (just instance some constants)
+#####################################################
+EXIF_DATID = None
+EXIF_ORIENTATION = None
+EXIF_GPS = None
+for k in ExifTags.TAGS:
+  if ExifTags.TAGS[k] == 'DateTimeOriginal':
+    EXIF_DATID = k
+  if ExifTags.TAGS[k] == 'Orientation':
+    EXIF_ORIENTATION = k
+  if ExifTags.TAGS[k] == 'GPSInfo' :
+    EXIF_GPS = k
+
 def get_geotagging(exif): # extract EXIF geographical information
-    if not exif:
-        #return None
-        raise ValueError("Get Geotag: No EXIF metadata found")
+  geotagging = {}
+  if EXIF_GPS not in exif:
+    raise ValueError("Get Geotag: No EXIF geotagging found")
+  for (key, val) in GPSTAGS.items():
+    if key in exif[EXIF_GPS]:
+      geotagging[val] = exif[EXIF_GPS][key]
 
-    geotagging = {}
-    for (idx, tag) in TAGS.items():
-        if tag == 'GPSInfo':
-            if idx not in exif:
-                raise ValueError("No EXIF geotagging found")
-
-            for (key, val) in GPSTAGS.items():
-                if key in exif[idx]:
-                    geotagging[val] = exif[idx][key]
-
-    return geotagging
+  return geotagging
     
 def get_decimal_from_dms(dms, ref): 
 
@@ -288,16 +296,7 @@ def main(
     global paused,geoloc,last_file_change
     next_check_tm=time.time()+check_dirs
     
-    EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
-    EXIF_ORIENTATION = None
-    EXIF_GPS = None
-    for k in ExifTags.TAGS:
-      if ExifTags.TAGS[k] == 'DateTimeOriginal':
-        EXIF_DATID = k
-      if ExifTags.TAGS[k] == 'Orientation':
-        EXIF_ORIENTATION = k
-      if ExifTags.TAGS[k] == 'GPSInfo' :
-        EXIF_GPS = k
+    
     ##############################################
     # Create GeoNames locator object www.geonames.org
     geoloc=None
@@ -376,7 +375,7 @@ def main(
           sfg = None
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
             #print("Fetch new image ",next_pic_num)
-            print("Time until next directory check ",next_check_tm - time.time())
+            #print("Time until next directory check ",next_check_tm - time.time())
             pic_num = next_pic_num
             next_pic_num += 1
             if next_pic_num >= nFi:
@@ -417,7 +416,7 @@ def main(
             try:
               location = get_geo_name(exif_data)
             except Exception as e: # NB should really check error
-              #print('Error preparing geoname: ', e)
+              print('Error preparing geoname: ', e)
               location = None
             try:
               sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
@@ -425,7 +424,7 @@ def main(
             except:
               next_pic_num += 1
               continue
-            print("Have to reset timer!")  
+            #print("Have to reset timer!")  
             nexttm = time.time()+interval #reset timer to cope with texture delays
             
           if sbg is None: # first time through
