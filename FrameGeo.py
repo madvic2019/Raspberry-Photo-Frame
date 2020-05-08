@@ -574,11 +574,12 @@ if __name__ == '__main__':
     parser.add_argument(
         '--debug',
         dest='debugprint',
+        default=False,
         help='Print Debug Information'
         )
 
     args = parser.parse_args()
-    if args.debugprint is not None:
+    if args.debugprint :
       printlevel=logging.Debug
     else :
       printlevel=logging.Info
