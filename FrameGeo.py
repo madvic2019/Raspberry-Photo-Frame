@@ -425,7 +425,7 @@ def main(
             except:
               next_pic_num += 1
               continue
-            print("Have to reset timer!")  
+            #print("Have to reset timer!")  
             nexttm = time.time()+interval #reset timer to cope with texture delays
             
           if sbg is None: # first time through
