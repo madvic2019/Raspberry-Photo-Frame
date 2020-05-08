@@ -105,6 +105,7 @@ last_file_change = 0.0 # holds last change time in directory structure
 #next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
 
 def get_geotagging(exif): # extract EXIF geographical information
+  global EXIF_GPS
   geotagging = {}
   if EXIF_GPS not in exif:
     raise ValueError("Get Geotag: No EXIF geotagging found")
