@@ -375,7 +375,7 @@ def main(
           sfg = None
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
             #print("Fetch new image ",next_pic_num)
-            print("Time until next directory check ",next_check_tm - time.time())
+            #print("Time until next directory check ",next_check_tm - time.time())
             pic_num = next_pic_num
             next_pic_num += 1
             if next_pic_num >= nFi:
@@ -424,7 +424,7 @@ def main(
             except:
               next_pic_num += 1
               continue
-            print("Have to reset timer!")  
+            #print("Have to reset timer!")  
             nexttm = time.time()+interval #reset timer to cope with texture delays
             
           if sbg is None: # first time through
