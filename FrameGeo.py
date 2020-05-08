@@ -410,7 +410,7 @@ def main(
             try:
               location = get_geo_name(exif_data)
             except Exception as e: # NB should really check error
-              #print('Error preparing geoname: ', e)
+              print('Error preparing geoname: ', e)
               location = None
             try:
               sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
