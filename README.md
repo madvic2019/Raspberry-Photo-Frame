@@ -37,4 +37,6 @@ arguments:
   
   ImagePath    Root directory where images will be found (default /home/pi/photos)
   
-
+For testing, just use the default values, plus your username for GeoNames:
+python3 FrameGeo.py --geouser <yout_user_name>
+That will launch the slideshow with the images in "examples" folder.
