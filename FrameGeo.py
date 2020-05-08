@@ -105,21 +105,14 @@ last_file_change = 0.0 # holds last change time in directory structure
 #next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
 
 def get_geotagging(exif): # extract EXIF geographical information
-    if not exif:
-        #return None
-        raise ValueError("Get Geotag: No EXIF metadata found")
+  geotagging = {}
+  if EXIF_GPS not in exif:
+    raise ValueError("Get Geotag: No EXIF geotagging found")
+  for (key, val) in GPSTAGS.items():
+    if key in exif[EXIF_GPS]:
+      geotagging[val] = exif[EXIF_GPS][key]
 
-    geotagging = {}
-    for (idx, tag) in TAGS.items():
-        if tag == 'GPSInfo':
-            if idx not in exif:
-                raise ValueError("No EXIF geotagging found")
-
-            for (key, val) in GPSTAGS.items():
-                if key in exif[idx]:
-                    geotagging[val] = exif[idx][key]
-
-    return geotagging
+  return geotagging
     
 def get_decimal_from_dms(dms, ref): 
 
