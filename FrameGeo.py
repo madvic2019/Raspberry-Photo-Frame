@@ -580,9 +580,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     if args.debugprint :
-      printlevel=logging.Debug
+      printlevel=logging.DEBUG
     else :
-      printlevel=logging.Info
+      printlevel=logging.INFO
     logging.basicConfig(level=printlevel,format='%(asctime)s - %(levelname)s - %(message)s')
     logging.info(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
     main(startdir=args.path,
