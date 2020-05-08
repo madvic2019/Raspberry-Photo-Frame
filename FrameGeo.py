@@ -104,8 +104,21 @@ delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 last_file_change = 0.0 # holds last change time in directory structure
 #next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
 
+#####################################################
+# Prepare EXIF data extraction (just instance some constants)
+#####################################################
+EXIF_DATID = None
+EXIF_ORIENTATION = None
+EXIF_GPS = None
+for k in ExifTags.TAGS:
+  if ExifTags.TAGS[k] == 'DateTimeOriginal':
+    EXIF_DATID = k
+  if ExifTags.TAGS[k] == 'Orientation':
+    EXIF_ORIENTATION = k
+  if ExifTags.TAGS[k] == 'GPSInfo' :
+    EXIF_GPS = k
+
 def get_geotagging(exif): # extract EXIF geographical information
-  global EXIF_GPS
   geotagging = {}
   if EXIF_GPS not in exif:
     raise ValueError("Get Geotag: No EXIF geotagging found")
@@ -282,16 +295,7 @@ def main(
     global paused,geoloc,last_file_change
     next_check_tm=time.time()+check_dirs
     
-    EXIF_DATID = None # this needs to be set before get_files() above can extract exif date info
-    EXIF_ORIENTATION = None
-    EXIF_GPS = None
-    for k in ExifTags.TAGS:
-      if ExifTags.TAGS[k] == 'DateTimeOriginal':
-        EXIF_DATID = k
-      if ExifTags.TAGS[k] == 'Orientation':
-        EXIF_ORIENTATION = k
-      if ExifTags.TAGS[k] == 'GPSInfo' :
-        EXIF_GPS = k
+    
     ##############################################
     # Create GeoNames locator object www.geonames.org
     geoloc=None
