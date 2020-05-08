@@ -44,7 +44,6 @@ import pi3d
 import argparse
 import stat
 import json
-import logging
 
 
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
@@ -228,7 +227,7 @@ def check_changes(dir): #walk the folder structure to check if there are changes
           last_file_change = mod_tm
           update = True
     except:
-        logging.error("Filesystem not available")
+        print("Filesystem not available")
         
   return update
 
@@ -239,22 +238,22 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
   file_list = None
   extensions = ['.png','.jpg','.jpeg','.bmp'] # can add to these
   if os.path.exists(config_file) : # If there is a previous file list stored, just use it
-    logging.info("Config file exists, open for reading",config_file)
+    print("Config file exists, open for reading",config_file)
     with open(config_file, 'r') as f:
         try:
           file_list=json.load(f)
           if len(file_list)>0:
             if len(os.path.commonprefix((file_list[0],dir))) < len(dir) :
-              logging.info("Directory is different from config file ",os.path.dirname(file_list[0]), " -- ",dir," reloading")
+              print("Directory is different from config file ",os.path.dirname(file_list[0]), " -- ",dir," reloading")
               file_list=None
           else:
             file_list=None
         except:
-          logging.info(config_file , 'Config File is not correct')   
+          print(config_file , 'Config File is not correct')   
             
   if file_list is None :
-    logging.info("Config File is not existing or corrupt")
-    logging.info("Clean config file for numbers")
+    print("Config File is not existing or corrupt")
+    print("Clean config file for numbers")
     if os.path.exists(config_file+".num"):
       os.remove(config_file+".num")
     file_list=[]
@@ -268,7 +267,7 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
           file_path_name = os.path.join(root, filename)
           file_list.append(file_path_name) 
         if (len(file_list) % 1000 == 0) : # print every 1000 files detected
-          logging.debug(len(file_list)) 
+          print(len(file_list)) 
     if shuffle:
       random.shuffle(file_list)
     else:
@@ -276,9 +275,9 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
     
     with open(config_file,'w') as f: #Store list in config file
       json.dump(file_list, f, sort_keys=True)
-      logging.info("List written to ",config_file) 
+      print("List written to ",config_file) 
 
-  logging.info(len(file_list)," image files found")
+  print(len(file_list)," image files found")
   return file_list, len(file_list) # tuple of file list, number of pictures
 
 
@@ -304,13 +303,13 @@ def main(
     try:
       geoloc=GeoNames(username=geonamesuser)
     except:
-      logging.warning("Geographic information server not available")
+      print("Geographic information server not available")
    
-    logging.info("Setting up display")
+    print("Setting up display")
     DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,
                   display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
     CAMERA = pi3d.Camera(is_3d=False)
-    logging.debug(DISPLAY.opengl.gl_id)
+    print(DISPLAY.opengl.gl_id)
     shader = pi3d.Shader("/home/pi/pi3d_demos/shaders/blend_new")
     #shader = pi3d.Shader("/home/patrick/python/pi3d_demos/shaders/blend_new")
     slide = pi3d.Sprite(camera=CAMERA, w=DISPLAY.width, h=DISPLAY.height, z=5.0)
@@ -327,7 +326,7 @@ def main(
     sfg = None # slide for foreground
     sbg = None # slide for background
     if nFi == 0:
-      logging.error('No files selected!')
+      print('No files selected!')
       exit()
 
     # PointText and TextBlock. 
@@ -357,11 +356,11 @@ def main(
     
     if (next_check_tm < time.time()) :  #if stored check time is in the past, refresh check timer
       next_check_tm = time.time() + check_dirs
-    logging.info("Start time ",time.time())
-    logging.info("Next Folder Check time ",next_check_tm)
+    print("Start time ",time.time())
+    print("Next Check time ",next_check_tm)
     
-    logging.info("Starting with round number ",num_run_through)
-    logging.info("Starting with picture number ",next_pic_num)
+    print("Starting with round number ",num_run_through)
+    print("Starting with picture number ",next_pic_num)
     
     pic_num=next_pic_num
     while DISPLAY.loop_running():
@@ -375,8 +374,8 @@ def main(
           sbg = sfg
           sfg = None
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
-            logging.debug("Fetch new image ",next_pic_num)
-            logging.debug("Time until next directory check ",next_check_tm - time.time())
+            #print("Fetch new image ",next_pic_num)
+            print("Time until next directory check ",next_check_tm - time.time())
             pic_num = next_pic_num
             next_pic_num += 1
             if next_pic_num >= nFi:
@@ -386,7 +385,7 @@ def main(
             #update persistent cached data for restart
             cacheddata=(num_run_through,pic_num,last_file_change,next_check_tm)
             with open(config_file+".num","w") as f:
-              logging.debug("Write to config.num file ", json.dumps(cachedddata))
+              #print("Write to config.num file ", json.dumps(cachedddata))
               json.dump(cacheddata,f,separators=(',',':'))
             
             orientation = 1 # this is default - unrotated
@@ -398,7 +397,7 @@ def main(
             try:
               im = Image.open(iFiles[pic_num])
             except:
-              logging.warning("Error Opening File",iFiles[pic_num])
+              print("Error Opening File",iFiles[pic_num])
               continue
             try:
               exif_data = im._getexif()
@@ -413,19 +412,19 @@ def main(
               datestruct=time.localtime(dt)
             except:
               datestruct=None
-              logging.debug("No date in EXIF")
+              #print("No date in EXIF")
             try:
               location = get_geo_name(exif_data)
             except Exception as e: # NB should really check error
-              logging.debug('Error preparing geoname: ', e)
+              print('Error preparing geoname: ', e)
               location = None
             try:
               sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-              logging.debug("Time to prepare and load image into Texture: ",time.time()-elapsed)
+              #print("Time to prepare and load image into Texture: ",time.time()-elapsed)
             except:
               next_pic_num += 1
               continue
-            logging.debug("Have to reset timer!")  
+            print("Have to reset timer!")  
             nexttm = time.time()+interval #reset timer to cope with texture delays
             
           if sbg is None: # first time through
@@ -452,15 +451,15 @@ def main(
           if SHOW_LOCATION: #(and/or month-year)
             if location is not None:
               overlay_text += tidy_name(str(location))
-              logging.debug(overlay_text)
+              #print(overlay_text)
             if datestruct is not None :
               overlay_text += " " + tidy_name(MES[datestruct.tm_mon - 1]) + "-" + str(datestruct.tm_year)
-              logging.debug(overlay_text)
+              #print(overlay_text)
             try:
               textblock.set_text(text_format="{}".format(overlay_text))
               text.regen()
             except :
-              logging.debug("Wrong Overlay_text Format")
+              #print("Wrong Overlay_text Format")
               textblock.set_text(" ")
               
         #text.regen()		
@@ -476,19 +475,19 @@ def main(
           slide.unif[44] = a
         else: # Check if images have to be re-fetched (no transition on going, so no harm to image
           if (num_run_through > NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
-            logging.info("Refreshing Files list")
+            print("Refreshing Files list")
             next_check_tm = time.time() + check_dirs  # Set up the next interval
             try:
               if check_changes(startdir): #rebuild files list if changes happened
-                logging.info("Re-Fetching images files, erase config file")
+                print("Re-Fetching images files, erase config file")
                 with open(config_file,'w') as f :
                   json.dump('',f) # creates an empty config file, forces directory reload
                 iFiles, nFi = get_files(startdir,config_file,shuffle)
                 next_pic_num = 0
               else :
-                logging.info("No directory changes: do nothing")
+                print("No directory changes: do nothing")
             except:
-                logging.info("Error refreshing file list, keep old one")
+                print("Error refreshing file list, keep old one")
             num_run_through = 0
         slide.draw()
         text.draw()  
@@ -571,20 +570,10 @@ if __name__ == '__main__':
         default=CHECK_DIR_TM,
         help='Interval between check directories'
         )
-    parser.add_argument(
-        '--debug',
-        dest='debugprint',
-        default=False,
-        help='Print Debug Information'
-        )
 
     args = parser.parse_args()
-    if args.debugprint :
-      printlevel=logging.DEBUG
-    else :
-      printlevel=logging.INFO
-    logging.basicConfig(level=printlevel,format='%(asctime)s - %(levelname)s - %(message)s')
-    logging.info(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
+    print(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
+
     main(startdir=args.path,
       config_file=args.config,
       interval=args.waittime,
