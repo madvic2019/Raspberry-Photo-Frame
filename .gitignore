@@ -2,3 +2,5 @@
 d3dcompiler_47.dll
 libEGL.dll
 *.dll
+.photo-frame
+.photo-frame.num
