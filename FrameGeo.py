@@ -44,41 +44,17 @@ import pi3d
 import argparse
 import stat
 import json
+import math
 
 
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 from geopy.geocoders import GeoNames
 
+import FrameConfig as config
 
-
-#####################################################
-# these variables are constants
-#####################################################
-# Default values
-GEONAMESUSER = ''
-DEFAULT_CONFIG_FILE = './.photo-frame' 
-PIC_DIR = './examples' #change this to your images default location folder
-CHECK_DIR_TM = 3600.0 # Time to check for directory changes
-NUMBEROFROUNDS = 0 # number of rounds before re-fetching images 0 means after one pass
-########################
-# Original constants
-FPS = 20
-FIT = True
-EDGE_ALPHA = 0.5 # see background colour at edge. 1.0 would show reflection of image
-BACKGROUND = (0.2, 0.2, 0.2, 1.0)
-RESHUFFLE_NUM = 5 # times through before reshuffling
-FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeSans.ttf'
-#FONT_FILE = '/home/pi/pi3d_demos/fonts/NotoSans-Regular.ttf'
-#FONT_FILE = '/home/patrick/python/pi3d_demos/fonts/NotoSans-Regular.ttf'
-
-# Use your Locale for these:
-CODEPOINTS = '1234567890ABCDEFGHIJKLMNÑOPQRSTUVWXYZ., _-/ÁÉÍÓÚabcdefghijklmnñopqrstuvwxyzáéíóú' # limit to 49 ie 7x7 grid_size
-MES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 #############################
-
 SHOW_LOCATION = True
-
 #####################################################
 BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
@@ -92,6 +68,11 @@ TIME_DELAY = 15 # default timer between slides
 fade_time = 2.0
 quit = False
 paused = False # NB must be set to True after the first iteration of the show!
+FPS = 20
+FIT = True
+EDGE_ALPHA = 0.5 # see background colour at edge. 1.0 would show reflection of image
+BACKGROUND = (0.2, 0.2, 0.2, 1.0)
+RESHUFFLE_NUM = 5 # times through before reshuffling
 #####################################################
 # only alter below here if you're keen to experiment!
 #####################################################
@@ -102,30 +83,17 @@ if KENBURNS:
 if BLUR_ZOOM < 1.0:
   BLUR_ZOOM = 1.0
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
-last_file_change = 0.0 # holds last change time in directory structure
-#next_check_tm = time.time() + CHECK_DIR_TM # check if new file or directory every hour
 
-#####################################################
-# Prepare EXIF data extraction (just instance some constants)
-#####################################################
-EXIF_DATID = None
-EXIF_ORIENTATION = None
-EXIF_GPS = None
-for k in ExifTags.TAGS:
-  if ExifTags.TAGS[k] == 'DateTimeOriginal':
-    EXIF_DATID = k
-  if ExifTags.TAGS[k] == 'Orientation':
-    EXIF_ORIENTATION = k
-  if ExifTags.TAGS[k] == 'GPSInfo' :
-    EXIF_GPS = k
+last_file_change = 0
+
 
 def get_geotagging(exif): # extract EXIF geographical information
   geotagging = {}
-  if EXIF_GPS not in exif:
+  if config.EXIF_GPS not in exif:
     raise ValueError("Get Geotag: No EXIF geotagging found")
-  for (key, val) in GPSTAGS.items():
-    if key in exif[EXIF_GPS]:
-      geotagging[val] = exif[EXIF_GPS][key]
+  for (key, val) in config.GPSTAGS.items():
+    if key in exif[config.EXIF_GPS]:
+      geotagging[val] = exif[config.EXIF_GPS][key]
 
   return geotagging
     
@@ -159,8 +127,8 @@ def get_orientation(fname) : #extract orientation and capture date from EXIF dat
   try:
     im = Image.open(fname) # lazy operation so shouldn't load (better test though)
     exif_data = im._getexif()
-    dt = time.mktime(time.strptime(exif_data[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
-    orientation = int(exif_data[EXIF_ORIENTATION])
+    dt = time.mktime(time.strptime(exif_data[config.EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
+    orientation = int(exif_data[config.EXIF_ORIENTATION])
 
   except Exception as e:  
 
@@ -198,7 +166,7 @@ def tex_load(im, orientation, size=None):
         im_b = im.resize(size, resample=0, box=box).resize(blr_sz)
         im_b = im_b.filter(ImageFilter.GaussianBlur(BLUR_AMOUNT))
         im_b = im_b.resize(size, resample=Image.BICUBIC)
-        im_b.putalpha(round(255 * EDGE_ALPHA))  # to apply the same EDGE_ALPHA as the no blur method.
+        im_b.putalpha(round(255 * config.EDGE_ALPHA))  # to apply the same EDGE_ALPHA as the no blur method.
         im = im.resize((int(x * sc_f) for x in im.size), resample=Image.BICUBIC)
         im_b.paste(im, box=(round(0.5 * (im_b.size[0] - im.size[0])),
                             round(0.5 * (im_b.size[1] - im.size[1]))))
@@ -213,7 +181,7 @@ def tex_load(im, orientation, size=None):
 
 def tidy_name(path_name):
     name = os.path.basename(path_name).upper()
-    name = ''.join([c for c in name if c in CODEPOINTS])
+    name = ''.join([c for c in name if c in config.CODEPOINTS])
     return name
 
 
@@ -234,7 +202,7 @@ def check_changes(dir): #walk the folder structure to check if there are changes
 
 def get_files(dir,config_file,shuffle): # Get image files names to show
   
-  global EXIF_DATID, last_file_change
+  global last_file_change
   file_list = None
   extensions = ['.png','.jpg','.jpeg','.bmp'] # can add to these
   if os.path.exists(config_file) : # If there is a previous file list stored, just use it
@@ -294,6 +262,7 @@ def main(
     ) :
 
     global paused,geoloc,last_file_change
+
     next_check_tm=time.time()+check_dirs
     
     
@@ -310,11 +279,11 @@ def main(
                   display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
     CAMERA = pi3d.Camera(is_3d=False)
     print(DISPLAY.opengl.gl_id)
-    shader = pi3d.Shader("/home/pi/pi3d_demos/shaders/blend_new")
+    shader = pi3d.Shader(config.PI3DDEMO + "/shaders/blend_new")
     #shader = pi3d.Shader("/home/patrick/python/pi3d_demos/shaders/blend_new")
     slide = pi3d.Sprite(camera=CAMERA, w=DISPLAY.width, h=DISPLAY.height, z=5.0)
     slide.set_shader(shader)
-    slide.unif[47] = EDGE_ALPHA
+    slide.unif[47] = config.EDGE_ALPHA
 
     if KEYBOARD:
       kbd = pi3d.Keyboard()
@@ -330,9 +299,14 @@ def main(
       exit()
 
     # PointText and TextBlock. 
-    font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(128,128,128,12))
+    #font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(128,128,128,12))
     
+    grid_size = math.ceil(len(config.CODEPOINTS) ** 0.5)
+    font = pi3d.Font(config.FONT_FILE, codepoints=config.CODEPOINTS, grid_size=grid_size, shadow_radius=4.0,shadow=(0,0,0,128))
     text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
+    
+    
+    #text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
     textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 20, y=-DISPLAY.height * 0.4,
                               z=0.1, rot=0.0, char_count=199,
                               text_format="{}".format(" "), size=0.65, 
@@ -404,11 +378,11 @@ def main(
             except:
               exif_data=None
             try:        
-              orientation = int(exif_data[EXIF_ORIENTATION])
+              orientation = int(exif_data[config.EXIF_ORIENTATION])
             except:
               orientation = 1
             try: 
-              dt = time.mktime(time.strptime(exif_data[EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
+              dt = time.mktime(time.strptime(exif_data[config.EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
               datestruct=time.localtime(dt)
             except:
               datestruct=None
@@ -453,7 +427,7 @@ def main(
               overlay_text += tidy_name(str(location))
               #print(overlay_text)
             if datestruct is not None :
-              overlay_text += " " + tidy_name(MES[datestruct.tm_mon - 1]) + "-" + str(datestruct.tm_year)
+              overlay_text += " " + tidy_name(config.MES[datestruct.tm_mon - 1]) + "-" + str(datestruct.tm_year)
               #print(overlay_text)
             try:
               textblock.set_text(text_format="{}".format(overlay_text))
@@ -474,7 +448,7 @@ def main(
           a += delta_alpha
           slide.unif[44] = a
         else: # Check if images have to be re-fetched (no transition on going, so no harm to image
-          if (num_run_through > NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
+          if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             print("Refreshing Files list")
             next_check_tm = time.time() + check_dirs  # Set up the next interval
             try:
@@ -527,7 +501,7 @@ if __name__ == '__main__':
         'path',
         metavar='ImagePath',
         type=str,
-        default=PIC_DIR,
+        default=config.PIC_DIR,
         nargs="?",
         help='Path to a directory that contains images'
         )
@@ -535,7 +509,7 @@ if __name__ == '__main__':
         '--config-file',
         dest='config',
         type=str,
-        default=DEFAULT_CONFIG_FILE,
+        default=config.DEFAULT_CONFIG_FILE,
         help='Configuration file holding list of image files'
         )
     parser.add_argument(
@@ -559,7 +533,7 @@ if __name__ == '__main__':
         type=str,
         dest='geouser',
         action='store',
-        default=GEONAMESUSER,
+        default=config.GEONAMESUSER,
         help='User Name for GeoNames server'
         )
     parser.add_argument(
@@ -567,7 +541,7 @@ if __name__ == '__main__':
         type=float,
         dest='dirchecktm',
         action='store',
-        default=CHECK_DIR_TM,
+        default=config.CHECK_DIR_TM,
         help='Interval between check directories'
         )
 

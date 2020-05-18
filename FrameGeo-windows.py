@@ -45,18 +45,10 @@ import argparse
 import stat
 import json
 import platform
-
-
+import math
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 from geopy.geocoders import GeoNames
-
-# Set Up prefixes depending on platform
-if platform.system() == "Windows" :
-   PI3DPREFIX = os.environ['HOMEPATH']+'/OneDrive - Nokia/victor/CppWin/pi3d_demos-master/'
-else :
-   PI3DPREFIX = '/home/pi/pi3d_demos-master/'
-   
 
 
 #####################################################
@@ -340,9 +332,13 @@ def main(
       exit()
 
     # PointText and TextBlock. 
-    font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(128,128,128,12))
-    
+    grid_size = math.ceil(len(CODEPOINTS) ** 0.5)
+    font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=grid_size, shadow_radius=4.0,shadow=(0,0,0,128))
     text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
+    
+    # font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(128,128,128,12))
+    
+    # text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
     textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 20, y=-DISPLAY.height * 0.4,
                               z=0.1, rot=0.0, char_count=199,
                               text_format="{}".format(" "), size=0.65, 
@@ -464,7 +460,7 @@ def main(
               #print(overlay_text)
             if datestruct is not None :
               overlay_text += " " + tidy_name(MES[datestruct.tm_mon - 1]) + "-" + str(datestruct.tm_year)
-              #print(overlay_text)
+              print(overlay_text)
             try:
               textblock.set_text(text_format="{}".format(overlay_text))
               text.regen()
