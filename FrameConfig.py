@@ -15,6 +15,8 @@ if platform.system() == "Windows" :
    PI3DDEMO = os.environ['HOMEPATH']+'/pi3d_demos-master/'
 else : #assume it is Raspberry Pi. This can be extended with other platforms
    PI3DDEMO = '/home/pi/pi3d_demos-master/'
+print (PI3DDEMO)
+
 
 # Default values
 GEONAMESUSER = ''
