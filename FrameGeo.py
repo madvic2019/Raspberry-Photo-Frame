@@ -329,9 +329,8 @@ def main(
     
     if (next_check_tm < time.time()) :  #if stored check time is in the past, refresh check timer
       next_check_tm = time.time() + check_dirs
-    print("Start time ",time.time())
-    print("Next Check time ",next_check_tm)
-    
+    print("Start time ",time.strftime(config.TIME_FORMAT,localtime())
+    print("Next Check time ",time.strftime(config.TIME_FORMAT,next_check_tm)
     print("Starting with round number ",num_run_through)
     print("Starting with picture number ",next_pic_num)
     
