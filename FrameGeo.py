@@ -130,8 +130,7 @@ def get_orientation(fname) : #extract orientation and capture date from EXIF dat
     dt = time.mktime(time.strptime(exif_data[config.EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
     orientation = int(exif_data[config.EXIF_ORIENTATION])
 
-  except Exception as e:  
-
+  except :  
     dt = os.path.getmtime(fname) # so use file last modified date
   return orientation,dt
 
@@ -363,11 +362,11 @@ def main(
               json.dump(cacheddata,f,separators=(',',':'))
             
             orientation = 1 # this is default - unrotated
-            coordinates = None
+            #coordinates = None
             dt=None
-            include=False
+            #include=False
             datestruct=None
-            elapsed=time.time()
+            #elapsed=time.time()
             try:
               im = Image.open(iFiles[pic_num])
             except:

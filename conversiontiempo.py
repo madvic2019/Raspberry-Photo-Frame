@@ -26,8 +26,8 @@ args=parser.parse_args()
 try:
   with open(args.path,'r') as f:
     data=json.load(f)
-    print("Last File Change: ",time.localtime(data[2]))
-    print("Next Directory check: ",time.localtime(data[3]))
+    print("Last File Change: ",time.strftime("%Y%m%d%H%M%S", time.localtime(data[2])))
+    print("Next Directory check: ",time.strftime("%Y%m%d%H%M%S",time.localtime(data[3])))
 
 except Exception as e:
   print(e)
