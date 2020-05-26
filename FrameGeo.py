@@ -135,10 +135,16 @@ def get_orientation(fname) : #extract orientation and capture date from EXIF dat
   return orientation,dt
 
   
-def tex_load(im, orientation, size=None):
-    #im.putalpha(255) # this will convert to RGBA and set alpha to opaque 
-    # REMOVED as it crashes with large images on Raspberry Pi (out of memory). To be checked if there are problems with some pictures
+def tex_load(im, orientation, size):
     
+    # change suggested to overcome the out of memory crash of putalpha() with very large images
+    (w, h) = im.size
+    if w > size[0]: # should really have `from pi3d.Texture import MAX_SIZE` at start
+        im = im.resize((size[0], int(h * size[0] / w)))
+    elif h > size[0]:
+        im = im.resize((int(w * size[0] / h), size[0]))
+    im.putalpha(255) # this will convert to RGBA and set alpha to opaque
+   
     if orientation == 2:
         im = im.transpose(Image.FLIP_LEFT_RIGHT)
     if orientation == 3:
