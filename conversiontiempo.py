@@ -29,7 +29,7 @@ try:
     picturesnameslist=json.load(f)
   with open(numberfilename,'r') as g:
     data=json.load(g)
-    print("Current Picture : ",picturenameslist[data[1]]," number ",data[1])
+    print("Current Picture : ",picturesnameslist[data[1]]," number ",data[1])
     print("Last File Change: ",time.strftime("%d/%m %H:%M:%S", time.localtime(data[2])))
     print("Next Directory check: ",time.strftime("%d/%m %H:%M:%S",time.localtime(data[3])))
 
