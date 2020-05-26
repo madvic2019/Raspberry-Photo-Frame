@@ -267,7 +267,7 @@ def main(
     check_dirs                     # Interval between checking folders in seconds
     ) :
 
-    global paused,geoloc,last_file_change
+    global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
 
     next_check_tm=time.time()+check_dirs
     
