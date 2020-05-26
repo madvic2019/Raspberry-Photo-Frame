@@ -21,12 +21,12 @@ parser.add_argument(
         help='Configuration file'
         )
 args=parser.parse_args()
-
 numberfilename=args.path+".num"
+print("Working with ",args.path," ",numberfilename)
+
 try:
   with open(args.path,'r') as f:
     picturesnameslist=json.load(f)
-
   with open(numberfilename,'r') as g:
     data=json.load(g)
     print("Current Picture : ",picturenameslist[data[1]]," number ",data[1])
