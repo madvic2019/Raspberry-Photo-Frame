@@ -328,8 +328,8 @@ def main(
       num_run_through=0
       next_pic_num=0      
     
-    if (next_check_tm < time.time()) :  #if stored check time is in the past, refresh check timer
-      next_check_tm = time.time() + check_dirs
+    if (next_check_tm < time.time()) :  #if stored check time is in the past, make it "now"
+      next_check_tm = time.time()
     print("Start time ",time.strftime(config.TIME_FORMAT,time.localtime()))
     print("Next Check time ",time.strftime(config.TIME_FORMAT,time.localtime(next_check_tm)))
     print("Starting with round number ",num_run_through)
