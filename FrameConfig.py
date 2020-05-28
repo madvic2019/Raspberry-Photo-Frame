@@ -9,12 +9,16 @@ from PIL.ExifTags import GPSTAGS,TAGS
 #
 #
 #
-# Set Up file search prefix depending on platform
+# Set Up file search prefix depending on platform, as examples
+uname=platform.uname() # tuple with (system, node, release, version, machine, processor)
 
-if platform.system() == "Windows" :
-   PI3DDEMO = os.environ['HOMEPATH']+'/pi3d_demos-master/'
-else : #assume it is Raspberry Pi. This can be extended with other platforms
-   PI3DDEMO = '/home/pi/pi3d_demos/'
+if uname[0] == "Windows" :
+   PI3DDEMO = os.environ['HOMEPATH']+'/pi3d_demos-master'
+elif uname[0] == "Linux" and uname[4] == "armv71" : 
+   PI3DDEMO = '/home/pi/pi3d_demos' #Raspberry Pi 
+else :
+   PI3DDEMO = '/home/victor/pi3d_demos' # assume in a Linux environment it will be located directly on user home
+   
 print (PI3DDEMO)
 
 
