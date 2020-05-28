@@ -14,7 +14,7 @@ uname=platform.uname() # tuple with (system, node, release, version, machine, pr
 
 if uname[0] == "Windows" :
    PI3DDEMO = os.environ['HOMEPATH']+'/pi3d_demos-master'
-elif uname[0] == "Linux" and uname[4] == "armv71" : 
+elif uname[0] == "Linux" and "arm" in uname[4] : 
    PI3DDEMO = '/home/pi/pi3d_demos' #Raspberry Pi 
 else :
    PI3DDEMO = '/home/victor/pi3d_demos' # assume in a Linux environment it will be located directly on user home
