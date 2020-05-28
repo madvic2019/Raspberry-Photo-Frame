@@ -6,3 +6,4 @@ libEGL.dll
 .photo-frame.num
 __pycache__/FrameConfig.cpython-38.pyc
 __pycache__/FrameGeo.cpython-38.pyc
+__pycache__/FrameConfig.cpython-36.pyc
