@@ -2,9 +2,7 @@
 d3dcompiler_47.dll
 libEGL.dll
 *.dll
-.photo-frame
-.photo-frame.num
 __pycache__/FrameConfig.cpython-38.pyc
 __pycache__/FrameGeo.cpython-38.pyc
 __pycache__/FrameConfig.cpython-36.pyc
-.photo-frame-N-5CG7244K36.num
+.*
