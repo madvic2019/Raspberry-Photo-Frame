@@ -308,7 +308,7 @@ def main(
     #font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(128,128,128,12))
     
     grid_size = math.ceil(len(config.CODEPOINTS) ** 0.5)
-    font = pi3d.Font(config.FONT_FILE, codepoints=config.CODEPOINTS, grid_size=grid_size, shadow_radius=4.0,shadow=(0,0,0,128))
+    font = pi3d.Font(config.FONT_FILE, codepoints=list(range(32,255), grid_size=grid_size, shadow_radius=4.0,shadow=(0,0,0,128))
     text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
     
     
