@@ -308,7 +308,7 @@ def main(
     #font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(128,128,128,12))
     
     grid_size = math.ceil(len(config.CODEPOINTS) ** 0.5)
-    font = pi3d.Font(config.FONT_FILE, codepoints=list(range(32,255), grid_size=grid_size, shadow_radius=4.0,shadow=(0,0,0,128))
+    font = pi3d.Font(config.FONT_FILE, codepoints=list(range(32,255)), grid_size=grid_size, shadow_radius=4.0,shadow=(0,0,0,128))
     text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
     
     
@@ -318,6 +318,10 @@ def main(
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
+    
+    textblock2 = pi3d.TextBlock(x=10,y=10,z=0.1,rot=0.0,char_count=199,text_format="{}".format(" "),size=0.65,spacing="F",spce=0.02,colour=(20,20,20,1.0))
+    text.add_text_block(textblock2)
+    
     
     #Retrieve last image number to restart the slideshow from config.num file
     #Retrieve next directory check time
