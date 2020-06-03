@@ -37,8 +37,8 @@ RESHUFFLE_NUM = 5 # times through before reshuffling
 FONT_FILE = PI3DDEMO + '/fonts/NotoSans-Regular.ttf'
 
 # Use your Locale for these:
-#CODEPOINTS = '1234567890ABCDEFGHIJKLMNÑOPQRSTUVWXYZ., _-/ÁÉÍÓÚabcdefghijklmnñopqrstuvwxyzáéíóú' # limit to 49 ie 7x7 grid_size
-CODEPOINTS=list(range(32,255))
+CODEPOINTS = '1234567890ABCDEFGHIJKLMNÑOPQRSTUVWXYZ., _-/ÁÉÍÓÚabcdefghijklmnñopqrstuvwxyzáéíóú' # limit to 49 ie 7x7 grid_size
+#CODEPOINTS=list(range(32,255))
 MES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 TIME_FORMAT="%d/%m/%Y %H:%M:%S"
 
