@@ -27,7 +27,7 @@ GEONAMESUSER = ''
 DEFAULT_CONFIG_FILE = './.photo-frame'
 PIC_DIR = './examples' #change this to your images default location folder
 CHECK_DIR_TM = 3600.0 # Time to check for directory changes
-NUMBEROFROUNDS = 0 # number of rounds before re-fetching images 0 means after one pass
+NUMBEROFROUNDS = 1 # number of rounds before re-fetching images 0 means after one pass
 
 FPS = 20
 FIT = True

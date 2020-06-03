@@ -239,12 +239,9 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
         ext = os.path.splitext(filename)[1].lower()
         if ext in extensions and not '.AppleDouble' in root and not filename.startswith('.'):
           file_path_name = os.path.join(root, filename)
-          changedate=os.path.getmtime(file_path_name)
-          aux_list=[file_path_name,changedate,False]
-          if file_path_name not in file_list : # new file, set as not visited
-            file_list.append(aux_list) #List of lists
-          elif changedate > file_list[file_list.index(file_path_name)][1] :
-            file_list[file_list.index(file_path_name)][2] = False #since file has changed, set visited to false
+          if file_path_name not in file_list : 
+            file_list.append(file_path_name) 
+          
         if (len(file_list) % 1000 == 0) : # print every 1000 files detected
           print(len(file_list)) 
     if shuffle:
@@ -359,12 +356,9 @@ def main(
             pic_num = next_pic_num
             next_pic_num += 1
             if next_pic_num >= nFi:
-              print("completed round, resetting visited flag")
               num_run_through += 1
               next_pic_num = 0
-              for tmp in range(len(iFiles)) :
-                iFiles[tmp][2]=False # reset visited flag after completing a round
-            
+              
             #update persistent cached data for restart
             cacheddata=(num_run_through,pic_num,last_file_change,next_check_tm)
             with open(config_file+".num","w") as f:
@@ -377,16 +371,13 @@ def main(
             #include=False
             datestruct=None
             #elapsed=time.time()
+            print("File number ",pic_num)
             try:
-              if iFiles[pic_num][2] : #image has been shown
-                print("Repeated image, do not show")
-                continue #do nothing, progress to next image
-              else :
-                im = Image.open(iFiles[pic_num][0])
-                iFiles[pic_num][2] = True # Set as visited
+              im = Image.open(iFiles[pic_num])
               
+           
             except:
-              print("Error Opening File",iFiles[pic_num][0])
+              print("Error Opening File",iFiles[pic_num])
               continue
             try:
               exif_data = im._getexif()
@@ -463,7 +454,7 @@ def main(
           a += delta_alpha
           slide.unif[44] = a
         else: # Check if images have to be re-fetched (no transition on going, so no harm to image
-          if time.time() > next_check_tm : #re-load images after running through them or exceeded time
+          if time.time() > next_check_tm  or num_run_through > config.NUMBEROFROUNDS: #re-load images after running through them or exceeded time
             print("Refreshing Files list")
             next_check_tm = time.time() + check_dirs  # Set up the next interval
             try:
