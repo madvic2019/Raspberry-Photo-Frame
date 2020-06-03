@@ -319,8 +319,7 @@ def main(
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
     
-    textblock2 = pi3d.TextBlock(x=10,y=10,z=0.1,rot=0.0,char_count=199,text_format="{}".format(" "),size=0.65,spacing="F",space=0.02,colour=(20,20,20,1.0))
-    text.add_text_block(textblock2)
+
     
     
     #Retrieve last image number to restart the slideshow from config.num file
@@ -444,7 +443,7 @@ def main(
             except :
               #print("Wrong Overlay_text Format")
               textblock.set_text(" ")
-        textblock2.set_text("LOLOLO ÑÑÑ ññññ")      
+        
         #text.regen()		
         if KENBURNS:
           t_factor = nexttm - tm
