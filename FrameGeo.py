@@ -454,7 +454,7 @@ def main(
             a += delta_alpha
             slide.unif[44] = a
         else:
-            if a = 1.0:
+            if a == 1.0:
                 print("a es 1.0")
                 
             else: # Check if images have to be re-fetched (no transition on going, so no harm to image
