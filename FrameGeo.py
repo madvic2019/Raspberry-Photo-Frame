@@ -328,7 +328,7 @@ def main(
                               z=0.1, rot=0.0, char_count=6,
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
-    text.add_text_block(timetext)
+    text.add_text_block(timeblock)
     
    
    
