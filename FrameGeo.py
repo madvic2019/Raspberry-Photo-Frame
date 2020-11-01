@@ -267,9 +267,8 @@ def main(
 
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
 
-  
-
-                
+    next_check_tm=time.time()+check_dirs
+             
         
     ##############################################
     # Create GeoNames locator object www.geonames.org
@@ -318,13 +317,7 @@ def main(
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
     
-    timeblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 , y=-DISPLAY.height ,
-                              z=0.1, rot=0.0, char_count=6,
-                              text_format="{}".format(" "), size=0.65, 
-                              spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
-    
-
-    
+  
     
     #Retrieve last image number to restart the slideshow from config.num file
     #Retrieve next directory check time
@@ -351,7 +344,7 @@ def main(
     pic_num=next_pic_num
     while DISPLAY.loop_running():
       tm = time.time()
-      next_check_tm=tm+check_dirs  
+
       #check if there are file to display  
       if nFi > 0:
         
