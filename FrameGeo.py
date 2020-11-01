@@ -261,8 +261,6 @@ def timetostring(dot,ticks) :
     separator=" "
   return str(time.localtime(ticks).tm_hour)+separator+str(time.localtime(ticks).tm_min)
 
-
-
 def main(
     startdir,                      # Root folder for images, with recursive search
     config_file,                   # File with list of file names (for fast restart)  
@@ -277,8 +275,6 @@ def main(
     next_check_tm=time.time()+check_dirs
     
     time_dot=True
-
-                
         
     ##############################################
     # Create GeoNames locator object www.geonames.org
@@ -327,14 +323,14 @@ def main(
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
     
+
     timeblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 , y=-DISPLAY.height ,
                               z=0.1, rot=0.0, char_count=6,
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     
-
-    
-    
+   
+   
     #Retrieve last image number to restart the slideshow from config.num file
     #Retrieve next directory check time
     
@@ -366,7 +362,7 @@ def main(
     
       if (time.localtime(previoustime).tm_sec > time.localtime(tm).tm_sec) :
         time_dot = not(time_dot)
-        
+
       #check if there are file to display  
       if nFi > 0:
         
@@ -463,9 +459,11 @@ def main(
             except :
               #print("Wrong Overlay_text Format")
               textblock.set_text(" ")
+
         # print time on screen, blink separator every second
         timetext=timetostring(time_dot,tm)
         timeblock.set_text(text_format="{}".format(timetext))
+
         
         #text.regen()		
         if KENBURNS:
@@ -476,9 +474,11 @@ def main(
           slide.unif[49] = ystep * t_factor
 
         if a < 1.0: # transition is happening
-          a += delta_alpha
-          slide.unif[44] = a
+            a += delta_alpha
+            slide.unif[44] = a
+            
         else: # Check if images have to be re-fetched (no transition on going, so no harm to image
+          slide.set_textures([sfg, sfg])
           if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             print("Refreshing Files list")
             next_check_tm = time.time() + check_dirs  # Set up the next interval
@@ -494,6 +494,7 @@ def main(
             except:
                 print("Error refreshing file list, keep old one")
             num_run_through = 0
+        
         slide.draw()
         text.draw()  
       else:
