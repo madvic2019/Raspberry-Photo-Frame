@@ -285,8 +285,7 @@ def main(
       print("Geographic information server not available")
    
     print("Setting up display")
-    DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,
-                  display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
+    DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
     CAMERA = pi3d.Camera(is_3d=False)
     print(DISPLAY.opengl.gl_id)
     shader = pi3d.Shader(config.PI3DDEMO + "/shaders/blend_new")
@@ -314,6 +313,7 @@ def main(
     grid_size = math.ceil(len(config.CODEPOINTS) ** 0.5)
     font = pi3d.Font(config.FONT_FILE, codepoints=config.CODEPOINTS, grid_size=grid_size, shadow_radius=4.0,shadow=(0,0,0,128))
     text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
+    text2 = pi3d.PointText(font, CAMERA, max_chars=8, point_size=50)
     
     
     #text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
@@ -328,7 +328,7 @@ def main(
                               z=0.1, rot=0.0, char_count=6,
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
-    text.add_text_block(timeblock)
+    text2.add_text_block(timeblock)
     
    
    
@@ -463,7 +463,7 @@ def main(
 
         # print time on screen, blink separator every second
         timetext=timetostring(time_dot,tm)
-        timeblock.set_text(text_format="{}".format("PEPE"))
+        timeblock.set_text(text_format="{}".format(timetext))
 
         
         #text.regen()		
