@@ -254,7 +254,12 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
   print(len(file_list)," image files found")
   return file_list, len(file_list) # tuple of file list, number of pictures
 
-
+def timetostring(dot,ticks) :
+  if (dot) :
+    separator=":"
+  else :
+    separator=" "
+  return str(time.localtime(ticks).tm_hour)+separator+str(time.localtime(ticks).tm_min)
 
 
 
@@ -270,8 +275,11 @@ def main(
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
 
     next_check_tm=time.time()+check_dirs
-    
-    
+    timetext="00:00"
+    time_dot=True
+
+                
+        
     ##############################################
     # Create GeoNames locator object www.geonames.org
     geoloc=None
@@ -319,6 +327,11 @@ def main(
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
     
+    timeblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 , y=-DISPLAY.height ,
+                              z=0.1, rot=0.0, char_count=6,
+                              text_format="{}".format(" "), size=0.65, 
+                              spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
+    
 
     
     
@@ -346,8 +359,13 @@ def main(
     
     pic_num=next_pic_num
     while DISPLAY.loop_running():
+      # use previous time to make spearator blink
+      previoustime=tm
       tm = time.time()
-      
+      if (time.localtime(previoustime).tm_sec > time.localtime(tm).tm_sec) :
+        time_dot = not(time_dot)
+        
+      #check if there are file to display  
       if nFi > 0:
         
         if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
@@ -443,6 +461,9 @@ def main(
             except :
               #print("Wrong Overlay_text Format")
               textblock.set_text(" ")
+        # print time on screen, blink separator every second
+        timetext=timetostring(time_dot,tm)
+        timeblock.set_text(text_format="{}".format(timetext))
         
         #text.regen()		
         if KENBURNS:
