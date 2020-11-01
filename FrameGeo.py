@@ -275,7 +275,7 @@ def main(
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
 
     next_check_tm=time.time()+check_dirs
-    timetext="00:00"
+    
     time_dot=True
 
                 
@@ -357,11 +357,13 @@ def main(
     print("Starting with round number ",num_run_through)
     print("Starting with picture number ",next_pic_num)
     
+    tm=time.time()    
     pic_num=next_pic_num
     while DISPLAY.loop_running():
       # use previous time to make spearator blink
       previoustime=tm
       tm = time.time()
+    
       if (time.localtime(previoustime).tm_sec > time.localtime(tm).tm_sec) :
         time_dot = not(time_dot)
         
