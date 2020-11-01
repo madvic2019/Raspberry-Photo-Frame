@@ -358,10 +358,9 @@ def main(
     pic_num=next_pic_num
     while DISPLAY.loop_running():
       # use previous time to make spearator blink
-      previoustime=tm
       tm = time.time()
     
-      if (time.localtime(previoustime).tm_sec > time.localtime(tm).tm_sec) :
+      if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) :
         time_dot = not(time_dot)
 
       #check if there are file to display  
@@ -463,6 +462,7 @@ def main(
 
         # print time on screen, blink separator every second
         timetext=timetostring(time_dot,tm)
+        previous=tm
         timeblock.set_text(text_format="{}".format(timetext))
        
 
