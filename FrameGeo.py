@@ -454,7 +454,7 @@ def main(
           a += delta_alpha
           slide.unif[44] = a
         else: # Check if images have to be re-fetched (no transition on going, so no harm to image
-          sbg=None
+          print("Fin de Display??")
           if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             print("Refreshing Files list")
             next_check_tm = time.time() + check_dirs  # Set up the next interval
