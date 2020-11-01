@@ -450,7 +450,7 @@ def main(
           slide.unif[48] = xstep * t_factor
           slide.unif[49] = ystep * t_factor
 
-        if a < 1.0: # transition is happening
+        if a <= 1.0: # transition is happening
           a += delta_alpha
           slide.unif[44] = a
         else: # Check if images have to be re-fetched (no transition on going, so no harm to image
