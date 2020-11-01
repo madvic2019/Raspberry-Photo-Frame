@@ -239,9 +239,7 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
         ext = os.path.splitext(filename)[1].lower()
         if ext in extensions and not '.AppleDouble' in root and not filename.startswith('.'):
           file_path_name = os.path.join(root, filename)
-          if file_path_name not in file_list : 
-            file_list.append(file_path_name) 
-          
+          file_list.append(file_path_name) 
         if (len(file_list) % 1000 == 0) : # print every 1000 files detected
           print(len(file_list)) 
     if shuffle:
@@ -256,6 +254,15 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
   print(len(file_list)," image files found")
   return file_list, len(file_list) # tuple of file list, number of pictures
 
+def timetostring(dot,ticks) :
+  if (dot) :
+    separator=":"
+  else :
+    separator=" "
+  return str(time.localtime(ticks).tm_hour)+separator+str(time.localtime(ticks).tm_min)
+
+
+
 def main(
     startdir,                      # Root folder for images, with recursive search
     config_file,                   # File with list of file names (for fast restart)  
@@ -268,8 +275,11 @@ def main(
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
 
     next_check_tm=time.time()+check_dirs
-    
-    
+    timetext="00:00"
+    time_dot=True
+
+                
+        
     ##############################################
     # Create GeoNames locator object www.geonames.org
     geoloc=None
@@ -306,7 +316,7 @@ def main(
     #font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(128,128,128,12))
     
     grid_size = math.ceil(len(config.CODEPOINTS) ** 0.5)
-    font = pi3d.Font(config.FONT_FILE, codepoints=list(range(32,255)), grid_size=grid_size, shadow_radius=4.0,shadow=(0,0,0,128))
+    font = pi3d.Font(config.FONT_FILE, codepoints=config.CODEPOINTS, grid_size=grid_size, shadow_radius=4.0,shadow=(0,0,0,128))
     text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
     
     
@@ -316,6 +326,14 @@ def main(
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
+    
+    timeblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 , y=-DISPLAY.height ,
+                              z=0.1, rot=0.0, char_count=6,
+                              text_format="{}".format(" "), size=0.65, 
+                              spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
+    
+
+    
     
     #Retrieve last image number to restart the slideshow from config.num file
     #Retrieve next directory check time
@@ -341,8 +359,13 @@ def main(
     
     pic_num=next_pic_num
     while DISPLAY.loop_running():
+      # use previous time to make spearator blink
+      previoustime=tm
       tm = time.time()
-      
+      if (time.localtime(previoustime).tm_sec > time.localtime(tm).tm_sec) :
+        time_dot = not(time_dot)
+        
+      #check if there are file to display  
       if nFi > 0:
         
         if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
@@ -358,7 +381,7 @@ def main(
             if next_pic_num >= nFi:
               num_run_through += 1
               next_pic_num = 0
-              
+            
             #update persistent cached data for restart
             cacheddata=(num_run_through,pic_num,last_file_change,next_check_tm)
             with open(config_file+".num","w") as f:
@@ -371,11 +394,8 @@ def main(
             #include=False
             datestruct=None
             #elapsed=time.time()
-            print("File number ",pic_num)
             try:
               im = Image.open(iFiles[pic_num])
-              
-           
             except:
               print("Error Opening File",iFiles[pic_num])
               continue
@@ -441,7 +461,10 @@ def main(
             except :
               #print("Wrong Overlay_text Format")
               textblock.set_text(" ")
-              
+        # print time on screen, blink separator every second
+        timetext=timetostring(time_dot,tm)
+        timeblock.set_text(text_format="{}".format(timetext))
+        
         #text.regen()		
         if KENBURNS:
           t_factor = nexttm - tm
@@ -454,7 +477,7 @@ def main(
           a += delta_alpha
           slide.unif[44] = a
         else: # Check if images have to be re-fetched (no transition on going, so no harm to image
-          if time.time() > next_check_tm  or num_run_through > config.NUMBEROFROUNDS: #re-load images after running through them or exceeded time
+          if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             print("Refreshing Files list")
             next_check_tm = time.time() + check_dirs  # Set up the next interval
             try:
@@ -468,7 +491,7 @@ def main(
                 print("No directory changes: do nothing")
             except:
                 print("Error refreshing file list, keep old one")
-            num_run_through = 0 # Will not repeat images already shown
+            num_run_through = 0
         slide.draw()
         text.draw()  
       else:
