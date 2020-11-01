@@ -256,7 +256,7 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
 
 def timetostring(dot,ticks) :
   if (dot) :
-    separator=":"
+    separator="."
   else :
     separator=" "
   return str(time.localtime(ticks).tm_hour)+separator+str(time.localtime(ticks).tm_min)
