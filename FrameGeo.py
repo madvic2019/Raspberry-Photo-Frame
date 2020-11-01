@@ -351,9 +351,7 @@ def main(
     pic_num=next_pic_num
     while DISPLAY.loop_running():
       tm = time.time()
-      if (time.localtime(previoustime).tm_sec > time.localtime(tm).tm_sec) :
-        time_dot = not(time_dot)
-        
+      next_check_tm=tm+check_dirs  
       #check if there are file to display  
       if nFi > 0:
         
