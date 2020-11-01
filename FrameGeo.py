@@ -256,6 +256,8 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
 
 
 
+
+
 def main(
     startdir,                      # Root folder for images, with recursive search
     config_file,                   # File with list of file names (for fast restart)  
@@ -268,8 +270,8 @@ def main(
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
 
     next_check_tm=time.time()+check_dirs
-             
-        
+    
+    
     ##############################################
     # Create GeoNames locator object www.geonames.org
     geoloc=None
@@ -317,7 +319,8 @@ def main(
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
     
-  
+
+    
     
     #Retrieve last image number to restart the slideshow from config.num file
     #Retrieve next directory check time
@@ -344,8 +347,7 @@ def main(
     pic_num=next_pic_num
     while DISPLAY.loop_running():
       tm = time.time()
-
-      #check if there are file to display  
+      
       if nFi > 0:
         
         if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
