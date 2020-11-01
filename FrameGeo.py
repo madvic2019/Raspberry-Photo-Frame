@@ -453,26 +453,24 @@ def main(
         if a < 1.0: # transition is happening
             a += delta_alpha
             slide.unif[44] = a
-        else:
-            if a == 1.0:
-                print("a es 1.0")
-                
-            else: # Check if images have to be re-fetched (no transition on going, so no harm to image
-              if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
-                print("Refreshing Files list")
-                next_check_tm = time.time() + check_dirs  # Set up the next interval
-                try:
-                  if check_changes(startdir): #rebuild files list if changes happened
-                    print("Re-Fetching images files, erase config file")
-                    with open(config_file,'w') as f :
-                      json.dump('',f) # creates an empty config file, forces directory reload
-                    iFiles, nFi = get_files(startdir,config_file,shuffle)
-                    next_pic_num = 0
-                  else :
-                    print("No directory changes: do nothing")
-                except:
-                    print("Error refreshing file list, keep old one")
-                num_run_through = 0
+            
+        else: # Check if images have to be re-fetched (no transition on going, so no harm to image
+          if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
+            print("Refreshing Files list")
+            next_check_tm = time.time() + check_dirs  # Set up the next interval
+            try:
+              if check_changes(startdir): #rebuild files list if changes happened
+                print("Re-Fetching images files, erase config file")
+                with open(config_file,'w') as f :
+                  json.dump('',f) # creates an empty config file, forces directory reload
+                iFiles, nFi = get_files(startdir,config_file,shuffle)
+                next_pic_num = 0
+              else :
+                print("No directory changes: do nothing")
+            except:
+                print("Error refreshing file list, keep old one")
+            num_run_through = 0
+        slide.set_textures([sfg, None])
         slide.draw()
         text.draw()  
       else:
