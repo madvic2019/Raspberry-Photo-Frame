@@ -59,7 +59,7 @@ SHOW_LOCATION = True
 BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
 BLUR_ZOOM = 1.0 # must be >= 1.0 which expands the backgorund to just fill the space around the image
-KENBURNS = True # will set FIT->False and BLUR_EDGES->False
+KENBURNS = False # will set FIT->False and BLUR_EDGES->False
 KEYBOARD = True  # set to False when running headless to avoid curses error. True for debugging
 #####################################################
 # these variables can be altered using MQTT messaging
@@ -454,6 +454,7 @@ def main(
           a += delta_alpha
           slide.unif[44] = a
         else: # Check if images have to be re-fetched (no transition on going, so no harm to image
+          sbg=None
           if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             print("Refreshing Files list")
             next_check_tm = time.time() + check_dirs  # Set up the next interval
