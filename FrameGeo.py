@@ -324,7 +324,7 @@ def main(
     text.add_text_block(textblock)
     
 
-    timeblock = pi3d.TextBlock(x=-DISPLAY.width, y=-DISPLAY.height * 0.4,
+    timeblock = pi3d.TextBlock(x=DISPLAY.width*0.5 - 100, y=DISPLAY.height * 0.4,
                               z=0.1, rot=0.0, char_count=6,
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
