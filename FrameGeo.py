@@ -328,6 +328,7 @@ def main(
                               z=0.1, rot=0.0, char_count=6,
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
+    text.add_text_block(timetext)
     
    
    
@@ -462,7 +463,7 @@ def main(
 
         # print time on screen, blink separator every second
         timetext=timetostring(time_dot,tm)
-        timeblock.set_text(text_format="{}".format(textblock))
+        timeblock.set_text(text_format="{}".format(timetext))
 
         
         #text.regen()		
