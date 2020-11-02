@@ -254,12 +254,18 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
   print(len(file_list)," image files found")
   return file_list, len(file_list) # tuple of file list, number of pictures
 
-def timetostring(dot,ticks) :
+def timetostring(dot,ticks):
   if (dot) :
     separator=":"
   else :
     separator=" "
-  return str(time.localtime(ticks).tm_hour)+separator+str(time.localtime(ticks).tm_min)
+  minutes = str(time.localtime(ticks).tm_min)
+  hour = str(time.localtime(ticks).tm_hour)
+  if int(hour) < 10 : 
+    hour = "0"+hour
+  if int(minutes) < 10 :
+    minutes ="0"+minutes
+  return hour+separator+minutes
 
 def main(
     startdir,                      # Root folder for images, with recursive search
