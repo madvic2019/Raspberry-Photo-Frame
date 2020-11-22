@@ -4,7 +4,7 @@
 from gpiozero import Button
 from time import sleep
 
-buttons[] = {Button(9),Button(8),Button(4),Button(5),Button(6),Button(7)}
+buttons = {Button(9),Button(8),Button(4),Button(5),Button(6),Button(7)}
 
 
 while True:
