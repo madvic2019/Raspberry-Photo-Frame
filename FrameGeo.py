@@ -276,6 +276,7 @@ def handle_button() :
     button_pressed = 1
   elif buttons.value(paused) == 1 :
     button_pressed = 2
+  print("Button ",button_pressed," pressed)
   
   
   
@@ -541,8 +542,10 @@ def main(
 # Handling of buttons goes here       
       if button_pressed is not None :
         if button_pressed == 2 :
+          print("toggle pause")
           paused = not paused
         if button_pressed == 1 :
+          print("Back one picture")
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
