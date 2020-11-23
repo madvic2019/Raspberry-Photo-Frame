@@ -12,12 +12,12 @@ while True :
     print("Boton uno !!")
   if buttons.dos.is_active :
     print("Boton dos !!")
-  if button.tres.is_active :
+  if buttons.tres.is_active :
     print("Boton tres !!")
   if buttons.cuatro.is_active :
     print("Boton cuatro !!")
   if buttons.cinco.is_active :
     print("Boton cinco !!")
-  if button.seis.is_active :
+  if buttons.seis.is_active :
     print("Boton seis !!")
     
