@@ -89,7 +89,7 @@ if BLUR_ZOOM < 1.0:
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 
 last_file_change = 0
-global geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, buttons,button_pressed
+
 
 def get_geotagging(exif): # extract EXIF geographical information
   geotagging = {}
@@ -290,12 +290,11 @@ def main(
     check_dirs                     # Interval between checking folders in seconds
     ) :
 
-    
+    global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, buttons,button_pressed
     buttons = ButtonBoard(atras=9,pause=8)
-    button_pressed = None
-    
+    button_pressed = 0
+    paused=False
     next_check_tm=time.time()+check_dirs
-    
     time_dot=True
     
     buttons.when_pressed = handle_button    
@@ -542,7 +541,7 @@ def main(
             next_pic_num = -1
        
 # Handling of buttons goes here       
-      if button_pressed is not None :
+      if button_pressed > 0 :
         if button_pressed == 2 :
           print("toggle pause")
           paused = not paused
@@ -551,7 +550,7 @@ def main(
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
-        button_pressed = None
+        button_pressed = 0
        
     try:
       client.loop_stop()
