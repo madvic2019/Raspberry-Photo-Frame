@@ -301,8 +301,9 @@ def main(
     
     #buttons.when_pressed = handle_button    
     GPIO.setmode(GPIO.BCM)
-    GPIO.setup(8,9,GPIO.IN,pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(8,9,GPIO.FALLING,callback=handle_button)
+    GPIO.setup((8,9),GPIO.IN,pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(8,GPIO.FALLING,callback=handle_button)
+    GPIO.add_event_detect(9,GPIO.FALLING,callback=handle_button)
     ##############################################
     # Create GeoNames locator object www.geonames.org
     geoloc=None
