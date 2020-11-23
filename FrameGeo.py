@@ -51,7 +51,7 @@ import math
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 from geopy.geocoders import GeoNames
-from gpiozero import ButtonBoard
+import RPi.GPIO as GPIO
 import FrameConfig as config
 
 
@@ -271,13 +271,13 @@ def timetostring(dot,ticks):
     minutes ="0"+minutes
   return hour+separator+minutes
 
-def handle_button() :
-  if buttons.atras.value == 1 :
+def handle_button(channel) :
+  if channel == 8 :
     button_pressed = 1
-    print("Button ",button_pressed," pressed")
-  elif buttons.pause.value == 1 :
+    print("Button ",channel," pressed")
+  elif channel == 9 :
     button_pressed = 2
-    print("Button ",button_pressed," pressed")
+    print("Button ",channel," pressed")
   
   
   
@@ -293,13 +293,16 @@ def main(
     ) :
 
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, buttons,button_pressed
-    buttons = ButtonBoard(atras=9,pause=8)
+    #buttons = ButtonBoard(atras=9,pause=8)
     button_pressed = 0
     paused=False
     next_check_tm=time.time()+check_dirs
     time_dot=True
     
-    buttons.when_pressed = handle_button    
+    #buttons.when_pressed = handle_button    
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup((8,9),GPIO.IN,pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect((8,9),GPIO.FALLING,callback=handle_button)
     ##############################################
     # Create GeoNames locator object www.geonames.org
     geoloc=None
