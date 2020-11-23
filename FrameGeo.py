@@ -276,7 +276,7 @@ def handle_button() :
     button_pressed = 1
   elif buttons.value(paused) == 1 :
     button_pressed = 2
-  print("Button ",button_pressed," pressed)
+  print("Button ",button_pressed," pressed")
   
   
   
