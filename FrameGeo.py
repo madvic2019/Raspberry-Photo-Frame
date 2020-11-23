@@ -47,11 +47,15 @@ import json
 import math
 
 
+
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 from geopy.geocoders import GeoNames
-
+from gpiozero import ButtonBoard
 import FrameConfig as config
+
+
+
 
 #############################
 SHOW_LOCATION = True
@@ -267,6 +271,11 @@ def timetostring(dot,ticks):
     minutes ="0"+minutes
   return hour+separator+minutes
 
+def handle_button(number) :
+  print("Button ",number," pressed")
+  button_pressed = number
+  
+
 def main(
     startdir,                      # Root folder for images, with recursive search
     config_file,                   # File with list of file names (for fast restart)  
@@ -276,12 +285,13 @@ def main(
     check_dirs                     # Interval between checking folders in seconds
     ) :
 
-    global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
-
+    global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, button_pressed
+    buttons = ButtonBoard(9=back,8=pause)
     next_check_tm=time.time()+check_dirs
     
     time_dot=True
-        
+    button_pressed = None
+    buttons.when_pressed = handle_button    
     ##############################################
     # Create GeoNames locator object www.geonames.org
     geoloc=None
@@ -289,7 +299,7 @@ def main(
       geoloc=GeoNames(username=geonamesuser)
     except:
       print("Geographic information server not available")
-   
+    
     print("Setting up display")
     DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
     CAMERA = pi3d.Camera(is_3d=False)
@@ -523,6 +533,16 @@ def main(
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
+       
+# Handling of buttons goes here       
+      if button_pressed is not None :
+        if button_pressed = 8 :
+          paused = not paused
+        if button_pressed = 9 :
+          next_pic_num -= 2
+          if next_pic_num < -1:
+            next_pic_num = -1
+       
     try:
       client.loop_stop()
     except Exception as e:
