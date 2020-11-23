@@ -89,7 +89,7 @@ if BLUR_ZOOM < 1.0:
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 
 last_file_change = 0
-
+global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, buttons,button_pressed
 
 def get_geotagging(exif): # extract EXIF geographical information
   geotagging = {}
@@ -290,12 +290,14 @@ def main(
     check_dirs                     # Interval between checking folders in seconds
     ) :
 
-    global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, buttons,button_pressed
+    
     buttons = ButtonBoard(atras=9,pause=8)
+    button_pressed = None
+    
     next_check_tm=time.time()+check_dirs
     
     time_dot=True
-    button_pressed = None
+    
     buttons.when_pressed = handle_button    
     ##############################################
     # Create GeoNames locator object www.geonames.org
