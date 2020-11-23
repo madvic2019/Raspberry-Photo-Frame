@@ -274,7 +274,7 @@ def timetostring(dot,ticks):
 def handle_button() :
   if buttons.atras.value == 1 :
     button_pressed = 1
-  elif buttons.paused.value == 1 :
+  elif buttons.pause.value == 1 :
     button_pressed = 2
   print("Button ",button_pressed," pressed")
   
