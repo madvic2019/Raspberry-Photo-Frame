@@ -89,7 +89,7 @@ if BLUR_ZOOM < 1.0:
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 
 last_file_change = 0
-global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, buttons,button_pressed
+global geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, buttons,button_pressed
 
 def get_geotagging(exif): # extract EXIF geographical information
   geotagging = {}
