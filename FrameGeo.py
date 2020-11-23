@@ -272,7 +272,6 @@ def timetostring(dot,ticks):
   return hour+separator+minutes
 
 def handle_button() :
-  button_pressed = None
   if buttons.atras.value == 1 :
     button_pressed = 1
   elif buttons.pause.value == 1 :
