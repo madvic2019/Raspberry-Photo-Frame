@@ -1,7 +1,7 @@
 #--coding: utf-8 --
 #!/usr/bin/python3
 
-from gpizero import ButtonBoard
+from gpiozero import ButtonBoard
 from time import sleep
 
 buttons = ButtonBoard(uno=9,dos=8,tres=4,cuatro=5,cinco=6,seis=7) 
