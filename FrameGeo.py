@@ -271,9 +271,13 @@ def timetostring(dot,ticks):
     minutes ="0"+minutes
   return hour+separator+minutes
 
-def handle_button(number) :
-  print("Button ",number," pressed")
-  button_pressed = number
+def handle_button() :
+  if buttons.value(atras) == 1 :
+    button_pressed = 1
+  elif buttons.value(paused) == 1 :
+    button_pressed = 2
+  
+  
   
 
 def main(
@@ -286,7 +290,7 @@ def main(
     ) :
 
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, button_pressed
-    buttons = ButtonBoard(9,8)
+    buttons = ButtonBoard(9=atras,8=pause)
     next_check_tm=time.time()+check_dirs
     
     time_dot=True
@@ -536,12 +540,13 @@ def main(
        
 # Handling of buttons goes here       
       if button_pressed is not None :
-        if button_pressed == 8 :
+        if button_pressed == 2 :
           paused = not paused
-        if button_pressed == 9 :
+        if button_pressed == 1 :
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
+        button_pressed = None
        
     try:
       client.loop_stop()
