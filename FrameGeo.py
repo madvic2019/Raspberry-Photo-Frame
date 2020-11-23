@@ -286,7 +286,7 @@ def main(
     ) :
 
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, button_pressed
-    buttons = ButtonBoard(9=back,8=pause)
+    buttons = ButtonBoard(9,8)
     next_check_tm=time.time()+check_dirs
     
     time_dot=True
@@ -536,9 +536,9 @@ def main(
        
 # Handling of buttons goes here       
       if button_pressed is not None :
-        if button_pressed = 8 :
+        if button_pressed == 8 :
           paused = not paused
-        if button_pressed = 9 :
+        if button_pressed == 9 :
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
