@@ -6,7 +6,7 @@ from time import sleep
 
 
 
-
+global action
 
 def hasbeenheld(btn) :
   btn.was_held=True
@@ -32,7 +32,7 @@ back.when_held=hasbeenheld
 play.when_held=hasbeenheld
 back.when_released=hasbeenreleased
 play.when_released=hasbeenreleased
-global action
+
 
 while True :
   if back.was_held :
