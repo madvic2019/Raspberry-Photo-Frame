@@ -294,9 +294,11 @@ def handle_button(channel) :
     print("Button ",channel," pressed")
     
 def handle_press(btn) :
-    print("Button pressed")
+    print("Button pressed, estado actual ",btn.estado)
     if btn.estado==0 or btn.estado == 2 :
       btn.estado=1
+      print("Nuevo Estado ",btn.estado)
+      
     
 def handle_hold(btn) :
     print("button held")
