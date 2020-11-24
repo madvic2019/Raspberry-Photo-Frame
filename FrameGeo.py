@@ -318,8 +318,8 @@ def main(
     ) :
 
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, buttons,button_pressed
-    pause_button = Button(9, hold_time=5)
-    back_button = Button(8, hold_time=5)
+    global pause_button = Button(9, hold_time=5)
+    global back_button = Button(8, hold_time=5)
     pause_button.when_pressed = handle_press
     back_button.when_pressed = handle_press
     pause_button.when_held=handle_hold
