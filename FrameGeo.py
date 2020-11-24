@@ -512,9 +512,12 @@ def main(
               textblock.set_text(" ")
 
         # print time on screen, blink separator every second
-        timetext=timetostring(time_dot,tm)
-        timeblock.set_text(text_format="{}".format(timetext))
-       
+        if not paused :
+          timetext=timetostring(time_dot,tm)
+        else :
+          timetext="PAUSED"
+          
+        timeblock.set_text(text_format="{}".format(timetext))          
 
         
         #text.regen()		
@@ -568,11 +571,13 @@ def main(
           if next_pic_num < -1:
             next_pic_num = -1
 #Handling of buttons goes here
-      if pause_button.estado >= 1 :
+      if pause_button.estado == 1 : # button was pressed
         print("toggle pause")
         paused = not paused
         pause_button.estado = 0
-      if back_button.estado >= 1 :
+      elif pause_button.estado == 2 : #button was held
+        pause_button.estado = 0 #do nothing, return to Idle
+      if back_button.estado >= 1 : #for the time being, back button has same behavior for hold and press
         print("Back one picture")
         next_pic_num -= 2
         if next_pic_num < -1:
