@@ -1,23 +1,35 @@
 #--coding: utf-8 --
 #!/usr/bin/python3
 
-from gpiozero import ButtonBoard
+from gpiozero import Button
 from time import sleep
 
-buttons = ButtonBoard(uno=9,dos=8,tres=4,cuatro=5,cinco=6,seis=7) 
+
+
+
+
+def hasbeenheld(btn) :
+  btn.was_held=True
+  print("button ",btn.pin ,"was held not just pressed")
+
+def hasbeenpressed(btn) :
+  print("button ",btn.pin ,"was pressed not held")
+
+def hasbeenreleased(btn):
+  if not btn.was_held :
+    hasbeenpressed(btn)
+  btn.was_held = False
+ 
+back = Button(8)
+play = Button(9)
+back.was_held=False
+play.was_held=False
+back.when_held=hasbeenheld
+play.when_held=hasbeenheld
+back.when_released=hasbeenreleased
+play.when_released=hasbeenreleased
+
 
 while True :
   
-  if buttons.uno.is_active :
-    print("Boton uno !!")
-  if buttons.dos.is_active :
-    print("Boton dos !!")
-  if buttons.tres.is_active :
-    print("Boton tres !!")
-  if buttons.cuatro.is_active :
-    print("Boton cuatro !!")
-  if buttons.cinco.is_active :
-    print("Boton cinco !!")
-  if buttons.seis.is_active :
-    print("Boton seis !!")
     
