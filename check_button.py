@@ -35,7 +35,7 @@ play.when_released=hasbeenreleased
 
 
 while True :
-  if action :
+  if back.was_held or play.was_held :
     print ("Action!!")
     sleep(1)
   
