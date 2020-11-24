@@ -19,7 +19,8 @@ def hasbeenreleased(btn):
   if not btn.was_held :
     hasbeenpressed(btn)
   btn.was_held = False
- 
+
+Button.was_held=False 
 back = Button(8)
 play = Button(9)
 back.was_held=False
