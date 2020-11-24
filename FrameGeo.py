@@ -423,19 +423,6 @@ def main(
     
       if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) :
         time_dot = not(time_dot)
-      #Handling of buttons goes here
-      print("check Buttons",pause_button.estado,back_button.estado)      
-      if pause_button.estado > 1 :
-        print("toggle pause")
-        paused = not paused
-        pause_button.estado = 0
-      if back_button.estado > 1 :
-        print("Back one picture")
-        next_pic_num -= 2
-        if next_pic_num < -1:
-          next_pic_num = -1
-        back.button.estado = 0
-      
       
       #check if there are file to display  
       if nFi > 0:
@@ -590,7 +577,19 @@ def main(
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
-
+#Handling of buttons goes here
+      if pause_button.estado >= 1 :
+        print("toggle pause")
+        paused = not paused
+        pause_button.estado = 0
+      if back_button.estado >= 1 :
+        print("Back one picture")
+        next_pic_num -= 2
+        if next_pic_num < -1:
+          next_pic_num = -1
+        back.button.estado = 0
+      
+      
 
        
     try:
