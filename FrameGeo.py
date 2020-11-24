@@ -283,7 +283,7 @@ def timetostring(dot,ticks):
   if int(minutes) < 10 :
     minutes ="0"+minutes
   return hour+separator+minutes
-
+"""
 def handle_button(channel) :
   global button_pressed
   if channel == 8 :
@@ -292,7 +292,7 @@ def handle_button(channel) :
   elif channel == 9 :
     button_pressed = 2
     print("Button ",channel," pressed")
-    
+"""    
 def handle_press(btn) :
     print("Button pressed, estado actual ",btn.estado)
     if btn.estado==0 or btn.estado == 2 :
@@ -305,7 +305,14 @@ def handle_hold(btn) :
     if btn.estado==0 :
       btn.estado=2
   
-  
+pause_button = Button(9, hold_time=5)
+back_button = Button(8, hold_time=5)
+pause_button.when_pressed = handle_press
+back_button.when_pressed = handle_press
+pause_button.when_held=handle_hold
+back_button.when_held=handle_hold
+#no need to handle release
+      
   
 
 def main(
@@ -317,16 +324,8 @@ def main(
     check_dirs                     # Interval between checking folders in seconds
     ) :
 
-    global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, buttons,button_pressed,
-           pause_button, back_button
-    pause_button = Button(9, hold_time=5)
-    back_button = Button(8, hold_time=5)
-    pause_button.when_pressed = handle_press
-    back_button.when_pressed = handle_press
-    pause_button.when_held=handle_hold
-    back_button.when_held=handle_hold
-    #no need to handle release
-    
+    global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
+
     paused=False
     next_check_tm=time.time()+check_dirs
     time_dot=True
