@@ -285,13 +285,13 @@ def timetostring(dot,ticks):
   return hour+separator+minutes
 
 def handle_press(btn) :
-    print("Button pressed, estado actual ",btn.estado)
+    #print("Button pressed, estado actual ",btn.estado)
     if btn.estado==0 or btn.estado == 2 :
       btn.estado=1
-      print("Nuevo Estado ",btn.estado)
+     # print("Nuevo Estado ",btn.estado)
    
 def handle_hold(btn) :
-    print("button held")
+    #print("button held")
     if btn.estado==0 :
       btn.estado=2
       
@@ -576,13 +576,11 @@ def main(
             next_pic_num = -1
 #Handling of buttons goes here
       if pause_button.estado == 1 : # button was pressed
-        print("toggle pause")
         paused = not paused
         pause_button.estado = 0
       elif pause_button.estado == 2 : #button was held
         pause_button.estado = 0 #do nothing, return to Idle
       if back_button.estado >= 1 : #for the time being, back button has same behavior for hold and press
-        print("Back one picture")
         next_pic_num -= 2
         if next_pic_num < -1:
           next_pic_num = -1
