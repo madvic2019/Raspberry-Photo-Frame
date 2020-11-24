@@ -294,10 +294,12 @@ def handle_button(channel) :
     print("Button ",channel," pressed")
     
 def handle_press(btn) :
+    print("Button pressed")
     if btn.estado==0 or btn.estado == 2 :
       btn.estado=1
     
 def handle_hold(btn) :
+    print("button held")
     if btn.estado==0 :
       btn.estado=2
   
@@ -577,7 +579,7 @@ def main(
       if pause_button.estado > 1 :
         print("toggle pause")
         paused = not paused
-        pause_button.estado = 0;
+        pause_button.estado = 0
       if back_button.estado > 1 :
         print("Back one picture")
         next_pic_num -= 2
