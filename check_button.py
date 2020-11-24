@@ -32,13 +32,13 @@ back.when_held=hasbeenheld
 play.when_held=hasbeenheld
 back.when_released=hasbeenreleased
 play.when_released=hasbeenreleased
-
+global action
 
 while True :
   if back.was_held :
-    print ("Action!! on back")
-    sleep(1)
+    print ("Action!! on back",action)
+    
   if play.was_held :
-    print("Action!! on play")
+    print("Action!! on play", action)
   
-  
+  sleep(1)
