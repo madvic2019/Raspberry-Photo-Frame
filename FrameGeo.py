@@ -415,7 +415,7 @@ def main(
       previous = tm
       tm = time.time()
     
-      if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) :
+      if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) : #blink dot
         time_dot = not(time_dot)
       
       #check if there are file to display  
@@ -519,7 +519,7 @@ def main(
         if not paused :
           timetext=timetostring(time_dot,tm)
         else :
-          timetext="PAUSED"
+          timetext="PAUSE"
           
         timeblock.set_text(text_format="{}".format(timetext))          
 
@@ -588,11 +588,11 @@ def main(
           next_pic_num = -1
         back_button.estado = 0
       if forward_button.estado >= 1 : # pressed or held forward button
-        tm += interval #force picture change
-        forward_button.estado = 0
-        
-      
-      
+        nexttm += tm
+         
+ 
+ # WHILE LOOP ends here       
+  
 
        
     try:
