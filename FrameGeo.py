@@ -272,6 +272,7 @@ def timetostring(dot,ticks):
   return hour+separator+minutes
 
 def handle_button(channel) :
+  global button_pressed
   if channel == 8 :
     button_pressed = 1
     print("Button ",channel," pressed")
@@ -391,17 +392,7 @@ def main(
     
       if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) :
         time_dot = not(time_dot)
-# Handling of buttons goes here       
-      if button_pressed > 0 :
-        if button_pressed == 2 :
-          print("toggle pause")
-          paused = not paused
-        if button_pressed == 1 :
-          print("Back one picture")
-          next_pic_num -= 2
-          if next_pic_num < -1:
-            next_pic_num = -1
-        button_pressed = 0
+
       #check if there are file to display  
       if nFi > 0:
         
@@ -555,7 +546,17 @@ def main(
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
-       
+       # Handling of buttons goes here       
+      if button_pressed > 0 :
+        if button_pressed == 2 :
+          print("toggle pause")
+          paused = not paused
+        if button_pressed == 1 :
+          print("Back one picture")
+          next_pic_num -= 2
+          if next_pic_num < -1:
+            next_pic_num = -1
+        button_pressed = 0
 
        
     try:
