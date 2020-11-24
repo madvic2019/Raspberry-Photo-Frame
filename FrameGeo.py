@@ -423,7 +423,8 @@ def main(
     
       if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) :
         time_dot = not(time_dot)
-      #Handling of buttons goes here       
+      #Handling of buttons goes here
+      print("check Buttons",pause_button.estado,back_button.estado)      
       if pause_button.estado > 1 :
         print("toggle pause")
         paused = not paused
