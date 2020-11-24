@@ -51,10 +51,23 @@ import math
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 from geopy.geocoders import GeoNames
+from gpiozero import Button
 import RPi.GPIO as GPIO
 import FrameConfig as config
 
-
+Button.estado=0 #idle
+"""
+ Button state is linked to the action taken
+ 0= Idle 
+ 1=was pressed, not yet attended
+ 2=was held, not yet attended. 
+ Transition Table
+ State / Event
+           Press    Hold    Release After Action
+ Idle      Pressed  Held    Idle    N/A
+ Pressed   Pressed  Pressed Pressed Idle
+ Held      Pressed  Held    Held    Idle
+"""
 
 
 #############################
@@ -279,7 +292,14 @@ def handle_button(channel) :
   elif channel == 9 :
     button_pressed = 2
     print("Button ",channel," pressed")
-  
+    
+def handle_press(btn) :
+    if btn.estado==0 or btn.estado == 2 :
+      btn.estado=1
+    
+def handle_hold(btn) :
+    if btn.estado==0 :
+      btn.estado=2
   
   
   
@@ -294,17 +314,24 @@ def main(
     ) :
 
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES, buttons,button_pressed
-    #buttons = ButtonBoard(atras=9,pause=8)
-    button_pressed = 0
+    pause_button = Button(9, hold_time=5)
+    back_button = Button(8, hold_time=5)
+    pause_button.when_pressed = handle_press
+    back_button.when_pressed = handle_press
+    pause_button.when_held=handle_hold
+    back_button.when_held=handle_hold
+    #no need to handle release
+    
     paused=False
     next_check_tm=time.time()+check_dirs
     time_dot=True
-    
+    """
     #buttons.when_pressed = handle_button    
     GPIO.setmode(GPIO.BCM)
     GPIO.setup((8,9),GPIO.IN,pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(8,GPIO.FALLING,callback=handle_button)
     GPIO.add_event_detect(9,GPIO.FALLING,callback=handle_button)
+    """
     ##############################################
     # Create GeoNames locator object www.geonames.org
     geoloc=None
@@ -547,16 +574,16 @@ def main(
           if next_pic_num < -1:
             next_pic_num = -1
        # Handling of buttons goes here       
-      if button_pressed > 0 :
-        if button_pressed == 2 :
-          print("toggle pause")
-          paused = not paused
-        if button_pressed == 1 :
-          print("Back one picture")
-          next_pic_num -= 2
-          if next_pic_num < -1:
-            next_pic_num = -1
-        button_pressed = 0
+      if pause_button.estado > 1 :
+        print("toggle pause")
+        paused = not paused
+        pause_button.estado = 0;
+      if back_button.estado > 1 :
+        print("Back one picture")
+        next_pic_num -= 2
+        if next_pic_num < -1:
+          next_pic_num = -1
+        back.button.estado = 0
 
        
     try:
