@@ -588,6 +588,7 @@ def main(
           next_pic_num = -1
         back_button.estado = 0
       if forward_button.estado >= 1 : # pressed or held forward button
+        forward_button.estado = 0
         nexttm -= tm
          
  
