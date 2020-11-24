@@ -35,8 +35,10 @@ play.when_released=hasbeenreleased
 
 
 while True :
-  if back.was_held or play.was_held :
-    print ("Action!!")
+  if back.was_held :
+    print ("Action!! on back")
     sleep(1)
+  if play.was_held :
+    print("Action!! on play")
   
   
