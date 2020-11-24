@@ -308,12 +308,16 @@ def main(
 
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
   
-    pause_button = Button(9, hold_time=5)
-    back_button = Button(8, hold_time=5)
+    pause_button = Button(8, hold_time=5)
+    back_button = Button(9, hold_time=5)
+    forward_button = Button(4,hold_time=5)
     pause_button.when_pressed = handle_press
     back_button.when_pressed = handle_press
     pause_button.when_held=handle_hold
     back_button.when_held=handle_hold
+    forward_button.when_pressed=handle_press
+    forward_button.when_held=handle_hold
+        
     #no need to handle release
 
     paused=False
@@ -583,6 +587,10 @@ def main(
         if next_pic_num < -1:
           next_pic_num = -1
         back_button.estado = 0
+      if forward_button.estado >= 1 : # pressed or held forward button
+        tm += interval #force picture change
+        forward_button.estado = 0
+        
       
       
 
