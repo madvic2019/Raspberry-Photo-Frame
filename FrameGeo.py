@@ -283,35 +283,17 @@ def timetostring(dot,ticks):
   if int(minutes) < 10 :
     minutes ="0"+minutes
   return hour+separator+minutes
-"""
-def handle_button(channel) :
-  global button_pressed
-  if channel == 8 :
-    button_pressed = 1
-    print("Button ",channel," pressed")
-  elif channel == 9 :
-    button_pressed = 2
-    print("Button ",channel," pressed")
-"""    
+
 def handle_press(btn) :
     print("Button pressed, estado actual ",btn.estado)
     if btn.estado==0 or btn.estado == 2 :
       btn.estado=1
       print("Nuevo Estado ",btn.estado)
-      
-    
+   
 def handle_hold(btn) :
     print("button held")
     if btn.estado==0 :
       btn.estado=2
-  
-pause_button = Button(9, hold_time=5)
-back_button = Button(8, hold_time=5)
-pause_button.when_pressed = handle_press
-back_button.when_pressed = handle_press
-pause_button.when_held=handle_hold
-back_button.when_held=handle_hold
-#no need to handle release
       
   
 
@@ -325,6 +307,14 @@ def main(
     ) :
 
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
+  
+    pause_button = Button(9, hold_time=5)
+    back_button = Button(8, hold_time=5)
+    pause_button.when_pressed = handle_press
+    back_button.when_pressed = handle_press
+    pause_button.when_held=handle_hold
+    back_button.when_held=handle_hold
+    #no need to handle release
 
     paused=False
     next_check_tm=time.time()+check_dirs
@@ -587,7 +577,7 @@ def main(
         next_pic_num -= 2
         if next_pic_num < -1:
           next_pic_num = -1
-        back.button.estado = 0
+        back_button.estado = 0
       
       
 
