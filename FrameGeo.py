@@ -77,7 +77,7 @@ BLUR_EDGES = True # use blurred version of image to fill edges - will override F
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
 BLUR_ZOOM = 1.0 # must be >= 1.0 which expands the backgorund to just fill the space around the image
 KENBURNS = False # will set FIT->False and BLUR_EDGES->False
-KEYBOARD = False  # set to False when running headless to avoid curses error. True for debugging
+KEYBOARD = True  # set to False when running headless to avoid curses error. True for debugging
 #####################################################
 # these variables can be altered using MQTT messaging
 #####################################################
@@ -421,7 +421,19 @@ def main(
     
       if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) :
         time_dot = not(time_dot)
-
+      #Handling of buttons goes here       
+      if pause_button.estado > 1 :
+        print("toggle pause")
+        paused = not paused
+        pause_button.estado = 0
+      if back_button.estado > 1 :
+        print("Back one picture")
+        next_pic_num -= 2
+        if next_pic_num < -1:
+          next_pic_num = -1
+        back.button.estado = 0
+      
+      
       #check if there are file to display  
       if nFi > 0:
         
@@ -575,17 +587,7 @@ def main(
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
-       # Handling of buttons goes here       
-      if pause_button.estado > 1 :
-        print("toggle pause")
-        paused = not paused
-        pause_button.estado = 0
-      if back_button.estado > 1 :
-        print("Back one picture")
-        next_pic_num -= 2
-        if next_pic_num < -1:
-          next_pic_num = -1
-        back.button.estado = 0
+
 
        
     try:
