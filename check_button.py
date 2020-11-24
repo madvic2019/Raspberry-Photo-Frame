@@ -6,9 +6,10 @@ from time import sleep
 
 
 
-global action
+
 
 def hasbeenheld(btn) :
+  global action
   btn.was_held=True
   action=True
   print("button ",btn.pin ,"was held not just pressed")
@@ -17,6 +18,7 @@ def hasbeenpressed(btn) :
   print("button ",btn.pin ,"was pressed not held")
 
 def hasbeenreleased(btn):
+  global action
   if not btn.was_held :
     hasbeenpressed(btn)
   btn.was_held = False
