@@ -586,10 +586,12 @@ def main(
         next_pic_num -= 2
         if next_pic_num < -1:
           next_pic_num = -1
+        nexttm = 0 #force reload
         back_button.estado = 0
       if forward_button.estado >= 1 : # pressed or held forward button
+        nexttm = 0 # force reload
         forward_button.estado = 0
-        nexttm -= tm
+        
          
  
  # WHILE LOOP ends here       
