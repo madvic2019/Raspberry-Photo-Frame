@@ -31,5 +31,6 @@ play.when_released=hasbeenreleased
 
 
 while True :
+  sleep(1)
   
-    
+  
