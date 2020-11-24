@@ -24,8 +24,8 @@ def hasbeenreleased(btn):
 
 Button.was_held=False
 action=False 
-back = Button(8)
-play = Button(9)
+back = Button(8,hold_time=10)
+play = Button(9,hold_time=10)
 back.was_held=False
 play.was_held=False
 back.when_held=hasbeenheld
