@@ -422,7 +422,7 @@ def main(
       
       #check if there are file to display  
       if nFi > 0:
-        
+        # If needed, display new photo
         if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
           nexttm = tm + interval
           a = 0.0 # alpha - proportion front image to back
@@ -581,18 +581,22 @@ def main(
 #Handling of buttons goes here
       if pause_button.estado == 1 : # button was pressed
         paused = not paused
-        pause_button.estado = 0
-      elif pause_button.estado == 2 : #button was held
-        pause_button.estado = 0 #do nothing, return to Idle
-      if back_button.estado >= 1 : #for the time being, back button has same behavior for hold and press
+      
+      
+      if back_button.estado == 1 : #only press is handled
         next_pic_num -= 2
         if next_pic_num < -1:
           next_pic_num = -1
-        nexttm = 0 #force reload
-        back_button.estado = 0
-      if forward_button.estado >= 1 : # pressed or held forward button
-        nexttm = 0 # force reload
-        forward_button.estado = 0
+        nexttm = tm #force reload
+      
+      if forward_button.estado == 1 : # only press is handled
+        nexttm = tm # force reload
+      
+      # All buttons go to idle after processing them, regardless of state
+      pause_button.estado = 0
+      back_button.estado = 0
+      forward_button.estado = 0
+      
  # WHILE LOOP ends here       
  
     try:
