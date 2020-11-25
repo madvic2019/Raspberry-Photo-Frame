@@ -410,9 +410,11 @@ def main(
     
     tm=time.time()    
     pic_num=next_pic_num
+    # Main loop 
+    
     while DISPLAY.loop_running():
-      # use previous time to make spearator blink
-      previous = tm
+    
+      previous = tm # record previous time value, used to make cursor blink
       tm = time.time()
     
       if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) : #blink dot
@@ -426,32 +428,37 @@ def main(
           a = 0.0 # alpha - proportion front image to back
           sbg = sfg
           sfg = None
+          
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
-            #print("Fetch new image ",next_pic_num)
-            #print("Time until next directory check ",next_check_tm - time.time())
+           # Calculate next picture index to be shown
             pic_num = next_pic_num
             next_pic_num += 1
             if next_pic_num >= nFi:
               num_run_through += 1
               next_pic_num = 0
-            
             #update persistent cached data for restart
             cacheddata=(num_run_through,pic_num,last_file_change,next_check_tm)
             with open(config_file+".num","w") as f:
-              #print("Write to config.num file ", json.dumps(cachedddata))
               json.dump(cacheddata,f,separators=(',',':'))
             
-            orientation = 1 # this is default - unrotated
-            #coordinates = None
-            dt=None
-            #include=False
-            datestruct=None
-            #elapsed=time.time()
+            # define some default values
+            orientation = 1 # unrotated
+            dt=None         # will hold date from EXIF
+            datestruct=None # will hold formatted date
+            
+            # File Open and texture build 
             try:
               im = Image.open(iFiles[pic_num])
             except:
               print("Error Opening File",iFiles[pic_num])
               continue
+            try:
+              sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
+            except:
+              #next_pic_num += 1 
+              continue
+              
+            # EXIF data and geolocation analysis  
             try:
               exif_data = im._getexif()
             except:
@@ -465,21 +472,14 @@ def main(
               datestruct=time.localtime(dt)
             except:
               datestruct=None
-              #print("No date in EXIF")
             try:
               location = get_geo_name(exif_data)
             except Exception as e: # NB should really check error
               print('Error preparing geoname: ', e)
               location = None
-            try:
-              sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-              #print("Time to prepare and load image into Texture: ",time.time()-elapsed)
-            except:
-              next_pic_num += 1
-              continue
-            #print("Have to reset timer!")  
-            nexttm = time.time()+interval #reset timer to cope with texture delays
-            
+            nexttm = time.time()+interval #Time points to next interval 
+
+# Image Rendering            
           if sbg is None: # first time through
             sbg = sfg
           slide.set_textures([sfg, sbg])
@@ -500,6 +500,10 @@ def main(
               slide.unif[48] = 0.0
               slide.unif[49] = 0.0
               kb_up = not kb_up
+ 
+              
+# Prepare the different texts to be shown
+
           overlay_text= "" #this will host the text on screen 
           if SHOW_LOCATION: #(and/or month-year)
             if location is not None:
@@ -519,10 +523,8 @@ def main(
         if not paused :
           timetext=timetostring(time_dot,tm)
         else :
-          timetext="PAUSE"
-          
+          timetext="PAUSA"
         timeblock.set_text(text_format="{}".format(timetext))          
-
         
         #text.regen()		
         if KENBURNS:
@@ -536,7 +538,7 @@ def main(
             a += delta_alpha
             slide.unif[44] = a
             
-        else: # Check if images have to be re-fetched (no transition on going, so no harm to image
+        else: # Check if image files list has to be rebuilt (no transition on going, so no harm to image
           slide.set_textures([sfg, sfg])
           if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             print("Refreshing Files list")
@@ -562,6 +564,7 @@ def main(
         textblock.colouring.set_colour(alpha=1.0)
         text.regen()
         text.draw()
+# Keyboard handling
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
@@ -574,6 +577,7 @@ def main(
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
+
 #Handling of buttons goes here
       if pause_button.estado == 1 : # button was pressed
         paused = not paused
@@ -589,21 +593,16 @@ def main(
       if forward_button.estado >= 1 : # pressed or held forward button
         nexttm = 0 # force reload
         forward_button.estado = 0
-        
-         
- 
  # WHILE LOOP ends here       
-  
-
-       
-    try:
+ 
+ try:
       client.loop_stop()
     except Exception as e:
       print("this was going to fail if previous try failed!")
     if KEYBOARD:
       kbd.close()
     DISPLAY.destroy()
-    
+# end of main function    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
