@@ -595,7 +595,7 @@ def main(
         forward_button.estado = 0
  # WHILE LOOP ends here       
  
- try:
+    try:
       client.loop_stop()
     except Exception as e:
       print("this was going to fail if previous try failed!")
