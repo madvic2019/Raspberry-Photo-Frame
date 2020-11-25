@@ -452,11 +452,7 @@ def main(
             except:
               print("Error Opening File",iFiles[pic_num])
               continue
-            try:
-              sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-            except:
-              #next_pic_num += 1 
-              continue
+            
               
             # EXIF data and geolocation analysis  
             try:
@@ -477,6 +473,12 @@ def main(
             except Exception as e: # NB should really check error
               print('Error preparing geoname: ', e)
               location = None
+            # Load and format image
+            try:
+              sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
+            except:
+              #next_pic_num += 1 
+              continue  
             nexttm = time.time()+interval #Time points to next interval 
 
 # Image Rendering            
