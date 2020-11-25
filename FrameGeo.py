@@ -497,6 +497,7 @@ def main(
           slide.unif[sz2] = 1.0
           slide.unif[os1] = (wh_rat - 1.0) * 0.5
           slide.unif[os2] = 0.0
+          #transition 
           if KENBURNS:
               xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
               slide.unif[48] = 0.0
@@ -527,14 +528,15 @@ def main(
         else :
           timetext="PAUSA"
         timeblock.set_text(text_format="{}".format(timetext))          
-        
-        #text.regen()		
+
+# manages transition
         if KENBURNS:
           t_factor = nexttm - tm
           if kb_up:
             t_factor = interval - t_factor
           slide.unif[48] = xstep * t_factor
           slide.unif[49] = ystep * t_factor
+
 
         if a < 1.0: # transition is happening
             a += delta_alpha
@@ -589,10 +591,10 @@ def main(
         next_pic_num -= 2
         if next_pic_num < -1:
           next_pic_num = -1
-        nexttm = tm #force reload
+        nexttm = 0 #force reload
       
       if forward_button.estado == 1 : # only press is handled
-        nexttm = tm # force reload
+        nexttm = 0 # force reload
       
       # All buttons go to idle after processing them, regardless of state
       pause_button.estado = 0
