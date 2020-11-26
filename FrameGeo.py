@@ -51,27 +51,13 @@ import math
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 from geopy.geocoders import GeoNames
-from gpiozero import Button
-import RPi.GPIO as GPIO
-import FrameConfig as config
 
-Button.estado=0 #idle
-"""
- Button state is linked to the action taken
- 0= Idle 
- 1=was pressed, not yet attended
- 2=was held, not yet attended. 
- Transition Table
- State / Event
-           Press    Hold    Release After Action
- Idle      Pressed  Held    Idle    N/A
- Pressed   Pressed  Pressed Pressed Idle
- Held      Pressed  Held    Held    Idle
-"""
+import FrameConfig as config
 
 
 #############################
 SHOW_LOCATION = True
+config.BUTTONS = False
 #####################################################
 BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
@@ -100,6 +86,24 @@ if KENBURNS:
 if BLUR_ZOOM < 1.0:
   BLUR_ZOOM = 1.0
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
+
+if config.BUTTONS:
+  from gpiozero import Button
+  Button.estado=0 #idle
+  """
+   Button state is linked to the action taken
+   0= Idle 
+   1=was pressed, not yet attended
+   2=was held, not yet attended. 
+   Transition Table
+   State / Event
+             Press    Hold    Release After Action
+   Idle      Pressed  Held    Idle    N/A
+   Pressed   Pressed  Pressed Pressed Idle
+   Held      Pressed  Held    Held    Idle
+  """
+
+
 
 last_file_change = 0
 
@@ -284,6 +288,7 @@ def timetostring(dot,ticks):
     minutes ="0"+minutes
   return hour+separator+minutes
 
+
 def handle_press(btn) :
     #print("Button pressed, estado actual ",btn.estado)
     if btn.estado==0 or btn.estado == 2 :
@@ -307,29 +312,23 @@ def main(
     ) :
 
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
-  
-    pause_button = Button(8, hold_time=5)
-    back_button = Button(9, hold_time=5)
-    forward_button = Button(4,hold_time=5)
-    pause_button.when_pressed = handle_press
-    back_button.when_pressed = handle_press
-    pause_button.when_held=handle_hold
-    back_button.when_held=handle_hold
-    forward_button.when_pressed=handle_press
-    forward_button.when_held=handle_hold
+    if config.BUTTONS:
+      pause_button = Button(8, hold_time=5)
+      back_button = Button(9, hold_time=5)
+      forward_button = Button(4,hold_time=5)
+      pause_button.when_pressed = handle_press
+      back_button.when_pressed = handle_press
+      pause_button.when_held=handle_hold
+      back_button.when_held=handle_hold
+      forward_button.when_pressed=handle_press
+      forward_button.when_held=handle_hold
         
-    #no need to handle release
+
 
     paused=False
     next_check_tm=time.time()+check_dirs
     time_dot=True
-    """
-    #buttons.when_pressed = handle_button    
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup((8,9),GPIO.IN,pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(8,GPIO.FALLING,callback=handle_button)
-    GPIO.add_event_detect(9,GPIO.FALLING,callback=handle_button)
-    """
+
     ##############################################
     # Create GeoNames locator object www.geonames.org
     geoloc=None
@@ -424,10 +423,12 @@ def main(
       if nFi > 0:
         # If needed, display new photo
         if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
+          print("tm es ",tm," nexttm es ", nexttm, " la resta ", tm-nexttm)
           nexttm = tm + interval
           a = 0.0 # alpha - proportion front image to back
           sbg = sfg
           sfg = None
+          
           
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
            # Calculate next picture index to be shown
@@ -441,20 +442,24 @@ def main(
             with open(config_file+".num","w") as f:
               json.dump(cacheddata,f,separators=(',',':'))
             
-            # define some default values
-            orientation = 1 # unrotated
-            dt=None         # will hold date from EXIF
-            datestruct=None # will hold formatted date
-            
+                 
             # File Open and texture build 
             try:
+              temp=time.time()
               im = Image.open(iFiles[pic_num])
+              print("Time to open file ",time.time()-temp)
             except:
               print("Error Opening File",iFiles[pic_num])
               continue
             
               
-            # EXIF data and geolocation analysis  
+            # EXIF data and geolocation analysis
+            
+            # define some default values
+            orientation = 1 # unrotated
+            dt=None         # will hold date from EXIF
+            datestruct=None # will hold formatted date
+            # Format metadata
             try:
               exif_data = im._getexif()
             except:
@@ -572,34 +577,36 @@ def main(
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
+          print("Key pressed", tm-nexttm)
           nexttm = time.time() - 86400.0
-        if k==27 or quit: #ESC
-          break
-        if k==ord(' '):
+          print(tm - nexttm)
+          if k==27 or quit: #ESC
+            break
+          if k==ord(' '):
+            paused = not paused
+          if k==ord('s'): # go back a picture
+            next_pic_num -= 2
+            if next_pic_num < -1:
+              next_pic_num = -1
+      if config.BUTTONS:
+  #Handling of config.BUTTONS goes here
+        if pause_button.estado == 1 : # button was pressed
           paused = not paused
-        if k==ord('s'): # go back a picture
+        
+        
+        if back_button.estado == 1 : #only press is handled
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
-
-#Handling of buttons goes here
-      if pause_button.estado == 1 : # button was pressed
-        paused = not paused
-      
-      
-      if back_button.estado == 1 : #only press is handled
-        next_pic_num -= 2
-        if next_pic_num < -1:
-          next_pic_num = -1
-        nexttm = 0 #force reload
-      
-      if forward_button.estado == 1 : # only press is handled
-        nexttm = 0 # force reload
-      
-      # All buttons go to idle after processing them, regardless of state
-      pause_button.estado = 0
-      back_button.estado = 0
-      forward_button.estado = 0
+          nexttm = 0 #force reload
+        
+        if forward_button.estado == 1 : # only press is handled
+          nexttm = 0 # force reload
+        
+        # All config.BUTTONS go to idle after processing them, regardless of state
+        pause_button.estado = 0
+        back_button.estado = 0
+        forward_button.estado = 0
       
  # WHILE LOOP ends here       
  
