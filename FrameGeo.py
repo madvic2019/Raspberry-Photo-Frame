@@ -57,7 +57,7 @@ import FrameConfig as config
 
 #############################
 SHOW_LOCATION = True
-config.BUTTONS = False
+
 #####################################################
 BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
