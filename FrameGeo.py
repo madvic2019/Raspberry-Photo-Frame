@@ -607,7 +607,10 @@ def main(
           nexttm = 0 # force forward and reload
           
         if rotate_button.estado == 1 or rotate_button.estado == 2 :
-          im.
+          rotated_image = im.transpose(method=PIL.Image.ROTATE_90) # rotates 90 degrees left
+          im.close() # close original image file
+          rotated_image.save(iFiles[pic_num]) #replaces file with rotated image
+          
         
         # All config.BUTTONS go to idle after processing them, regardless of state
         pause_button.estado = 0
