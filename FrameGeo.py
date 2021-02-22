@@ -1,5 +1,5 @@
 #--coding: utf-8 --
-#!/usr/bin/python
+#!/usr/bin/python3
 from __future__ import absolute_import, division, print_function, unicode_literals
 ''' Simplified slideshow system using ImageSprite and without threading for background
 loading of images (so may show delay for v large images).
@@ -47,14 +47,17 @@ import json
 import math
 
 
+
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 from geopy.geocoders import GeoNames
 
 import FrameConfig as config
 
+
 #############################
 SHOW_LOCATION = True
+
 #####################################################
 BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
@@ -83,6 +86,24 @@ if KENBURNS:
 if BLUR_ZOOM < 1.0:
   BLUR_ZOOM = 1.0
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
+
+if config.BUTTONS:
+  from gpiozero import Button
+  Button.estado=0 #idle
+  """
+   Button state is linked to the action taken
+   0= Idle 
+   1=was pressed, not yet attended
+   2=was held, not yet attended. 
+   Transition Table
+   State / Event
+             Press    Hold    Release After Action
+   Idle      Pressed  Held    Idle    N/A
+   Pressed   Pressed  Pressed Pressed Idle
+   Held      Pressed  Held    Held    Idle
+  """
+
+
 
 last_file_change = 0
 
@@ -254,12 +275,32 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
   print(len(file_list)," image files found")
   return file_list, len(file_list) # tuple of file list, number of pictures
 
-def timetostring(dot,ticks) :
+def timetostring(dot,ticks):
   if (dot) :
     separator=":"
   else :
     separator=" "
-  return str(time.localtime(ticks).tm_hour)+separator+str(time.localtime(ticks).tm_min)
+  minutes = str(time.localtime(ticks).tm_min)
+  hour = str(time.localtime(ticks).tm_hour)
+  if int(hour) < 10 : 
+    hour = "0"+hour
+  if int(minutes) < 10 :
+    minutes ="0"+minutes
+  return hour+separator+minutes
+
+
+def handle_press(btn) :
+    #print("Button pressed, estado actual ",btn.estado)
+    if btn.estado==0 or btn.estado == 2 :
+      btn.estado=1
+     # print("Nuevo Estado ",btn.estado)
+   
+def handle_hold(btn) :
+    #print("button held")
+    if btn.estado==0 :
+      btn.estado=2
+      
+  
 
 def main(
     startdir,                      # Root folder for images, with recursive search
@@ -271,11 +312,26 @@ def main(
     ) :
 
     global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
-
-    next_check_tm=time.time()+check_dirs
-    
-    time_dot=True
+    if config.BUTTONS:
+      pause_button = Button(8, hold_time=5)
+      back_button = Button(9, hold_time=5)
+      forward_button = Button(4,hold_time=5)
+      pause_button.when_pressed = handle_press
+      back_button.when_pressed = handle_press
+      pause_button.when_held=handle_hold
+      back_button.when_held=handle_hold
+      forward_button.when_pressed=handle_press
+      forward_button.when_held=handle_hold
+      rotate_button = Button(3, hold_time=10)
+      rotate_button.when_pressed= handle_press
+      rotate_button.when_held=handle_hold
         
+
+
+    paused=False
+    next_check_tm=time.time()+check_dirs
+    time_dot=True
+
     ##############################################
     # Create GeoNames locator object www.geonames.org
     geoloc=None
@@ -283,7 +339,7 @@ def main(
       geoloc=GeoNames(username=geonamesuser)
     except:
       print("Geographic information server not available")
-   
+    
     print("Setting up display")
     DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
     CAMERA = pi3d.Camera(is_3d=False)
@@ -356,48 +412,57 @@ def main(
     
     tm=time.time()    
     pic_num=next_pic_num
+    # Main loop 
+    
     while DISPLAY.loop_running():
-      # use previous time to make spearator blink
-      previous = tm
+    
+      previous = tm # record previous time value, used to make cursor blink
       tm = time.time()
     
-      if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) :
+      if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) : #blink dot
         time_dot = not(time_dot)
-
+      
       #check if there are file to display  
       if nFi > 0:
-        
+        # If needed, display new photo
         if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
+          print("tm es ",tm," nexttm es ", nexttm, " la resta ", tm-nexttm)
           nexttm = tm + interval
           a = 0.0 # alpha - proportion front image to back
           sbg = sfg
           sfg = None
+          
+          
           while sfg is None: # keep going through until a usable picture is found TODO break out how?
-            #print("Fetch new image ",next_pic_num)
-            #print("Time until next directory check ",next_check_tm - time.time())
+           # Calculate next picture index to be shown
             pic_num = next_pic_num
             next_pic_num += 1
             if next_pic_num >= nFi:
               num_run_through += 1
               next_pic_num = 0
-            
             #update persistent cached data for restart
             cacheddata=(num_run_through,pic_num,last_file_change,next_check_tm)
             with open(config_file+".num","w") as f:
-              #print("Write to config.num file ", json.dumps(cachedddata))
               json.dump(cacheddata,f,separators=(',',':'))
             
-            orientation = 1 # this is default - unrotated
-            #coordinates = None
-            dt=None
-            #include=False
-            datestruct=None
-            #elapsed=time.time()
+                 
+            # File Open and texture build 
             try:
+              temp=time.time()
               im = Image.open(iFiles[pic_num])
+              print("Time to open file ",time.time()-temp)
             except:
               print("Error Opening File",iFiles[pic_num])
               continue
+            
+              
+            # EXIF data and geolocation analysis
+            
+            # define some default values
+            orientation = 1 # unrotated
+            dt=None         # will hold date from EXIF
+            datestruct=None # will hold formatted date
+            # Format metadata
             try:
               exif_data = im._getexif()
             except:
@@ -411,21 +476,20 @@ def main(
               datestruct=time.localtime(dt)
             except:
               datestruct=None
-              #print("No date in EXIF")
             try:
               location = get_geo_name(exif_data)
             except Exception as e: # NB should really check error
               print('Error preparing geoname: ', e)
               location = None
+            # Load and format image
             try:
               sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-              #print("Time to prepare and load image into Texture: ",time.time()-elapsed)
             except:
-              next_pic_num += 1
-              continue
-            #print("Have to reset timer!")  
-            nexttm = time.time()+interval #reset timer to cope with texture delays
-            
+              #next_pic_num += 1 
+              continue  
+            nexttm = time.time()+interval #Time points to next interval 
+
+# Image Rendering            
           if sbg is None: # first time through
             sbg = sfg
           slide.set_textures([sfg, sbg])
@@ -441,11 +505,16 @@ def main(
           slide.unif[sz2] = 1.0
           slide.unif[os1] = (wh_rat - 1.0) * 0.5
           slide.unif[os2] = 0.0
+          #transition 
           if KENBURNS:
               xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
               slide.unif[48] = 0.0
               slide.unif[49] = 0.0
               kb_up = not kb_up
+ 
+              
+# Prepare the different texts to be shown
+
           overlay_text= "" #this will host the text on screen 
           if SHOW_LOCATION: #(and/or month-year)
             if location is not None:
@@ -462,12 +531,13 @@ def main(
               textblock.set_text(" ")
 
         # print time on screen, blink separator every second
-        timetext=timetostring(time_dot,tm)
-        timeblock.set_text(text_format="{}".format(timetext))
-       
+        if not paused :
+          timetext=timetostring(time_dot,tm)
+        else :
+          timetext="PAUSA"
+        timeblock.set_text(text_format="{}".format(timetext))          
 
-        
-        #text.regen()		
+# manages transition
         if KENBURNS:
           t_factor = nexttm - tm
           if kb_up:
@@ -475,11 +545,12 @@ def main(
           slide.unif[48] = xstep * t_factor
           slide.unif[49] = ystep * t_factor
 
+
         if a < 1.0: # transition is happening
             a += delta_alpha
             slide.unif[44] = a
             
-        else: # Check if images have to be re-fetched (no transition on going, so no harm to image
+        else: # Check if image files list has to be rebuilt (no transition on going, so no harm to image
           slide.set_textures([sfg, sfg])
           if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             print("Refreshing Files list")
@@ -505,18 +576,46 @@ def main(
         textblock.colouring.set_colour(alpha=1.0)
         text.regen()
         text.draw()
+# Keyboard handling
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
+          print("Key pressed", tm-nexttm)
           nexttm = time.time() - 86400.0
-        if k==27 or quit: #ESC
-          break
-        if k==ord(' '):
+          print(tm - nexttm)
+          if k==27 or quit: #ESC
+            break
+          if k==ord(' '):
+            paused = not paused
+          if k==ord('s'): # go back a picture
+            next_pic_num -= 2
+            if next_pic_num < -1:
+              next_pic_num = -1
+      if config.BUTTONS:
+  #Handling of config.BUTTONS goes here
+        if pause_button.estado == 1 or pause_button.estado == 2 : # button was pressed
           paused = not paused
-        if k==ord('s'): # go back a picture
+        
+        
+        if back_button.estado == 1 or back_button.estado == 2 : #only press is handled
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
+          nexttm = 0 #force reload
+        
+        if forward_button.estado == 1 or forward_button.estado == 2 : # only press is handled
+          nexttm = 0 # force forward and reload
+          
+        if rotate_button.estado == 1 or rotate_button.estado == 2 :
+          im.
+        
+        # All config.BUTTONS go to idle after processing them, regardless of state
+        pause_button.estado = 0
+        back_button.estado = 0
+        forward_button.estado = 0
+      
+ # WHILE LOOP ends here       
+ 
     try:
       client.loop_stop()
     except Exception as e:
@@ -524,7 +623,7 @@ def main(
     if KEYBOARD:
       kbd.close()
     DISPLAY.destroy()
-    
+# end of main function    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
