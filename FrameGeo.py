@@ -322,10 +322,10 @@ def main(
       back_button.when_held=handle_hold
       forward_button.when_pressed=handle_press
       forward_button.when_held=handle_hold
+
       rotate_button = Button(3, hold_time=10)
       rotate_button.when_pressed= handle_press
       rotate_button.when_held=handle_hold
-        
 
 
     paused=False
@@ -567,8 +567,9 @@ def main(
             except:
                 print("Error refreshing file list, keep old one")
             num_run_through = 0
-        
+#render the image        
         slide.draw()
+#render the text
         text.draw()
         text2.draw()
       else:
@@ -591,6 +592,7 @@ def main(
             next_pic_num -= 2
             if next_pic_num < -1:
               next_pic_num = -1
+
           if k==ord('r') and paused: # rotate picture (only if paused)
             rotated_image = im.transpose(method=PIL.Image.ROTATE_90) # rotates 90 degrees left
             im.close() # close original image file
@@ -608,6 +610,7 @@ def main(
             next_pic_num = -1
           nexttm = 0 #force reload
         
+
         if forward_button.estado == 1 or forward_button.estado == 2 : # only press is handled
           nexttm = 0 # force forward and reload
           
@@ -616,6 +619,7 @@ def main(
           im.close() # close original image file
           rotated_image.save(iFiles[pic_num]) #replaces file with rotated image
           
+
         
         # All config.BUTTONS go to idle after processing them, regardless of state
         pause_button.estado = 0

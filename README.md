@@ -40,3 +40,6 @@ arguments:
 For testing, just use the default values, plus your username for GeoNames:
 python3 FrameGeo.py --geouser <yout_user_name>
 That will launch the slideshow with the images in "examples" folder.
+
+the utility "nameconversion.py" will show the file name for a given picture number. Without arguments it will show the number and file name of next picture to be shown
+
