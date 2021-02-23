@@ -591,6 +591,11 @@ def main(
             next_pic_num -= 2
             if next_pic_num < -1:
               next_pic_num = -1
+          if k==ord('r') and paused: # rotate picture (only if paused)
+            rotated_image = im.transpose(method=PIL.Image.ROTATE_90) # rotates 90 degrees left
+            im.close() # close original image file
+            rotated_image.save(iFiles[pic_num]) #replaces file with rotated image
+            
       if config.BUTTONS:
   #Handling of config.BUTTONS goes here
         if pause_button.estado == 1 or pause_button.estado == 2 : # button was pressed
