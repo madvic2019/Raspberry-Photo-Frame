@@ -564,8 +564,9 @@ def main(
             except:
                 print("Error refreshing file list, keep old one")
             num_run_through = 0
-        
+#render the image        
         slide.draw()
+#render the text
         text.draw()
         text2.draw()
       else:
