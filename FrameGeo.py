@@ -301,6 +301,8 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
 
 def save_file(filename) : # Makes a copy of the file to a Backup folder
   stripped_filename = os.path.basename(filename)
+  if not os.path.exists(config.BKUP_DIR) : # create Backup folder if it does not exist
+    os.mkdir(config.BKUP_DIR)
   dest_filename = config.BKUP_DIR + "/" + stripped_filename
   if not os.path.exists(dest_filename) :# check if there is already a copy saved in backup
     print("copying "+ stripped_filename + " to " + config.BKUP_DIR)
