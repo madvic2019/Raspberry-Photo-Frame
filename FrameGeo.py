@@ -301,7 +301,7 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
 
 def save_file(filename) : # Makes a copy of the file to a Backup folder
   stripped_filename = os.path.basename(filename)
-  dest_filename = backup_dir + "/" + stripped_filename
+  dest_filename = config.BKUP_DIR + "/" + stripped_filename
   if not os.path.exists(dest_filename) :# check if there is already a copy saved in backup
     print("copying "+ stripped_filename + " to " + config.BKUP_DIR)
     shutil.copy2(filename,dest_filename)
@@ -343,10 +343,8 @@ def main(
     check_dirs                     # Interval between checking folders in seconds
     ) :
 
-    global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
+    global paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
     
-    backup_dir = startdir + config.BKUP_DIR
-
     if config.BUTTONS:
       pause_button = Button(8, hold_time=5)
       back_button = Button(9, hold_time=5)
