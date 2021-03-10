@@ -92,7 +92,7 @@ delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 if config.BUTTONS:
   from gpiozero import Button
   Button.estado=0 #idle
-  
+
   """
    Button state is linked to the action taken
    0= Idle 
@@ -348,7 +348,8 @@ def main(
 
     global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
     
-    backup_dir = os.path.abspath(os.path.join(startdir,config.BKUP_DIR))
+    # backup_dir = os.path.abspath(os.path.join(startdir,config.BKUP_DIR))
+    backup_dir = config.BKUP_DIR
     print(startdir)
     print(config.BKUP_DIR)
     print(backup_dir)
