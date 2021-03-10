@@ -50,6 +50,7 @@ import math
 
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
+import exif # Direct access to EXIF tags
 from geopy.geocoders import GeoNames
 
 import FrameConfig as config
@@ -155,7 +156,29 @@ def get_orientation(fname) : #extract orientation and capture date from EXIF dat
     dt = os.path.getmtime(fname) # so use file last modified date
   return orientation,dt
 
-  
+def rotate90CW(old_orientation) :
+  new_orientation = old_orientation
+
+  if (old_orientation == 1) : #up right
+    new_orientation = 6 # set to rotate 90CW
+  elif (old_orientation == 2) : #Mirror horizontal
+    new_orientation = 7 # Mirror Horizontal rotated 90 CW
+  elif (old_orientation == 3) : # rotate 180
+    new_orientation = 8 # rotate 270 CW
+  elif (old_orientation == 4) : # Mirror Vertical
+    new_orientation = 5 # mirror horizontal and rotate 270 CW
+  elif (old_orientation == 5) : # mirror horizontal and rotate 270 CW
+    new_orientation = 4 # mirror vertical
+  elif (old_orientation == 6) : # Rotate 90 CW
+    new_orientation = 3 # rotate 180
+  elif (old_orientation == 7) : # Mirror horizontal and rotate 90CW
+    new_orientation = 4 # mirror vertical
+  elif (old_orientation == 8) : # Rotate 270 CW
+    new_orientation = 1 # upright
+
+  return new_orientation
+
+
 def tex_load(im, orientation, size):
     
     # change suggested to overcome the out of memory crash of putalpha() with very large images
@@ -594,9 +617,16 @@ def main(
               next_pic_num = -1
 
           if k==ord('r') and paused: # rotate picture (only if paused)
-            rotated_image = im.transpose(method=PIL.Image.ROTATE_90) # rotates 90 degrees left
-            im.close() # close original image file
-            rotated_image.save(iFiles[pic_num]) #replaces file with rotated image
+            im.close() #close file on disk
+            with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
+              tmp_im = exif.Image(tmp_file)
+              tmp_file.close() 
+              if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+                tmp_im.orientation = rotate90CW(tmp_im.orientation) # changes EXIF data orientation parameter              
+                with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
+                  tmp_file.write(tmp_im.get_file())
+                next_pic_num -=1 # force reload on screen
+                
             
       if config.BUTTONS:
   #Handling of config.BUTTONS goes here
@@ -614,10 +644,17 @@ def main(
         if forward_button.estado == 1 or forward_button.estado == 2 : # only press is handled
           nexttm = 0 # force forward and reload
           
-        if rotate_button.estado == 1 or rotate_button.estado == 2 :
-          rotated_image = im.transpose(method=PIL.Image.ROTATE_90) # rotates 90 degrees left
-          im.close() # close original image file
-          rotated_image.save(iFiles[pic_num]) #replaces file with rotated image
+        if paused and rotate_button.estado == 2 : # Need to be on pause and hold button to rotate image (and file on disk)
+          im.close() #close file on disk
+          with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
+            tmp_im = exif.Image(tmp_file)
+            tmp_file.close() 
+            if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+              tmp_im.orientation = rotate90CW(tmp_im.orientation) # changes EXIF data orientation parameter              
+              with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
+                tmp_file.write(tmp_im.get_file())
+              next_pic_num -=1 # force reload on screen
+          
           
 
         
@@ -629,7 +666,7 @@ def main(
  # WHILE LOOP ends here       
  
     try:
-      client.loop_stop()
+      DISPLAY.loop_stop()
     except Exception as e:
       print("this was going to fail if previous try failed!")
     if KEYBOARD:
