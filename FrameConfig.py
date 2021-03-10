@@ -29,7 +29,7 @@ print (PI3DDEMO)
 GEONAMESUSER = ''
 DEFAULT_CONFIG_FILE = './.photo-frame'
 PIC_DIR = './examples' #change this to your images default location folder
-BKUP_DIR = PIC_DIR + '/../' +'Backup' # This will be used to store modified or deleted image files. Must exist
+BKUP_DIR = '/../' +'Backup' # This will be used to store modified or deleted image files. Must exist
 CHECK_DIR_TM = 3600.0 # Time to check for directory changes
 NUMBEROFROUNDS = 1 # number of rounds before re-fetching images 0 means after one pass
 
