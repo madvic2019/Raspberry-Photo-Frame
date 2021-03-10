@@ -308,7 +308,7 @@ def save_file(filename) : # Makes a copy of the file to a Backup folder
     os.mkdir(backup_dir)
   if not os.path.exists(dest_filename) :# check if there is already a copy saved in backup
     print("copying "+ stripped_filename + " to " + config.BKUP_DIR)
-    shutil.copy(filename,dest_filename)
+    shutil.copy2(filename,dest_filename)
     
 def timetostring(dot,ticks):
   if (dot) :
@@ -693,6 +693,7 @@ def main(
         pause_button.estado = 0
         back_button.estado = 0
         forward_button.estado = 0
+        rotate_button.estado = 0
       
  # WHILE LOOP ends here       
  
