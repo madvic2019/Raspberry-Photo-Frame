@@ -38,6 +38,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
 import os
+import shutil
 import time 
 import random
 import pi3d
@@ -298,6 +299,15 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
   print(len(file_list)," image files found")
   return file_list, len(file_list) # tuple of file list, number of pictures
 
+def save_file(filename) : # Makes a copy of the file to a Backup folder
+  stripped_filename = os.path.basename(filename)
+  dest_filename = config.BKUP_DIR + "/" + stripped_filename
+  
+  if not os.path.exists(dest_filename) :# check if there is already a copy saved in backup
+    print("copying "+ stripped_filename + " to " + config.BKUP_DIR)
+    shutil.copy2(filename,dest_filename)
+  
+  
 def timetostring(dot,ticks):
   if (dot) :
     separator=":"
@@ -473,7 +483,7 @@ def main(
             try:
               temp=time.time()
               im = Image.open(iFiles[pic_num])
-              print("Time to open file ",time.time()-temp)
+              print("foto numero ",pic_num)
             except:
               print("Error Opening File",iFiles[pic_num])
               continue
@@ -605,8 +615,8 @@ def main(
         k = kbd.read()
         if k != -1:
           print("Key pressed", tm-nexttm)
-          nexttm = time.time() - 86400.0
-          print(tm - nexttm)
+          # nexttm = time.time() - 86400.0
+          # print(tm - nexttm)
           if k==27 or quit: #ESC
             break
           if k==ord(' '):
@@ -615,17 +625,23 @@ def main(
             next_pic_num -= 2
             if next_pic_num < -1:
               next_pic_num = -1
+            nexttm = 0
+          if k==ord('q'): #go forward
+            nexttm = 0
 
           if k==ord('r') and paused: # rotate picture (only if paused)
             im.close() #close file on disk
+            
             with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
               tmp_im = exif.Image(tmp_file)
               tmp_file.close() 
               if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+                save_file(iFiles[pic_num]) # Copy file to Backup folder
                 tmp_im.orientation = rotate90CW(tmp_im.orientation) # changes EXIF data orientation parameter              
                 with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                   tmp_file.write(tmp_im.get_file())
                 next_pic_num -=1 # force reload on screen
+                nexttm = 0
                 
             
       if config.BUTTONS:
@@ -646,10 +662,12 @@ def main(
           
         if paused and (rotate_button.estado == 1 or rotate_button.estado == 2): # Need to be on pause 
           im.close() #close file on disk
+          
           with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
             tmp_im = exif.Image(tmp_file)
             tmp_file.close() 
             if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+              save_file(iFiles[pic_num]) # Copy file to Backup folder
               tmp_im.orientation = rotate90CW(tmp_im.orientation) # changes EXIF data orientation parameter              
               with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                 tmp_file.write(tmp_im.get_file())
