@@ -644,7 +644,7 @@ def main(
         if forward_button.estado == 1 or forward_button.estado == 2 : # only press is handled
           nexttm = 0 # force forward and reload
           
-        if paused and rotate_button.estado == 2 : # Need to be on pause and hold button to rotate image (and file on disk)
+        if paused and (rotate_button.estado == 1 or rotate_button.estado == 2): # Need to be on pause 
           im.close() #close file on disk
           with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
             tmp_im = exif.Image(tmp_file)
