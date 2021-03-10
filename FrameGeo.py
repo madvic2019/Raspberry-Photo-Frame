@@ -346,7 +346,7 @@ def main(
       forward_button.when_pressed=handle_press
       forward_button.when_held=handle_hold
 
-      rotate_button = Button(3, hold_time=10)
+      rotate_button = Button(3, hold_time=5)
       rotate_button.when_pressed= handle_press
       rotate_button.when_held=handle_hold
 
