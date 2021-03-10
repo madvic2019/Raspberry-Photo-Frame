@@ -92,6 +92,7 @@ delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 if config.BUTTONS:
   from gpiozero import Button
   Button.estado=0 #idle
+  
   """
    Button state is linked to the action taken
    0= Idle 
@@ -307,7 +308,7 @@ def save_file(filename) : # Makes a copy of the file to a Backup folder
     os.mkdir(backup_dir)
   if not os.path.exists(dest_filename) :# check if there is already a copy saved in backup
     print("copying "+ stripped_filename + " to " + config.BKUP_DIR)
-    shutil.copy2(filename,dest_filename)
+    shutil.copy(filename,dest_filename)
     
 def timetostring(dot,ticks):
   if (dot) :
@@ -357,6 +358,7 @@ def main(
       pause_button = Button(8, hold_time=5)
       back_button = Button(9, hold_time=5)
       forward_button = Button(4,hold_time=5)
+      
       pause_button.when_pressed = handle_press
       back_button.when_pressed = handle_press
       pause_button.when_held=handle_hold
@@ -367,6 +369,11 @@ def main(
       rotate_button = Button(5, hold_time=5)
       rotate_button.when_pressed= handle_press
       rotate_button.when_held=handle_hold
+      
+      delete_button = Button(6, hold_time=5)
+      delete_button.when_pressed=handle_press
+      delete_button.when_held=handle_hold
+
 
 
     paused=False
