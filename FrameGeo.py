@@ -159,22 +159,22 @@ def get_orientation(fname) : #extract orientation and capture date from EXIF dat
 def rotate90CW(old_orientation) :
   new_orientation = old_orientation
 
-  if (old_orientation == 1) : #up right
-    new_orientation = 6 # set to rotate 90CW
-  elif (old_orientation == 2) : #Mirror horizontal
-    new_orientation = 7 # Mirror Horizontal rotated 90 CW
+  if (old_orientation == 1) :   #upright
+    new_orientation = 6         # set to rotate 90CW
+  elif (old_orientation == 2) : # Mirror horizontal
+    new_orientation = 7         # set to Mirror Horizontal rotated 90 CW
   elif (old_orientation == 3) : # rotate 180
-    new_orientation = 8 # rotate 270 CW
+    new_orientation = 8         # set to rotate 270 CW
   elif (old_orientation == 4) : # Mirror Vertical
-    new_orientation = 5 # mirror horizontal and rotate 270 CW
+    new_orientation = 5         # set to mirror horizontal and rotate 270 CW
   elif (old_orientation == 5) : # mirror horizontal and rotate 270 CW
-    new_orientation = 4 # mirror vertical
+    new_orientation = 4         # set to mirror vertical
   elif (old_orientation == 6) : # Rotate 90 CW
-    new_orientation = 3 # rotate 180
+    new_orientation = 3         # set to rotate 180
   elif (old_orientation == 7) : # Mirror horizontal and rotate 90CW
-    new_orientation = 4 # mirror vertical
+    new_orientation = 4         # set to mirror vertical
   elif (old_orientation == 8) : # Rotate 270 CW
-    new_orientation = 1 # upright
+    new_orientation = 1         # set to upright
 
   return new_orientation
 
