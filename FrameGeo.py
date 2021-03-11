@@ -474,7 +474,7 @@ def main(
       #check if there are file to display  
       if nFi > 0:
         # If needed, display new photo
-        if (tm > nexttm and not paused) :#or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
+        if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
           print("tm es ",tm," nexttm es ", nexttm, " la resta ", tm-nexttm)
           nexttm = tm + interval
           a = 0.0 # alpha - proportion front image to back
