@@ -671,12 +671,12 @@ def main(
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
-          nexttm = 0 #force reload
+          #nexttm = 0 #force reload
           back_button.estado = 0
         
 
         if forward_button.estado == 1 or forward_button.estado == 2 : # only press is handled
-          nexttm = 0 # force forward and reload
+          #nexttm = 0 # force forward and reload
           forward_button.estado = 0
           
         if paused and (rotate_button.estado == 1 or rotate_button.estado == 2): # Need to be on pause 
@@ -691,7 +691,7 @@ def main(
                 with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                   tmp_file.write(tmp_im.get_file())
                 next_pic_num -=1 # force reload on screen
-                nexttm = 0
+                #nexttm = 0
 
         # All config.BUTTONS go to idle after processing them, regardless of state
        
