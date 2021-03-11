@@ -664,6 +664,7 @@ def main(
   #Handling of config.BUTTONS goes here
         if pause_button.estado == 1 or pause_button.estado == 2 : # button was pressed
           paused = not paused
+          pause_button.estado = 0
         
         
         if back_button.estado == 1 or back_button.estado == 2 : #only press is handled
@@ -671,12 +672,15 @@ def main(
           if next_pic_num < -1:
             next_pic_num = -1
           nexttm = 0 #force reload
+          back_button.estado = 0
         
 
         if forward_button.estado == 1 or forward_button.estado == 2 : # only press is handled
           nexttm = 0 # force forward and reload
+          forward_button.estado = 0
           
         if paused and (rotate_button.estado == 1 or rotate_button.estado == 2): # Need to be on pause 
+            rotate_button.estado = 0
             im.close() #close file on disk
             with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
               tmp_im = exif.Image(tmp_file)
@@ -690,10 +694,10 @@ def main(
                 nexttm = 0
 
         # All config.BUTTONS go to idle after processing them, regardless of state
-        pause_button.estado = 0
-        back_button.estado = 0
-        forward_button.estado = 0
-        rotate_button.estado = 0
+       
+        
+
+        
       
  # WHILE LOOP ends here       
  
