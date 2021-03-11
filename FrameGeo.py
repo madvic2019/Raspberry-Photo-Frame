@@ -631,7 +631,7 @@ def main(
         k = kbd.read()
         if k != -1:
           print("Key pressed", tm-nexttm)
-          # nexttm = time.time() - 86400.0
+          nexttm = time.time() - 86400.0
           # print(tm - nexttm)
           if k==27 or quit: #ESC
             break
@@ -641,9 +641,9 @@ def main(
             next_pic_num -= 2
             if next_pic_num < -1:
               next_pic_num = -1
-            nexttm = 0
+            #nexttm = 0
           if k==ord('q'): #go forward
-            nexttm = 0
+            #nexttm = 0
 
           if k==ord('r') and paused: # rotate picture (only if paused)
             im.close() #close file on disk
@@ -657,17 +657,19 @@ def main(
                 with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                   tmp_file.write(tmp_im.get_file())
                 next_pic_num -=1 # force reload on screen
-                nexttm = 0
+            #    nexttm = 0
                 
             
       if config.BUTTONS:
   #Handling of config.BUTTONS goes here
         if pause_button.estado == 1 or pause_button.estado == 2 : # button was pressed
+          nexttm = time.time() - 86400.0
           paused = not paused
           pause_button.estado = 0
         
         
         if back_button.estado == 1 or back_button.estado == 2 : #only press is handled
+          nexttm = time.time() - 86400.0
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
@@ -676,11 +678,12 @@ def main(
         
 
         if forward_button.estado == 1 or forward_button.estado == 2 : # only press is handled
-          #nexttm = 0 # force forward and reload
+          nexttm = time.time() - 86400.0
           forward_button.estado = 0
           
         if paused and (rotate_button.estado == 1 or rotate_button.estado == 2): # Need to be on pause 
             rotate_button.estado = 0
+            nexttm = time.time() - 86400.0
             im.close() #close file on disk
             with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
               tmp_im = exif.Image(tmp_file)
@@ -691,7 +694,7 @@ def main(
                 with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                   tmp_file.write(tmp_im.get_file())
                 next_pic_num -=1 # force reload on screen
-                #nexttm = 0
+                
 
         # All config.BUTTONS go to idle after processing them, regardless of state
        
