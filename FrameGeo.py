@@ -643,11 +643,10 @@ def main(
               next_pic_num = -1
             #nexttm = 0
           if k==ord('q'): #go forward
-            #nexttm = 0
+            nexttm = time.time() - 86400.0
 
           if k==ord('r') and paused: # rotate picture (only if paused)
             im.close() #close file on disk
-            
             with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
               tmp_im = exif.Image(tmp_file)
               tmp_file.close() 
