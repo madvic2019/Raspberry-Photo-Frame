@@ -537,10 +537,8 @@ def main(
             except:
               #next_pic_num += 1 
               continue  
-            print("Nexttm(antes): ",nexttm)
-            #nexttm = time.time()+interval #Time points to next interval 
             nexttm = tm+interval #Time points to next interval 
-            print("Nexttm(despues): ",nexttm)
+            
 
 # Image Rendering            
           if sbg is None: # first time through
@@ -631,13 +629,13 @@ def main(
         text.regen()
         text.draw()
 # Keyboard handling
-      delta=time.time()-86400.0
+      #delta=time.time()-86400.0
       delta=0
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
           print("Key pressed", tm-nexttm)
-          #nexttm = time.time() - 86400.0
+          #nexttm = delta
           # print(tm - nexttm)
           if k==27 or quit: #ESC
             break
