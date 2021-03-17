@@ -461,6 +461,7 @@ def main(
     
     tm=time.time()    
     pic_num=next_pic_num
+    nexttm = 0
     # Main loop 
     
     while DISPLAY.loop_running():
@@ -474,7 +475,7 @@ def main(
       #check if there are file to display  
       if nFi > 0:
         # If needed, display new photo
-        if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
+        if (tm > nexttm and not paused): #or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
           print("tm es ",tm," nexttm es ", nexttm, " la resta ", tm-nexttm)
           nexttm = tm + interval
           a = 0.0 # alpha - proportion front image to back
@@ -537,7 +538,8 @@ def main(
               #next_pic_num += 1 
               continue  
             print("Nexttm(antes): ",nexttm)
-            nexttm = time.time()+interval #Time points to next interval 
+            #nexttm = time.time()+interval #Time points to next interval 
+            nexttm = tm+interval #Time points to next interval 
             print("Nexttm(despues): ",nexttm)
 
 # Image Rendering            
@@ -629,6 +631,8 @@ def main(
         text.regen()
         text.draw()
 # Keyboard handling
+      delta=time.time()-86400.0
+      delta=0
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
@@ -641,16 +645,16 @@ def main(
             
             paused = not paused
           if k==ord('s'): # go back a picture
-            nexttm = time.time() - 86400.0
+            nexttm = 0
             next_pic_num -= 2
             if next_pic_num < -1:
               next_pic_num = -1
-            #nexttm = 0
+            nexttm = delta
           if k==ord('q'): #go forward
-            nexttm = time.time() - 86400.0
+            nexttm = delta
 
           if k==ord('r') and paused: # rotate picture (only if paused)
-            nexttm = time.time() - 86400.0
+            nexttm = delta
             im.close() #close file on disk
             with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
               tmp_im = exif.Image(tmp_file)
@@ -661,19 +665,19 @@ def main(
                 with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                   tmp_file.write(tmp_im.get_file())
                 next_pic_num -=1 # force reload on screen
-            #    nexttm = 0
+            #    nexttm = delta
                 
             
       if config.BUTTONS:
   #Handling of config.BUTTONS goes here
         if pause_button.estado == 1 or pause_button.estado == 2 : # button was pressed
-          #nexttm = time.time() - 86400.0
+          #nexttm = delta
           paused = not paused
           pause_button.estado = 0
         
         
         if back_button.estado == 1 or back_button.estado == 2 : #only press is handled
-          nexttm = time.time() - 86400.0
+          nexttm = delta
           next_pic_num -= 2
           if next_pic_num < -1:
             next_pic_num = -1
@@ -682,12 +686,12 @@ def main(
         
 
         if forward_button.estado == 1 or forward_button.estado == 2 : # only press is handled
-          nexttm = time.time() - 86400.0
+          nexttm = delta
           forward_button.estado = 0
           
         if paused and (rotate_button.estado == 1 or rotate_button.estado == 2): # Need to be on pause 
             rotate_button.estado = 0
-            nexttm = time.time() - 86400.0
+            nexttm = delta
             im.close() #close file on disk
             with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
               tmp_im = exif.Image(tmp_file)
