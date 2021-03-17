@@ -633,13 +633,15 @@ def main(
         k = kbd.read()
         if k != -1:
           print("Key pressed", tm-nexttm)
-          nexttm = time.time() - 86400.0
+          #nexttm = time.time() - 86400.0
           # print(tm - nexttm)
           if k==27 or quit: #ESC
             break
           if k==ord(' '):
+            
             paused = not paused
           if k==ord('s'): # go back a picture
+            nexttm = time.time() - 86400.0
             next_pic_num -= 2
             if next_pic_num < -1:
               next_pic_num = -1
@@ -648,6 +650,7 @@ def main(
             nexttm = time.time() - 86400.0
 
           if k==ord('r') and paused: # rotate picture (only if paused)
+            nexttm = time.time() - 86400.0
             im.close() #close file on disk
             with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
               tmp_im = exif.Image(tmp_file)
@@ -664,7 +667,7 @@ def main(
       if config.BUTTONS:
   #Handling of config.BUTTONS goes here
         if pause_button.estado == 1 or pause_button.estado == 2 : # button was pressed
-          nexttm = time.time() - 86400.0
+          #nexttm = time.time() - 86400.0
           paused = not paused
           pause_button.estado = 0
         
