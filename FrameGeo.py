@@ -461,7 +461,7 @@ def main(
     
     tm=time.time()    
     pic_num=next_pic_num
-    nexttm = 0
+    
     # Main loop 
     
     while DISPLAY.loop_running():
@@ -475,7 +475,7 @@ def main(
       #check if there are file to display  
       if nFi > 0:
         # If needed, display new photo
-        if (not paused) or (tm >= nexttm): # 
+        if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
           print("tm es ",tm," nexttm es ", nexttm, " la resta ", tm-nexttm)
           nexttm = tm + interval
           a = 0.0 # alpha - proportion front image to back
@@ -629,8 +629,8 @@ def main(
         text.regen()
         text.draw()
 # Keyboard handling
-      #delta=time.time()-86400.0
-      delta=0
+      delta=time.time()-86400.0
+      #delta=0
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
