@@ -351,8 +351,8 @@ def main(
     # backup_dir = os.path.abspath(os.path.join(startdir,config.BKUP_DIR))
     backup_dir = config.BKUP_DIR
     print(startdir)
-    print(config.BKUP_DIR)
-    print(backup_dir)
+    #print(config.BKUP_DIR)
+    #print(backup_dir)
 
 
     if config.BUTTONS:
@@ -499,7 +499,7 @@ def main(
             try:
               temp=time.time()
               im = Image.open(iFiles[pic_num])
-              print("foto numero ",pic_num)
+              print("foto numero ",pic_num," time ",time.time())
             except:
               print("Error Opening File",iFiles[pic_num])
               continue
@@ -536,7 +536,9 @@ def main(
             except:
               #next_pic_num += 1 
               continue  
+            print("Nexttm(antes): ",nexttm)
             nexttm = time.time()+interval #Time points to next interval 
+            print("Nexttm(despues): ",nexttm)
 
 # Image Rendering            
           if sbg is None: # first time through
