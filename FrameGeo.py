@@ -631,8 +631,8 @@ def main(
         text.regen()
         text.draw()
 # Keyboard and button handling
-      #delta=time.time()-86400.0
-      delta=0
+      delta=time.time()-86400.0
+      #delta=0
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
