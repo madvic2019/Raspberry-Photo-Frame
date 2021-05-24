@@ -596,8 +596,9 @@ def main(
           slide.unif[48] = xstep * t_factor
           slide.unif[49] = ystep * t_factor
 
-
-        if a < 1.0: # transition is happening
+        
+        if a <= 1.0: # transition is happening
+            
             a += delta_alpha
             slide.unif[44] = a
             
@@ -619,6 +620,7 @@ def main(
                 print("Error refreshing file list, keep old one")
             num_run_through = 0
 #render the image        
+        
         slide.draw()
 #render the text
         text.draw()
@@ -628,9 +630,9 @@ def main(
         textblock.colouring.set_colour(alpha=1.0)
         text.regen()
         text.draw()
-# Keyboard handling
-      delta=time.time()-86400.0
-      #delta=0
+# Keyboard and button handling
+      #delta=time.time()-86400.0
+      delta=0
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
@@ -668,25 +670,6 @@ def main(
             
       if config.BUTTONS:
   #Handling of config.BUTTONS goes here
-        if pause_button.estado == 1 or pause_button.estado == 2 : # button was pressed
-          #nexttm = delta
-          paused = not paused
-          pause_button.estado = 0
-        
-        
-        if back_button.estado == 1 or back_button.estado == 2 : #only press is handled
-          nexttm = delta
-          next_pic_num -= 2
-          if next_pic_num < -1:
-            next_pic_num = -1
-          #nexttm = 0 #force reload
-          back_button.estado = 0
-        
-
-        if forward_button.estado == 1 or forward_button.estado == 2 : # only press is handled
-          nexttm = delta
-          forward_button.estado = 0
-          
         if paused and (rotate_button.estado == 1 or rotate_button.estado == 2): # Need to be on pause 
             rotate_button.estado = 0
             nexttm = delta
@@ -700,14 +683,30 @@ def main(
                 with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                   tmp_file.write(tmp_im.get_file())
                 next_pic_num -=1 # force reload on screen
-                
+        
+        if pause_button.estado == 1 or pause_button.estado == 2 : # button was pressed
+          #nexttm = delta
+          paused = not paused
+          pause_button.estado = 0
+        
+        
+        if back_button.estado == 1 or back_button.estado == 2 : 
+          nexttm = delta
+          next_pic_num -= 2
+          if next_pic_num < -1:
+            next_pic_num = -1
+          #nexttm = 0 #force reload
+          back_button.estado = 0
+        
+
+        if forward_button.estado == 1 or forward_button.estado == 2 : 
+          nexttm = delta
+          forward_button.estado = 0
+          
+        
 
         # All config.BUTTONS go to idle after processing them, regardless of state
-       
-        
-
-        
-      
+            
  # WHILE LOOP ends here       
  
     try:
