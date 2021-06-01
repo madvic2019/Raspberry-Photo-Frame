@@ -371,10 +371,6 @@ def main(
       rotate_button.when_pressed= handle_press
       rotate_button.when_held=handle_hold
       
-      delete_button = Button(6, hold_time=5)
-      delete_button.when_pressed=handle_press
-      delete_button.when_held=handle_hold
-
 
 
     paused=False
