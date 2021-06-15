@@ -135,6 +135,7 @@ def get_coordinates(geotags):
     if geotags is not None :
       lat = get_decimal_from_dms(geotags['GPSLatitude'], geotags['GPSLatitudeRef'])
       lon = get_decimal_from_dms(geotags['GPSLongitude'], geotags['GPSLongitudeRef'])
+      print('coordinates=',lat,lon)
       return (lat,lon)
     else :
       return None
