@@ -652,15 +652,21 @@ def main(
           if k==ord('r') and paused: # rotate picture (only if paused)
             nexttm = delta
             im.close() #close file on disk
-            with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
-              tmp_im = exif.Image(tmp_file)
-              tmp_file.close() 
-              if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
-                save_file(iFiles[pic_num]) # Copy file to Backup folder
-                tmp_im.orientation = rotate90CW(tmp_im.orientation) # changes EXIF data orientation parameter              
-                with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
-                  tmp_file.write(tmp_im.get_file())
-                next_pic_num -=1 # force reload on screen
+            try:
+                with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
+                  tmp_im = exif.Image(tmp_file)
+                  tmp_file.close() 
+                  if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+                    print("Saving File")
+                    save_file(iFiles[pic_num]) # Copy file to Backup folder
+                    print("Rotating")
+                    tmp_im.orientation = rotate90CW(tmp_im.orientation) # changes EXIF data orientation parameter              
+                    with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
+                      print("Saving Rotated Version")
+                      tmp_file.write(tmp_im.get_file())
+                    next_pic_num -=1 # force reload on screen
+            except:
+                print("Error when rotating photo")
             #    nexttm = delta
                 
             
