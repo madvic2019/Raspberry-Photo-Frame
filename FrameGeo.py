@@ -392,11 +392,11 @@ def main(
       forward_button.when_pressed=handle_press
       forward_button.when_held=handle_hold
 
-      rotateCW_button = Button(5, hold_time=5)
+      rotateCW_button = Button(6, hold_time=5)
       rotateCW_button.when_pressed= handle_press
       rotateCW_button.when_held=handle_hold
       
-      rotateCCW_button = Button(6, hold_time=5)
+      rotateCCW_button = Button(5, hold_time=5)
       rotateCCW_button.when_pressed= handle_press
       rotateCCW_button.when_held=handle_hold
       
