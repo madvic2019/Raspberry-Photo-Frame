@@ -89,6 +89,9 @@ if BLUR_ZOOM < 1.0:
   BLUR_ZOOM = 1.0
 delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 
+CW = 0 # Clockwise rotation
+CCW = 1 # Counterclockwise rotation
+
 if config.BUTTONS:
   from gpiozero import Button
   Button.estado=0 #idle
@@ -159,27 +162,48 @@ def get_orientation(fname) : #extract orientation and capture date from EXIF dat
     dt = os.path.getmtime(fname) # so use file last modified date
   return orientation,dt
 
-def rotate90CW(old_orientation) :
-  new_orientation = old_orientation
+def rotate90(old_orientation,sense) : # sense can be CW (0) or CCW (1)
+  CW_dict={1:6,2:7,3:8,4:5,5:2,6:3,7:4,8:1}
+  CCW_dict={1:8,2:5,3:6,4:7,5:4,6:1,7:2,8:3}
+  Rotation=[CW_dict,CCW_dict]
+  
+  return Rotation[sense][old_orientation]
+  """ if (sense == CW) :
+    if (old_orientation == 1) :   #upright
+      new_orientation = 6         # set to rotate 90CW
+    elif (old_orientation == 2) : # Mirror horizontal
+      new_orientation = 7         # set to Mirror Horizontal rotated 90 CW
+    elif (old_orientation == 3) : # rotate 180
+      new_orientation = 8         # set to rotate 270 CW
+    elif (old_orientation == 4) : # Mirror Vertical
+      new_orientation = 5         # set to mirror horizontal and rotate 270 CW
+    elif (old_orientation == 5) : # mirror horizontal and rotate 270 CW
+      new_orientation = 2         # set to mirror horizontal
+    elif (old_orientation == 6) : # Rotate 90 CW
+      new_orientation = 3         # set to rotate 180
+    elif (old_orientation == 7) : # Mirror horizontal and rotate 90CW
+      new_orientation = 4         # set to mirror vertical
+    elif (old_orientation == 8) : # Rotate 270 CW
+      new_orientation = 1         # set to upright
+  elif (sense==CCW):
+    if (old_orientation == 1) :   #upright
+      new_orientation = 8         # set to rotate 90CCW/270CW
+    elif (old_orientation == 2) : # Mirror horizontal
+      new_orientation = 5         # set to Mirror Horizontal rotated 90CCW/270CW
+    elif (old_orientation == 3) : # rotate 180
+      new_orientation = 6         # set to rotate 90CW/270CCW
+    elif (old_orientation == 4) : # Mirror Vertical
+      new_orientation = 7         # set to mirror horizontal and rotate 90CW
+    elif (old_orientation == 5) : # mirror horizontal and rotate 270 CW
+      new_orientation = 4         # set to mirror vertical
+    elif (old_orientation == 6) : # Rotate 90 CW
+      new_orientation = 1         # set to upright
+    elif (old_orientation == 7) : # Mirror horizontal and rotate 90CW
+      new_orientation = 2         # set to mirror horizontal
+    elif (old_orientation == 8) : # Rotate 270 CW
+      new_orientation = 3         # set to rotate 180
+ """
 
-  if (old_orientation == 1) :   #upright
-    new_orientation = 6         # set to rotate 90CW
-  elif (old_orientation == 2) : # Mirror horizontal
-    new_orientation = 7         # set to Mirror Horizontal rotated 90 CW
-  elif (old_orientation == 3) : # rotate 180
-    new_orientation = 8         # set to rotate 270 CW
-  elif (old_orientation == 4) : # Mirror Vertical
-    new_orientation = 5         # set to mirror horizontal and rotate 270 CW
-  elif (old_orientation == 5) : # mirror horizontal and rotate 270 CW
-    new_orientation = 4         # set to mirror vertical
-  elif (old_orientation == 6) : # Rotate 90 CW
-    new_orientation = 3         # set to rotate 180
-  elif (old_orientation == 7) : # Mirror horizontal and rotate 90CW
-    new_orientation = 4         # set to mirror vertical
-  elif (old_orientation == 8) : # Rotate 270 CW
-    new_orientation = 1         # set to upright
-
-  return new_orientation
 
 
 def tex_load(im, orientation, size):
@@ -368,9 +392,13 @@ def main(
       forward_button.when_pressed=handle_press
       forward_button.when_held=handle_hold
 
-      rotate_button = Button(5, hold_time=5)
-      rotate_button.when_pressed= handle_press
-      rotate_button.when_held=handle_hold
+      rotateCW_button = Button(5, hold_time=5)
+      rotateCW_button.when_pressed= handle_press
+      rotateCW_button.when_held=handle_hold
+      
+      rotateCCW_button = Button(6, hold_time=5)
+      rotateCCW_button.when_pressed= handle_press
+      rotateCCW_button.when_held=handle_hold
       
 
 
@@ -659,19 +687,15 @@ def main(
                   tmp_file.close() 
                   if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
                     save_file(iFiles[pic_num]) # Copy file to Backup folder
-                    tmp_im.orientation = rotate90CW(tmp_im.orientation) # changes EXIF data orientation parameter              
+                    tmp_im.orientation = rotate90(tmp_im.orientation,CCW) # changes EXIF data orientation parameter              
                     with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
             except:
                 print("Error when rotating photo")
             #    nexttm = delta
-                
-            
-      if config.BUTTONS:
-  #Handling of config.BUTTONS goes here
-        if paused and (rotate_button.estado == 1 or rotate_button.estado == 2): # Need to be on pause 
-            rotate_button.estado = 0
+
+          if k==ord('t') and paused: # rotate picture (only if paused)
             nexttm = delta
             im.close() #close file on disk
             try:
@@ -680,7 +704,44 @@ def main(
                   tmp_file.close() 
                   if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
                     save_file(iFiles[pic_num]) # Copy file to Backup folder
-                    tmp_im.orientation = rotate90CW(tmp_im.orientation) # changes EXIF data orientation parameter              
+                    tmp_im.orientation = rotate90(tmp_im.orientation,CW) # changes EXIF data orientation parameter              
+                    with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
+                      tmp_file.write(tmp_im.get_file())
+                    next_pic_num -=1 # force reload on screen
+            except:
+                print("Error when rotating photo")
+            #    nexttm = delta
+            
+      if config.BUTTONS:
+  #Handling of config.BUTTONS goes here
+        if paused and (rotateCW_button.estado == 1 or rotateCW_button.estado == 2): # Need to be on pause 
+            rotateCW_button.estado = 0
+            nexttm = delta
+            im.close() #close file on disk
+            try:
+                with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
+                  tmp_im = exif.Image(tmp_file)
+                  tmp_file.close() 
+                  if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+                    save_file(iFiles[pic_num]) # Copy file to Backup folder
+                    tmp_im.orientation = rotate90(tmp_im.orientation,CW) # changes EXIF data orientation parameter
+                    with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
+                      tmp_file.write(tmp_im.get_file())
+                    next_pic_num -=1 # force reload on screen
+            except:
+                print("Error when rotating photo")
+
+        if paused and (rotateCCW_button.estado == 1 or rotateCCW_button.estado == 2): # Need to be on pause 
+            rotateCCW_button.estado = 0
+            nexttm = delta
+            im.close() #close file on disk
+            try:
+                with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
+                  tmp_im = exif.Image(tmp_file)
+                  tmp_file.close() 
+                  if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+                    save_file(iFiles[pic_num]) # Copy file to Backup folder
+                    tmp_im.orientation = rotate90(tmp_im.orientation,CCW) # changes EXIF data orientation parameter              
                     with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
