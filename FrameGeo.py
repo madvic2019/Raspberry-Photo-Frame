@@ -532,7 +532,7 @@ def main(
             try:
               sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
             except:
-              #next_pic_num += 1 
+              next_pic_num += 1 # skip to next photo
               continue  
             nexttm = tm+interval #Time points to next interval 
             
