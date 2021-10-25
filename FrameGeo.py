@@ -231,6 +231,43 @@ def tex_load(im, orientation, size):
                        free_after_load=True)
 
     return tex
+    
+def render(foregroung, background) :
+    # Image Rendering: from the foreground image to the background image becoming new foreground            
+    a = 0 # starts with full foreground
+    if background is None: # first time through
+          background = foreground
+    while(a <= 1.0)
+        slide.set_textures([foreground, background])
+        slide.unif[45:47] = slide.unif[42:44] # transfer front width and height factors to back
+        slide.unif[51:53] = slide.unif[48:50] # transfer front width and height offsets
+        wh_rat = (DISPLAY.width * foreground.iy) / (DISPLAY.height * foreground.ix)
+        if (wh_rat > 1.0 and FIT) or (wh_rat <= 1.0 and not FIT):
+          sz1, sz2, os1, os2 = 42, 43, 48, 49
+        else:
+          sz1, sz2, os1, os2 = 43, 42, 49, 48
+          wh_rat = 1.0 / wh_rat
+        slide.unif[sz1] = wh_rat
+        slide.unif[sz2] = 1.0
+        slide.unif[os1] = (wh_rat - 1.0) * 0.5
+        slide.unif[os2] = 0.0
+      #transition 
+        if KENBURNS:
+          xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
+          slide.unif[48] = 0.0
+          slide.unif[49] = 0.0
+          kb_up = not kb_up
+            
+        # manages transition
+        if KENBURNS:
+          t_factor = nexttm - tm
+          if kb_up:
+            t_factor = interval - t_factor
+            slide.unif[48] = xstep * t_factor
+            slide.unif[49] = ystep * t_factor
+          a += delta_alpha
+          slide.unif[44] = a
+        
 
 def tidy_name(path_name):
     name = os.path.basename(path_name).upper()
@@ -536,31 +573,8 @@ def main(
               continue  
             nexttm = tm+interval #Time points to next interval 
             
-
-# Image Rendering            
-          if sbg is None: # first time through
-            sbg = sfg
-          slide.set_textures([sfg, sbg])
-          slide.unif[45:47] = slide.unif[42:44] # transfer front width and height factors to back
-          slide.unif[51:53] = slide.unif[48:50] # transfer front width and height offsets
-          wh_rat = (DISPLAY.width * sfg.iy) / (DISPLAY.height * sfg.ix)
-          if (wh_rat > 1.0 and FIT) or (wh_rat <= 1.0 and not FIT):
-            sz1, sz2, os1, os2 = 42, 43, 48, 49
-          else:
-            sz1, sz2, os1, os2 = 43, 42, 49, 48
-            wh_rat = 1.0 / wh_rat
-          slide.unif[sz1] = wh_rat
-          slide.unif[sz2] = 1.0
-          slide.unif[os1] = (wh_rat - 1.0) * 0.5
-          slide.unif[os2] = 0.0
-          #transition 
-          if KENBURNS:
-              xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
-              slide.unif[48] = 0.0
-              slide.unif[49] = 0.0
-              kb_up = not kb_up
- 
-              
+            render(sfg,sbg) # performs the full transition in a blocking operation (loop)
+                     
 # Prepare the different texts to be shown
 
           overlay_text= "" #this will host the text on screen 
@@ -585,37 +599,25 @@ def main(
           timetext="PAUSA"
         timeblock.set_text(text_format="{}".format(timetext))          
 
-# manages transition
-        if KENBURNS:
-          t_factor = nexttm - tm
-          if kb_up:
-            t_factor = interval - t_factor
-          slide.unif[48] = xstep * t_factor
-          slide.unif[49] = ystep * t_factor
 
-        
-        if a <= 1.0: # transition is happening
             
-            a += delta_alpha
-            slide.unif[44] = a
-            
-        else: # Check if image files list has to be rebuilt (no transition on going, so no harm to image
-          slide.set_textures([sfg, sfg])
-          if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
-            print("Refreshing Files list")
-            next_check_tm = time.time() + check_dirs  # Set up the next interval
-            try:
-              if check_changes(startdir): #rebuild files list if changes happened
-                print("Re-Fetching images files, erase config file")
-                with open(config_file,'w') as f :
-                  json.dump('',f) # creates an empty config file, forces directory reload
-                iFiles, nFi = get_files(startdir,config_file,shuffle)
-                next_pic_num = 0
-              else :
-                print("No directory changes: do nothing")
-            except:
-                print("Error refreshing file list, keep old one")
-            num_run_through = 0
+        # Check if image files list has to be rebuilt (no transition on going, so no harm to image
+        slide.set_textures([sfg, sfg])
+        if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
+          print("Refreshing Files list")
+          next_check_tm = time.time() + check_dirs  # Set up the next interval
+          try:
+            if check_changes(startdir): #rebuild files list if changes happened
+              print("Re-Fetching images files, erase config file")
+              with open(config_file,'w') as f :
+                json.dump('',f) # creates an empty config file, forces directory reload
+              iFiles, nFi = get_files(startdir,config_file,shuffle)
+              next_pic_num = 0
+            else :
+              print("No directory changes: do nothing")
+          except:
+              print("Error refreshing file list, keep old one")
+          num_run_through = 0
 #render the image        
         
         slide.draw()
