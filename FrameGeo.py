@@ -232,42 +232,45 @@ def tex_load(im, orientation, size):
 
     return tex
     
-def render(foregroung, background) :
+def render(interval,foreground, background) :
     # Image Rendering: from the foreground image to the background image becoming new foreground            
     a = 0 # starts with full foreground
     if background is None: # first time through
           background = foreground
-    while(a <= 1.0)
-        slide.set_textures([foreground, background])
-        slide.unif[45:47] = slide.unif[42:44] # transfer front width and height factors to back
-        slide.unif[51:53] = slide.unif[48:50] # transfer front width and height offsets
-        wh_rat = (DISPLAY.width * foreground.iy) / (DISPLAY.height * foreground.ix)
-        if (wh_rat > 1.0 and FIT) or (wh_rat <= 1.0 and not FIT):
-          sz1, sz2, os1, os2 = 42, 43, 48, 49
-        else:
-          sz1, sz2, os1, os2 = 43, 42, 49, 48
-          wh_rat = 1.0 / wh_rat
-        slide.unif[sz1] = wh_rat
-        slide.unif[sz2] = 1.0
-        slide.unif[os1] = (wh_rat - 1.0) * 0.5
-        slide.unif[os2] = 0.0
-      #transition 
-        if KENBURNS:
-          xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
-          slide.unif[48] = 0.0
-          slide.unif[49] = 0.0
-          kb_up = not kb_up
-            
-        # manages transition
-        if KENBURNS:
-          t_factor = nexttm - tm
-          if kb_up:
-            t_factor = interval - t_factor
-            slide.unif[48] = xstep * t_factor
-            slide.unif[49] = ystep * t_factor
-          a += delta_alpha
-          slide.unif[44] = a
-        
+    while(a <= 1.0) :
+      slide.set_textures([foreground, background])
+      slide.unif[45:47] = slide.unif[42:44] # transfer front width and height factors to back
+      slide.unif[51:53] = slide.unif[48:50] # transfer front width and height offsets
+      wh_rat = (DISPLAY.width * foreground.iy) / (DISPLAY.height * foreground.ix)
+      if (wh_rat > 1.0 and FIT) or (wh_rat <= 1.0 and not FIT):
+        sz1, sz2, os1, os2 = 42, 43, 48, 49
+      else:
+        sz1, sz2, os1, os2 = 43, 42, 49, 48
+        wh_rat = 1.0 / wh_rat
+      slide.unif[sz1] = wh_rat
+      slide.unif[sz2] = 1.0
+      slide.unif[os1] = (wh_rat - 1.0) * 0.5
+      slide.unif[os2] = 0.0
+    #transition 
+      if KENBURNS:
+        xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
+        slide.unif[48] = 0.0
+        slide.unif[49] = 0.0
+        kb_up = not kb_up
+          
+      # manages transition
+      if KENBURNS:
+        t_factor = nexttm - tm
+        if kb_up:
+          t_factor = interval - t_factor
+          slide.unif[48] = xstep * t_factor
+          slide.unif[49] = ystep * t_factor
+      a += delta_alpha
+      slide.unif[44] = a
+      #render the image        
+      slide.draw()
+      
+    return  
 
 def tidy_name(path_name):
     name = os.path.basename(path_name).upper()
@@ -384,7 +387,7 @@ def main(
     check_dirs                     # Interval between checking folders in seconds
     ) :
 
-    global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
+    global nexttm, tm,DISPLAY, slide, backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
     
     # backup_dir = os.path.abspath(os.path.join(startdir,config.BKUP_DIR))
     backup_dir = config.BKUP_DIR
@@ -571,10 +574,11 @@ def main(
             except:
               next_pic_num += 1 # skip to next photo
               continue  
-            nexttm = tm+interval #Time points to next interval 
             
-            render(sfg,sbg) # performs the full transition in a blocking operation (loop)
-                     
+          render(interval,sfg,sbg) # performs the full transition in a blocking operation (loop)
+            
+          nexttm = tm+interval #Time points to next interval 
+                                
 # Prepare the different texts to be shown
 
           overlay_text= "" #this will host the text on screen 
@@ -618,9 +622,7 @@ def main(
           except:
               print("Error refreshing file list, keep old one")
           num_run_through = 0
-#render the image        
-        
-        slide.draw()
+
 #render the text
         text.draw()
         text2.draw()
