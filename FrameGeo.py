@@ -286,7 +286,7 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
     print("Config file exists, open for reading",config_file)
     with open(config_file, 'r') as f:
         try:
-          file_list=json.load(f)
+          file_list=json.loads(f)
           if len(file_list)>0:
             if len(os.path.commonprefix((file_list[0],dir))) < len(dir) :
               print("Directory is different from config file ",os.path.dirname(file_list[0]), " -- ",dir," reloading")
@@ -319,7 +319,7 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
       file_list.sort() # if not shuffled; sort by name
     
     with open(config_file,'w') as f: #Store list in config file
-      json.dump(file_list, f, sort_keys=True)
+      json.dumpsfile_list, f, sort_keys=True)
       print("List written to ",config_file) 
 
   print(len(file_list)," image files found")
@@ -636,7 +636,7 @@ def main(
               if check_changes(startdir): #rebuild files list if changes happened
                 print("Re-Fetching images files, erase config file")
                 with open(config_file,'w') as f :
-                  json.dump('',f) # creates an empty config file, forces directory reload
+                  json.dumps('',f) # creates an empty config file, forces directory reload
                 iFiles, nFi = get_files(startdir,config_file,shuffle)
                 next_pic_num = 0
               else :
