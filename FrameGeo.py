@@ -319,7 +319,7 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
       file_list.sort() # if not shuffled; sort by name
     
     with open(config_file,'w') as f: #Store list in config file
-      json.dumpsfile_list, f, sort_keys=True)
+      json.dumps(file_list, f, sort_keys=True)
       print("List written to ",config_file) 
 
   print(len(file_list)," image files found")
