@@ -91,6 +91,42 @@ delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 
 CW = 0 # Clockwise rotation
 CCW = 1 # Counterclockwise rotation
+Rotation=[{1:6,2:7,3:8,4:5,5:2,6:3,7:4,8:1},{1:8,2:5,3:6,4:7,5:4,6:1,7:2,8:3}] #Transformations to rotate pictures (see below)
+  """ if (sense == CW) :
+    if (old_orientation == 1) :   #upright
+      new_orientation = 6         # set to rotate 90CW
+    elif (old_orientation == 2) : # Mirror horizontal
+      new_orientation = 7         # set to Mirror Horizontal rotated 90 CW
+    elif (old_orientation == 3) : # rotate 180
+      new_orientation = 8         # set to rotate 270 CW
+    elif (old_orientation == 4) : # Mirror Vertical
+      new_orientation = 5         # set to mirror horizontal and rotate 270 CW
+    elif (old_orientation == 5) : # mirror horizontal and rotate 270 CW
+      new_orientation = 2         # set to mirror horizontal
+    elif (old_orientation == 6) : # Rotate 90 CW
+      new_orientation = 3         # set to rotate 180
+    elif (old_orientation == 7) : # Mirror horizontal and rotate 90CW
+      new_orientation = 4         # set to mirror vertical
+    elif (old_orientation == 8) : # Rotate 270 CW
+      new_orientation = 1         # set to upright
+  elif (sense==CCW):
+    if (old_orientation == 1) :   #upright
+      new_orientation = 8         # set to rotate 90CCW/270CW
+    elif (old_orientation == 2) : # Mirror horizontal
+      new_orientation = 5         # set to Mirror Horizontal rotated 90CCW/270CW
+    elif (old_orientation == 3) : # rotate 180
+      new_orientation = 6         # set to rotate 90CW/270CCW
+    elif (old_orientation == 4) : # Mirror Vertical
+      new_orientation = 7         # set to mirror horizontal and rotate 90CW
+    elif (old_orientation == 5) : # mirror horizontal and rotate 270 CW
+      new_orientation = 4         # set to mirror vertical
+    elif (old_orientation == 6) : # Rotate 90 CW
+      new_orientation = 1         # set to upright
+    elif (old_orientation == 7) : # Mirror horizontal and rotate 90CW
+      new_orientation = 2         # set to mirror horizontal
+    elif (old_orientation == 8) : # Rotate 270 CW
+      new_orientation = 3         # set to rotate 180
+ """
 
 if config.BUTTONS:
   from gpiozero import Button
@@ -162,47 +198,6 @@ def get_orientation(fname) : #extract orientation and capture date from EXIF dat
     dt = os.path.getmtime(fname) # so use file last modified date
   return orientation,dt
 
-def rotate90(old_orientation,sense) : # sense can be CW (0) or CCW (1)
-  CW_dict={1:6,2:7,3:8,4:5,5:2,6:3,7:4,8:1}
-  CCW_dict={1:8,2:5,3:6,4:7,5:4,6:1,7:2,8:3}
-  Rotation=[CW_dict,CCW_dict]
-  
-  return Rotation[sense][old_orientation]
-  """ if (sense == CW) :
-    if (old_orientation == 1) :   #upright
-      new_orientation = 6         # set to rotate 90CW
-    elif (old_orientation == 2) : # Mirror horizontal
-      new_orientation = 7         # set to Mirror Horizontal rotated 90 CW
-    elif (old_orientation == 3) : # rotate 180
-      new_orientation = 8         # set to rotate 270 CW
-    elif (old_orientation == 4) : # Mirror Vertical
-      new_orientation = 5         # set to mirror horizontal and rotate 270 CW
-    elif (old_orientation == 5) : # mirror horizontal and rotate 270 CW
-      new_orientation = 2         # set to mirror horizontal
-    elif (old_orientation == 6) : # Rotate 90 CW
-      new_orientation = 3         # set to rotate 180
-    elif (old_orientation == 7) : # Mirror horizontal and rotate 90CW
-      new_orientation = 4         # set to mirror vertical
-    elif (old_orientation == 8) : # Rotate 270 CW
-      new_orientation = 1         # set to upright
-  elif (sense==CCW):
-    if (old_orientation == 1) :   #upright
-      new_orientation = 8         # set to rotate 90CCW/270CW
-    elif (old_orientation == 2) : # Mirror horizontal
-      new_orientation = 5         # set to Mirror Horizontal rotated 90CCW/270CW
-    elif (old_orientation == 3) : # rotate 180
-      new_orientation = 6         # set to rotate 90CW/270CCW
-    elif (old_orientation == 4) : # Mirror Vertical
-      new_orientation = 7         # set to mirror horizontal and rotate 90CW
-    elif (old_orientation == 5) : # mirror horizontal and rotate 270 CW
-      new_orientation = 4         # set to mirror vertical
-    elif (old_orientation == 6) : # Rotate 90 CW
-      new_orientation = 1         # set to upright
-    elif (old_orientation == 7) : # Mirror horizontal and rotate 90CW
-      new_orientation = 2         # set to mirror horizontal
-    elif (old_orientation == 8) : # Rotate 270 CW
-      new_orientation = 3         # set to rotate 180
- """
 
 
 
@@ -319,7 +314,7 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
       file_list.sort() # if not shuffled; sort by name
     
     with open(config_file,'w') as f: #Store list in config file
-      json.dump(file_list, f, indent=0,sort_keys=True)
+      json.dump(file_list, f, sort_keys=True)
       print("List written to ",config_file) 
 
   print(len(file_list)," image files found")
@@ -687,7 +682,7 @@ def main(
                   tmp_file.close() 
                   if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
                     save_file(iFiles[pic_num]) # Copy file to Backup folder
-                    tmp_im.orientation = rotate90(tmp_im.orientation,CCW) # changes EXIF data orientation parameter              
+                    tmp_im.orientation = Rotation[CCW][tmp_im.orientation] # changes EXIF data orientation parameter              
                     with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
@@ -704,7 +699,7 @@ def main(
                   tmp_file.close() 
                   if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
                     save_file(iFiles[pic_num]) # Copy file to Backup folder
-                    tmp_im.orientation = rotate90(tmp_im.orientation,CW) # changes EXIF data orientation parameter              
+                    tmp_im.orientation = Rotation[CW][tmp_im.orientation] # changes EXIF data orientation parameter              
                     with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
