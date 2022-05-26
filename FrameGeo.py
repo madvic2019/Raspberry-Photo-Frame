@@ -92,7 +92,7 @@ delta_alpha = 1.0 / (FPS * fade_time) # delta alpha
 CW = 0 # Clockwise rotation
 CCW = 1 # Counterclockwise rotation
 Rotation=[{1:6,2:7,3:8,4:5,5:2,6:3,7:4,8:1},{1:8,2:5,3:6,4:7,5:4,6:1,7:2,8:3}] #Transformations to rotate pictures (see below)
-  """ if (sense == CW) :
+""" if (sense == CW) :
     if (old_orientation == 1) :   #upright
       new_orientation = 6         # set to rotate 90CW
     elif (old_orientation == 2) : # Mirror horizontal
