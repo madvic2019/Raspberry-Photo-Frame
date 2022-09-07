@@ -46,6 +46,7 @@ import argparse
 import stat
 import json
 import math
+import subprocess
 
 
 
@@ -357,9 +358,9 @@ def handle_hold(btn) :
       
 def show_solar(cmd) :
     if cmd :
-        os.system('chromium-browser -app=http://localhost:1890/ui')
+        subprocess.Popen('chromium-browser -app=http://localhost:1890/ui')
     else :
-        os.system('killall -9 chromium-browser')
+        subprocess.Popen('killall -9 chromium-browser')
         
   
 
