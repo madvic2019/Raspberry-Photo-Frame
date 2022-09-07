@@ -373,7 +373,7 @@ def main(
     print(startdir)
     #print(config.BKUP_DIR)
     #print(backup_dir)
-
+    solar_show_running = False
 
     if config.BUTTONS:
       pause_button = Button(8, hold_time=5)
@@ -395,9 +395,7 @@ def main(
       rotateCCW_button.when_pressed= handle_press
       rotateCCW_button.when_held=handle_hold
       
-      showSolar_button = Button(3, hold_time=5)
-      showSolar_button.when_held=handle_hold
-      showSolar_button.when_pressed=handle_press
+
       
       
 
@@ -710,7 +708,18 @@ def main(
                     next_pic_num -=1 # force reload on screen
             except:
                 print("Error when rotating photo")
-            #    nexttm = delta
+          
+          if k==ord('o') : 
+            # activate Alternative application (solar plant in this case)
+            if solar_show_running : # We are already showing the Solar Plant Data, toggle to off
+              os.system('bash -c killall chromium-browser')
+              pause = False
+              solar_show_running = False
+            else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
+              os.system('bash -c chromium-browser -app="http://localhost:1890/ui" &')
+              pause = True
+              solar_show_running = True
+            
             
       if config.BUTTONS:
   #Handling of config.BUTTONS goes here
@@ -748,10 +757,23 @@ def main(
             except:
                 print("Error when rotating photo")
                 
-        if pause_button.estado == 1 or pause_button.estado == 2 : # button was pressed
+        if pause_button.estado == 1 : # button was pressed
           #nexttm = delta
           paused = not paused
           pause_button.estado = 0
+          
+        if pause_button.estado == 2 : # button was held -> activate Alternative application (solar plant in this case)
+          if solar_show_running : # We are already showing the Solar Plant Data, toggle to off
+            os.system('bash -c killall chromium-browser')
+            pause = False
+            solar_show_running = False
+          else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
+            os.system('bash -c chromium-browser -app="http://localhost:1890/ui" &')
+            pause = True
+            solar_show_running = True
+        
+        
+            
         
         
         if back_button.estado == 1 or back_button.estado == 2 : 
