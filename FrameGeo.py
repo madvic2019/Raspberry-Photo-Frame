@@ -358,9 +358,11 @@ def handle_hold(btn) :
       
 def show_solar(cmd) :
     if cmd :
-        subprocess.Popen(['/usr/bin/chromium-browser','-app=http://localhost:1890/ui'])
+        print("Launching Broswer")
+        subprocess.run('/usr/bin/chromium-browser -app=http://localhost:1890/ui')
     else :
-        subprocess.Popen(['/usr/bin/killall','-9','chromium-browser'])
+        print("Stopping Browser")
+        subprocess.run('/usr/bin/killall -9 chromium-browser')
         
         
   
