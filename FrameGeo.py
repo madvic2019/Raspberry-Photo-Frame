@@ -395,6 +395,11 @@ def main(
       rotateCCW_button.when_pressed= handle_press
       rotateCCW_button.when_held=handle_hold
       
+      showSolar_button = Button(3, hold_time=5)
+      showSolar_button.when_held=handle_hold
+      showSolar_button.when_pressed=handle_press
+      
+      
 
 
     paused=False
@@ -761,6 +766,7 @@ def main(
         if forward_button.estado == 1 or forward_button.estado == 2 : 
           nexttm = delta
           forward_button.estado = 0
+
           
         
 
