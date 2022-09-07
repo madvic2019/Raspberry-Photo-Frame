@@ -747,36 +747,36 @@ def main(
             except:
                 print("Error when rotating photo")
 
-        if paused and (rotateCCW_button.estado == 1 or rotateCCW_button.estado == 2): # Need to be on pause 
-            rotateCCW_button.estado = 0
-            nexttm = delta
-            im.close() #close file on disk
-            try:
-                with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
-                  tmp_im = exif.Image(tmp_file)
-                  tmp_file.close() 
-                  if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
-                    save_file(iFiles[pic_num]) # Copy file to Backup folder
-                    tmp_im.orientation = rotate90(tmp_im.orientation,CCW) # changes EXIF data orientation parameter              
-                    with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
-                      tmp_file.write(tmp_im.get_file())
-                    next_pic_num -=1 # force reload on screen
-            except:
-                print("Error when rotating photo")
+        # if paused and (rotateCCW_button.estado == 1 or rotateCCW_button.estado == 2): # Need to be on pause 
+            # rotateCCW_button.estado = 0
+            # nexttm = delta
+            # im.close() #close file on disk
+            # try:
+                # with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
+                  # tmp_im = exif.Image(tmp_file)
+                  # tmp_file.close() 
+                  # if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+                    # save_file(iFiles[pic_num]) # Copy file to Backup folder
+                    # tmp_im.orientation = rotate90(tmp_im.orientation,CCW) # changes EXIF data orientation parameter              
+                    # with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
+                      # tmp_file.write(tmp_im.get_file())
+                    # next_pic_num -=1 # force reload on screen
+            # except:
+                # print("Error when rotating photo")
                 
         if pause_button.estado == 1 : # button was pressed
           #nexttm = delta
           paused = not paused
           pause_button.estado = 0
           
-        if pause_button.estado == 2 : # button was held -> activate Alternative application (solar plant in this case)
+        if rotateCCW_button.estado == 1 : # button was held -> activate Alternative application (solar plant in this case)
           if solar_show_running : # We are already showing the Solar Plant Data, toggle to off
             show_solar(False)
-            paused = False
+            paused = False #pause slide show
             solar_show_running = False
           else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
             show_solar(True)
-            paused = True
+            paused = True #unpause slide show
             solar_show_running = True
         
         
