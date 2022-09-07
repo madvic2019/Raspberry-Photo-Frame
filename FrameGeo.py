@@ -673,7 +673,6 @@ def main(
           if k==27 or quit: #ESC
             break
           if k==ord(' '):
-            
             paused = not paused
           if k==ord('s'): # go back a picture
             nexttm = 0
@@ -721,11 +720,11 @@ def main(
             # activate Alternative application (solar plant in this case)
             if solar_show_running : # We are already showing the Solar Plant Data, toggle to off
               show_solar(False)
-              pause = False
+              paused = False
               solar_show_running = False
             else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
               show_solar(True)
-              pause = True
+              paused = True
               solar_show_running = True
             
             
@@ -773,11 +772,11 @@ def main(
         if pause_button.estado == 2 : # button was held -> activate Alternative application (solar plant in this case)
           if solar_show_running : # We are already showing the Solar Plant Data, toggle to off
             show_solar(False)
-            pause = False
+            paused = False
             solar_show_running = False
           else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
             show_solar(True)
-            pause = True
+            paused = True
             solar_show_running = True
         
         
