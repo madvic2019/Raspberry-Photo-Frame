@@ -712,11 +712,11 @@ def main(
           if k==ord('o') : 
             # activate Alternative application (solar plant in this case)
             if solar_show_running : # We are already showing the Solar Plant Data, toggle to off
-              os.system('bash -c killall chromium-browser')
+              os.system('bash -c killall -9 chromium-browser')
               pause = False
               solar_show_running = False
             else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
-              os.system('bash -c chromium-browser -app="http://localhost:1890/ui" &')
+              os.system('bash -c "chromium-browser -app="http://localhost:1890/ui &" ')
               pause = True
               solar_show_running = True
             
