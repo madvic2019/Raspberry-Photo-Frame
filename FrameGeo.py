@@ -716,7 +716,7 @@ def main(
               pause = False
               solar_show_running = False
             else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
-              os.system('bash -c "chromium-browser -app=http://localhost:1890/ui > /dev/null &"')
+              os.system('bash -c "chromium-browser -app=http://localhost:1890/ui > /dev/null"')
               pause = True
               solar_show_running = True
             
@@ -768,7 +768,7 @@ def main(
             pause = False
             solar_show_running = False
           else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
-            os.system('bash -c "chromium-browser -app=http://localhost:1890/ui > /dev/null &"')
+            os.system('bash -c "chromium-browser -app=http://localhost:1890/ui > /dev/null"')
             pause = True
             solar_show_running = True
         
