@@ -355,6 +355,12 @@ def handle_hold(btn) :
     if btn.estado==0 :
       btn.estado=2
       
+def show_solar(cmd) :
+    if cmd :
+        os.system('chromium-browser -app=http://localhost:1890/ui')
+    else :
+        os.system('killall -9 chromium-browser')
+        
   
 
 def main(
@@ -712,11 +718,11 @@ def main(
           if k==ord('o') : 
             # activate Alternative application (solar plant in this case)
             if solar_show_running : # We are already showing the Solar Plant Data, toggle to off
-              os.system('bash -c "killall -9 chromium-browser > /dev/null"')
+              show_solar(False)
               pause = False
               solar_show_running = False
             else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
-              os.system('bash -c "chromium-browser -app=http://localhost:1890/ui > /dev/null"')
+              show_solar(True)
               pause = True
               solar_show_running = True
             
@@ -764,11 +770,11 @@ def main(
           
         if pause_button.estado == 2 : # button was held -> activate Alternative application (solar plant in this case)
           if solar_show_running : # We are already showing the Solar Plant Data, toggle to off
-            os.system('bash -c "killall -9 chromium-browser > /dev/null"')
+            show_solar(False)
             pause = False
             solar_show_running = False
           else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
-            os.system('bash -c "chromium-browser -app=http://localhost:1890/ui > /dev/null"')
+            show_solar(True)
             pause = True
             solar_show_running = True
         
