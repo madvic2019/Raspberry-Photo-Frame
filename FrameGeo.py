@@ -355,17 +355,7 @@ def handle_hold(btn) :
     #print("button held")
     if btn.estado==0 :
       btn.estado=2
-      
-def show_solar(cmd) :
-    if cmd :
-        print("Launching Broswer")
-        subprocess.run('/usr/bin/chromium-browser -app=http://localhost:1890/ui')
-    else :
-        print("Stopping Browser")
-        subprocess.run('/usr/bin/killall -9 chromium-browser')
-        
-        
-  
+ 
 
 def main(
     startdir,                      # Root folder for images, with recursive search
@@ -404,12 +394,7 @@ def main(
       rotateCCW_button = Button(5, hold_time=5)
       rotateCCW_button.when_pressed= handle_press
       rotateCCW_button.when_held=handle_hold
-      
-
-      
-      
-
-
+ 
     paused=False
     next_check_tm=time.time()+check_dirs
     time_dot=True
@@ -718,16 +703,7 @@ def main(
             except:
                 print("Error when rotating photo")
           
-          if k==ord('o') : 
-            # activate Alternative application (solar plant in this case)
-            if solar_show_running : # We are already showing the Solar Plant Data, toggle to off
-              show_solar(False)
-              paused = False
-              solar_show_running = False
-            else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
-              show_solar(True)
-              paused = True
-              solar_show_running = True
+
             
             
       if config.BUTTONS:
@@ -749,41 +725,27 @@ def main(
             except:
                 print("Error when rotating photo")
 
-        # if paused and (rotateCCW_button.estado == 1 or rotateCCW_button.estado == 2): # Need to be on pause 
-            # rotateCCW_button.estado = 0
-            # nexttm = delta
-            # im.close() #close file on disk
-            # try:
-                # with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
-                  # tmp_im = exif.Image(tmp_file)
-                  # tmp_file.close() 
-                  # if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
-                    # save_file(iFiles[pic_num]) # Copy file to Backup folder
-                    # tmp_im.orientation = rotate90(tmp_im.orientation,CCW) # changes EXIF data orientation parameter              
-                    # with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
-                      # tmp_file.write(tmp_im.get_file())
-                    # next_pic_num -=1 # force reload on screen
-            # except:
-                # print("Error when rotating photo")
+        if paused and (rotateCCW_button.estado == 1 or rotateCCW_button.estado == 2): # Need to be on pause 
+            rotateCCW_button.estado = 0
+            nexttm = delta
+            im.close() #close file on disk
+            try:
+                with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
+                  tmp_im = exif.Image(tmp_file)
+                  tmp_file.close() 
+                  if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+                    save_file(iFiles[pic_num]) # Copy file to Backup folder
+                    tmp_im.orientation = rotate90(tmp_im.orientation,CCW) # changes EXIF data orientation parameter              
+                    with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
+                      tmp_file.write(tmp_im.get_file())
+                    next_pic_num -=1 # force reload on screen
+            except:
+                print("Error when rotating photo")
                 
         if pause_button.estado == 1 : # button was pressed
           #nexttm = delta
           paused = not paused
           pause_button.estado = 0
-          
-        if rotateCCW_button.estado == 1 : # button was held -> activate Alternative application (solar plant in this case)
-          if solar_show_running : # We are already showing the Solar Plant Data, toggle to off
-            show_solar(False)
-            paused = False #pause slide show
-            solar_show_running = False
-          else : # are are not showing Solar Plant Data: start showing it and put the photo show in pause
-            show_solar(True)
-            paused = True #unpause slide show
-            solar_show_running = True
-        
-        
-            
-        
         
         if back_button.estado == 1 or back_button.estado == 2 : 
           nexttm = delta
