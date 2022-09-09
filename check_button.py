@@ -26,8 +26,8 @@ def hasbeenreleased(btn):
 
 Button.was_held=False
 action=False 
-back = Button(8,hold_time=10)
-play = Button(9,hold_time=10)
+back = Button(9,hold_time=10)
+play = Button(11,hold_time=10)
 back.was_held=False
 play.was_held=False
 back.when_held=hasbeenheld
@@ -35,12 +35,11 @@ play.when_held=hasbeenheld
 back.when_released=hasbeenreleased
 play.when_released=hasbeenreleased
 
-
 while True :
   if back.was_held :
-    print ("Action!! on back",action)
+    print ("Action!! on 24",action)
     
   if play.was_held :
-    print("Action!! on play", action)
-  
+    print("Action!! on 25", action)
+
   sleep(1)
