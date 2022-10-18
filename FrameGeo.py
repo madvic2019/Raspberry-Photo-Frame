@@ -373,13 +373,14 @@ def main(
     print(startdir)
     #print(config.BKUP_DIR)
     #print(backup_dir)
-    solar_show_running = False
 
     if config.BUTTONS:
       pause_button = Button(8, hold_time=5)
       back_button = Button(9, hold_time=5)
       forward_button = Button(4,hold_time=5)
-      
+      rotateCW_button = Button(6, hold_time=5)
+      rotateCCW_button = Button(5, hold_time=5)
+
       pause_button.when_pressed = handle_press
       back_button.when_pressed = handle_press
       pause_button.when_held=handle_hold
@@ -387,11 +388,9 @@ def main(
       forward_button.when_pressed=handle_press
       forward_button.when_held=handle_hold
 
-      rotateCW_button = Button(6, hold_time=5)
       rotateCW_button.when_pressed= handle_press
       rotateCW_button.when_held=handle_hold
       
-      rotateCCW_button = Button(5, hold_time=5)
       rotateCCW_button.when_pressed= handle_press
       rotateCCW_button.when_held=handle_hold
  
@@ -742,7 +741,7 @@ def main(
             except:
                 print("Error when rotating photo")
                 
-        if pause_button.estado == 1 : # button was pressed
+        if pause_button.estado == 1 or pause_button.estado == 2: # button was pressed
           #nexttm = delta
           paused = not paused
           pause_button.estado = 0
