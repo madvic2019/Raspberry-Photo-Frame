@@ -717,7 +717,7 @@ def main(
                   tmp_file.close() 
                   if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
                     save_file(iFiles[pic_num]) # Copy file to Backup folder
-                    tmp_im.orientation = rotate90(tmp_im.orientation,CW) # changes EXIF data orientation parameter
+                    tmp_im.orientation =  Rotation[CW][tmp_im.orientation] # changes EXIF data orientation parameter
                     with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
@@ -734,7 +734,7 @@ def main(
                   tmp_file.close() 
                   if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
                     save_file(iFiles[pic_num]) # Copy file to Backup folder
-                    tmp_im.orientation = rotate90(tmp_im.orientation,CCW) # changes EXIF data orientation parameter              
+                    tmp_im.orientation = Rotation[CCW][tmp_im.orientation] # changes EXIF data orientation parameter              
                     with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
