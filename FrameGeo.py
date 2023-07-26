@@ -53,7 +53,7 @@ import subprocess
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 import exif # Direct access to EXIF tags
-from geopy.geocoders import GeoNames
+from geopy.geocoders import GeoNames,Nominatim
 
 import FrameConfig as config
 
@@ -184,7 +184,7 @@ def get_coordinates(geotags):
       return None
 
 def get_geo_name(exif) : #Obtain geographic names from service provider
-  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,lang='es') #use your country code for language selection
+  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,zoom=18,language='es') #use your country code for language selection
   return geocoder
 
 def get_orientation(fname) : #extract orientation and capture date from EXIF data
@@ -405,7 +405,7 @@ def main(
       geoloc=GeoNames(username=geonamesuser)
     except:
       print("Geographic information server not available")
-    
+      
     print("Setting up display")
     DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
     CAMERA = pi3d.Camera(is_3d=False)
@@ -545,6 +545,7 @@ def main(
               datestruct=None
             try:
               location = get_geo_name(exif_data)
+              print("Location = ",location)
             except Exception as e: # NB should really check error
               print('Error preparing geoname: ', e)
               location = None

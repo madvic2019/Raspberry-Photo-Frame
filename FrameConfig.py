@@ -26,7 +26,7 @@ print (PI3DDEMO)
 
 
 # Default values
-GEONAMESUSER = ''
+GEONAMESUSER = 'myuser'
 DEFAULT_CONFIG_FILE = './.photo-frame'
 PIC_DIR = './examples' #change this to your images default location folder
 BKUP_DIR = '.backup-MarcoFotos' # This will be used to store modified or deleted image files. Must exist
