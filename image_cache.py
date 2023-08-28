@@ -1,42 +1,6 @@
 #--coding: utf-8 --
 #!/usr/bin/python3
 from __future__ import absolute_import, division, print_function, unicode_literals
-''' Simplified slideshow system using ImageSprite and without threading for background
-loading of images (so may show delay for v large images).
-    Also has a minimal use of PointText and TextBlock system with reduced  codepoints
-and reduced grid_size to give better resolution for large characters.
-    
-
-USING exif info to rotate images
-
-    by default the global KEYBOARD is set False so the only way to stop the
-    probram is Alt-F4 or reboot. If you intend to test from command line set
-    KEYBOARD True. After that:
-    ESC to quit, 's' to reverse, any other key to move on one.
-    
-ADDED by V. Diaz:
-Commandline arguments defined:
-python3 FrameGeo [Image Path] [--config-file configfilename] [--waittime delaybetweenslides] [--shuffle True|False] [--geonamesuser username]
-
-Support of geo tagging in EXIF to show location of photo in slide show (using GeoNames service)
-Persistent images list: enables restart with same images list and resume from last shown image.
-Optimized file list creation to enable (very) large images catalog.
-Use logging Module instead of print
-
-
-Copyright (c) Victor Diaz  2020
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
-to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, 
-distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-'''
 import os
 import shutil
 import time 
@@ -57,30 +21,7 @@ from geopy.geocoders import GeoNames,Nominatim
 
 import FrameConfig as config
 
-
-#############################
-SHOW_LOCATION = True
-
-#####################################################
-BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
-BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
-BLUR_ZOOM = 1.0 # must be >= 1.0 which expands the backgorund to just fill the space around the image
-KENBURNS = False # will set FIT->False and BLUR_EDGES->False
-KEYBOARD = True  # set to False when running headless to avoid curses error. True for debugging
-#####################################################
-# these variables can be altered using MQTT messaging
-#####################################################
-TIME_DELAY = 15 # default timer between slides
-fade_time = 0.5
-quit = False
-paused = False # NB must be set to True after the first iteration of the show!
-FPS = 20
-FIT = True
-EDGE_ALPHA = 0.5 # see background colour at edge. 1.0 would show reflection of image
-BACKGROUND = (0.2, 0.2, 0.2, 1.0)
-RESHUFFLE_NUM = 5 # times through before reshuffling
-
-
+'''
 def get_files(dir,config_file,shuffle): # Get image files names to show
   
   global last_file_change
@@ -129,4 +70,92 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
   print(len(file_list)," image files found")
   return file_list, len(file_list) # tuple of file list, number of pictures
   
+'''
+
+
+# Create a dictionary to store cached file paths
+cached_files = {}
+
+def cache_file(file_name,source,local_cache_path):
+    if file_name in cached_files:
+        print(f"{file_name} is already cached.")
+        return
+
+    source_file_path = os.path.join(source, file_name)
+    destination_file_path = os.path.join(local_cache_path, file_name)
+
+    try:
+        shutil.copy(source_file_path, destination_file_path)
+        cached_files[file_name] = destination_file_path
+        print(f"{file_name} cached successfully.")
+    except FileNotFoundError:
+        print(f"File {file_name} not found on the network drive.")
+    except Exception as e:
+        print(f"An error occurred while caching {file_name}: {e}")
+
+
+def main(
+    startdir,                      # Root folder for images cache in local storage
+    config_file,                   # File with list of file names. Comes from FrameGeo, so config_file.num is also present and gives the last file used.
+    number_of_files,                # number of files to be cached, starting with last used file from config_file.num
+    network_drive_path
+    ) :
+
+        
+# List of files to be cached locally
+    files_to_cache = json.load(open(config_file,'r'))
+    first_file_number = json.load(open(config_file+".num",'r'))[1]
+    
+    for i in range(first_file_number,first_file_number+number_of_files):
+        cache_file(files_to_cache[i],network_drive_path,startdir)
+
+    # Now you can access the cached files quickly using the paths stored in the 'cached_files' dictionary
+    print("Cached files:")
+    for cached_file_name, cached_file_path in cached_files.items():
+        print(f"{cached_file_name}: {cached_file_path}")
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Copies files to a cache directory'
+        )
+
+    parser.add_argument(
+        'path',
+        metavar='ImagePath',
+        type=str,
+        default=config.PIC_DIR,
+        nargs="?",
+        help='Path to a directory that contains images'
+        )
+    parser.add_argument(
+        '--config-file',
+        dest='config',
+        type=str,
+        default=config.DEFAULT_CONFIG_FILE,
+        help='Configuration file holding list of image files'
+        )
+    parser.add_argument(
+        '--cacheroot',
+        type=str,
+        dest='cachedir',
+        action='store',
+        default='/media/pi/Expansion Drive',
+        help='Root for cached images'
+        )
+    parser.add_argument(
+        '--quantity',
+        type=int,
+        dest='quantity',
+        action='store',
+        help='How many files'
+        )
+
+    args = parser.parse_args()
+    print(args.path,args.config,args.cachedir,args.quantity)
+
+    main(startdir=args.cachedir,
+      config_file=args.config,
+      number_of_files=args.quantity,
+      network_drive_path=args.path
+      )
 
