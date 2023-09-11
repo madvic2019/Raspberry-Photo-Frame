@@ -187,17 +187,17 @@ def get_geo_name(exif) : #Obtain geographic names from service provider
   geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,language='es') #use your country code for language selection
   return geocoder
 
-def get_orientation(fname) : #extract orientation and capture date from EXIF data
-  orientation = 1 
-  try:
-    im = Image.open(fname) # lazy operation so shouldn't load (better test though)
-    exif_data = im._getexif()
-    dt = time.mktime(time.strptime(exif_data[config.EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
-    orientation = int(exif_data[config.EXIF_ORIENTATION])
+# def get_orientation(fname) : #extract orientation and capture date from EXIF data
+  # orientation = 1 
+  # try:
+    # im = Image.open(fname) # lazy operation so shouldn't load (better test though)
+    # exif_data = im._getexif()
+    # dt = time.mktime(time.strptime(exif_data[config.EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
+    # orientation = int(exif_data[config.EXIF_ORIENTATION])
 
-  except :  
-    dt = os.path.getmtime(fname) # so use file last modified date
-  return orientation,dt
+  # except :  
+    # dt = os.path.getmtime(fname) # so use file last modified date
+  # return orientation,dt
 
 
 
