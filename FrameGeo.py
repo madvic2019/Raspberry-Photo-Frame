@@ -184,7 +184,7 @@ def get_coordinates(geotags):
       return None
 
 def get_geo_name(exif) : #Obtain geographic names from service provider
-  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,zoom=18,language='es') #use your country code for language selection
+  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,language='es') #use your country code for language selection
   return geocoder
 
 def get_orientation(fname) : #extract orientation and capture date from EXIF data
