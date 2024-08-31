@@ -742,18 +742,18 @@ def main(
             except:
                 print("Error when rotating photo")
                 
-        if pause_button.estado == 1 # or pause_button.estado == 2: # button was pressed
+        if pause_button.estado == 1: # or pause_button.estado == 2: # button was pressed
           #nexttm = delta
           paused = not paused
           pause_button.estado = 0
 	
-	    if pause_button.estado == 2 # pause button held: toggle screen on/off
+	    if pause_button.estado == 2: # pause button held: toggle screen on/off
           pause_button.estado = 0
           if screen:
             os.system(CMD_SCREEN_OFF)
           else:
             os.system(CMD_SCREEN_ON)
-	    screen=not screen
+	      screen=not screen
 
         if back_button.estado == 1 or back_button.estado == 2 : 
           nexttm = delta
