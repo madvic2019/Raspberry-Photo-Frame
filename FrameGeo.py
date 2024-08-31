@@ -748,12 +748,13 @@ def main(
           pause_button.estado = 0
 	
         if pause_button.estado == 2: # pause button held: toggle screen on/off
-          pause_button.estado = 0
+          
           if screen:
             os.system(CMD_SCREEN_OFF)
           else:
             os.system(CMD_SCREEN_ON)
-	      screen=not screen
+          screen=not screen
+          pause_button.estado = 0
 
         if back_button.estado == 1 or back_button.estado == 2 : 
           nexttm = delta
