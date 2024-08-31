@@ -747,7 +747,7 @@ def main(
           paused = not paused
           pause_button.estado = 0
 	
-	    if pause_button.estado == 2: # pause button held: toggle screen on/off
+        if pause_button.estado == 2: # pause button held: toggle screen on/off
           pause_button.estado = 0
           if screen:
             os.system(CMD_SCREEN_OFF)
