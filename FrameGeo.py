@@ -57,7 +57,8 @@ from geopy.geocoders import GeoNames
 
 import FrameConfig as config
 
-
+CMD_SCREEN_OFF = 'xset -display :0 dpms force off'
+CMD_SCREEN_ON = 'xset -display :0 dpms force on'
 #############################
 SHOW_LOCATION = True
 
@@ -353,7 +354,7 @@ def handle_press(btn) :
    
 def handle_hold(btn) :
     #print("button held")
-    if btn.estado==0 :
+    if btn.estado==0 or btn.estado == 1:
       btn.estado=2
  
 
@@ -480,7 +481,7 @@ def main(
     pic_num=next_pic_num
     
     # Main loop 
-    
+    screen= True 
     while DISPLAY.loop_running():
     
       previous = tm # record previous time value, used to make cursor blink
@@ -741,11 +742,19 @@ def main(
             except:
                 print("Error when rotating photo")
                 
-        if pause_button.estado == 1 or pause_button.estado == 2: # button was pressed
+        if pause_button.estado == 1 # or pause_button.estado == 2: # button was pressed
           #nexttm = delta
           paused = not paused
           pause_button.estado = 0
-        
+	
+	if pause_button.estado == 2 # pause button held: toggle screen on/off
+          pause_button.estado = 0
+	  if screen:
+	    os.system(CMD_SCREEN_OFF)
+          else:
+            os.system(CMD_SCREEN_ON)
+	  screen=not screen
+
         if back_button.estado == 1 or back_button.estado == 2 : 
           nexttm = delta
           next_pic_num -= 2
