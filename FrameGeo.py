@@ -659,9 +659,17 @@ def main(
           # print(tm - nexttm)
           if k==27 or quit: #ESC
             break
+          if k==ord('b'):
+            print("Toggle Screen on/off")
+            if screen:
+              os.system(CMD_SCREEN_OFF)
+            else:
+              os.system(CMD_SCREEN_ON)
+            screen=not screen
+            print("Screen ON ",screen)
           if k==ord(' '):
             paused = not paused
-          if k==ord('b'): # go back a picture
+          if k==ord('s'): # go back a picture
             nexttm = 0
             next_pic_num -= 2
             if next_pic_num < -1:
@@ -702,14 +710,7 @@ def main(
                     next_pic_num -=1 # force reload on screen
             except:
                 print("Error when rotating photo")
-          if k=='s':
-            print("Toggle Screen on/off")
-            if screen:
-              os.system(CMD_SCREEN_OFF)
-            else:
-              os.system(CMD_SCREEN_ON)
-            screen=not screen
-            print("Screen ON ",screen)
+
 
             
             
