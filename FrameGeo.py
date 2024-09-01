@@ -661,7 +661,7 @@ def main(
             break
           if k==ord(' '):
             paused = not paused
-          if k==ord('s'): # go back a picture
+          if k==ord('b'): # go back a picture
             nexttm = 0
             next_pic_num -= 2
             if next_pic_num < -1:
