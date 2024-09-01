@@ -702,7 +702,14 @@ def main(
                     next_pic_num -=1 # force reload on screen
             except:
                 print("Error when rotating photo")
-          
+          if k=='b':
+            print("Toggle Screen on/off")
+            if screen:
+              os.system(CMD_SCREEN_OFF)
+            else:
+              os.system(CMD_SCREEN_ON)
+            screen=not screen
+            print("Screen ON ",screen)
 
             
             
