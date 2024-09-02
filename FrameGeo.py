@@ -359,10 +359,12 @@ def handle_hold(btn) :
       btn.estado=2
       
 def sighandler(signum,frame) : # OS Signal handler
-    signame=signal.Signals(signum).name
-    print('Signal handler called with signal ',signame, signum)
+    if screen :
+        CMD_SCREEN_ON
+    else :
+        CMD_SCREEN_OFF
     
-signal.signal(signal.SIGUSR1,sighandler)
+    
 signal.signal(signal.SIGCONT,sighandler)
 
 
@@ -377,7 +379,7 @@ def main(
     check_dirs                     # Interval between checking folders in seconds
     ) :
 
-    global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
+    global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES,screen
     
     # backup_dir = os.path.abspath(os.path.join(startdir,config.BKUP_DIR))
     backup_dir = config.BKUP_DIR
@@ -408,6 +410,7 @@ def main(
     paused=False
     next_check_tm=time.time()+check_dirs
     time_dot=True
+    screen = True 
 
     ##############################################
     # Create GeoNames locator object www.geonames.org
@@ -491,7 +494,7 @@ def main(
     pic_num=next_pic_num
     
     # Main loop 
-    screen= True 
+
     while DISPLAY.loop_running():
     
       previous = tm # record previous time value, used to make cursor blink
