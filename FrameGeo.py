@@ -47,6 +47,7 @@ import stat
 import json
 import math
 import subprocess
+import signal
 
 
 
@@ -356,6 +357,15 @@ def handle_hold(btn) :
     #print("button held")
     if btn.estado==0 or btn.estado == 1:
       btn.estado=2
+      
+def sighandler(signum,frame) : # OS Signal handler
+    signame=signal.Signals(signum).name
+    print('Signal handler called with signal ',signame, signum)
+    
+signal.signal(signal.SIGSTOP,sighandler)
+signal.signal(signakl.SIGCONT,sighandler)
+
+
  
 
 def main(
