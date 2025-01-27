@@ -9,7 +9,11 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["examples"]
-        }
-    ]
+            "args": ["--config-file","~/.photo-frame",
+                     "--waittime", "20",
+                     "--geouser","madvic",
+                     "/mnt/frodomedia/photo/Fotos"],
+            "env": {"DISPLAY": ":0"}
+         }
+   ]
 }
