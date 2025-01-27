@@ -47,6 +47,7 @@ import stat
 import json
 import math
 import subprocess
+import signal
 
 
 
@@ -57,7 +58,8 @@ from geopy.geocoders import GeoNames
 
 import FrameConfig as config
 
-
+CMD_SCREEN_OFF = 'xset -display :0 dpms force off'
+CMD_SCREEN_ON = 'xset -display :0 dpms force on'
 #############################
 SHOW_LOCATION = True
 
@@ -163,9 +165,9 @@ def get_geotagging(exif): # extract EXIF geographical information
     
 def get_decimal_from_dms(dms, ref): 
 
-    degrees = dms[0][0] / dms[0][1]
-    minutes = dms[1][0] / dms[1][1] / 60.0
-    seconds = dms[2][0] / dms[2][1] / 3600.0
+    degrees = dms[0]
+    minutes = dms[1] / 60.0
+    seconds = dms[2] / 3600.0
 
     if ref in ['S', 'W']:
         degrees = -degrees
@@ -353,8 +355,11 @@ def handle_press(btn) :
    
 def handle_hold(btn) :
     #print("button held")
-    if btn.estado==0 :
+    if btn.estado==0 or btn.estado == 1:
       btn.estado=2
+      
+
+
  
 
 def main(
@@ -366,7 +371,7 @@ def main(
     check_dirs                     # Interval between checking folders in seconds
     ) :
 
-    global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES
+    global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES,screen
     
     # backup_dir = os.path.abspath(os.path.join(startdir,config.BKUP_DIR))
     backup_dir = config.BKUP_DIR
@@ -397,6 +402,7 @@ def main(
     paused=False
     next_check_tm=time.time()+check_dirs
     time_dot=True
+    screen = True 
 
     ##############################################
     # Create GeoNames locator object www.geonames.org
@@ -480,7 +486,7 @@ def main(
     pic_num=next_pic_num
     
     # Main loop 
-    
+
     while DISPLAY.loop_running():
     
       previous = tm # record previous time value, used to make cursor blink
@@ -658,6 +664,14 @@ def main(
           # print(tm - nexttm)
           if k==27 or quit: #ESC
             break
+          if k==ord('b'):
+            print("Toggle Screen on/off")
+            if screen:
+              os.system(CMD_SCREEN_OFF)
+            else:
+              os.system(CMD_SCREEN_ON)
+            screen=not screen
+            print("Screen ON ",screen)
           if k==ord(' '):
             paused = not paused
           if k==ord('s'): # go back a picture
@@ -701,7 +715,7 @@ def main(
                     next_pic_num -=1 # force reload on screen
             except:
                 print("Error when rotating photo")
-          
+
 
             
             
@@ -741,11 +755,21 @@ def main(
             except:
                 print("Error when rotating photo")
                 
-        if pause_button.estado == 1 or pause_button.estado == 2: # button was pressed
+        if pause_button.estado == 1: # or pause_button.estado == 2: # button was pressed
           #nexttm = delta
           paused = not paused
           pause_button.estado = 0
-        
+	
+        if pause_button.estado == 2: # pause button held: toggle screen on/off
+          
+          if screen:
+            os.system(CMD_SCREEN_OFF)
+          else:
+            os.system(CMD_SCREEN_ON)
+          screen=not screen
+          pause_button.estado = 0
+          print("Toggle Screen ON/OFF",screen)
+
         if back_button.estado == 1 or back_button.estado == 2 : 
           nexttm = delta
           next_pic_num -= 2
