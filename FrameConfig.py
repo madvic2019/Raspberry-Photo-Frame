@@ -15,7 +15,7 @@ uname=platform.uname() # tuple with (system, node, release, version, machine, pr
 if uname.system == "Windows" :
    PI3DDEMO = os.environ['HOMEPATH']+'/pi3d_demos-master'
    BUTTONS = False
-elif uname.system == "Linux" and "aarch" in uname.machine : 
+elif "aarch" == uname.machine or "armv7l" == uname.machine: 
    PI3DDEMO = '/usr/local/lib/pi3d_demos' # requires copying downloaded demos from https://github.com/pi3d/pi3d_demos/archive/master.zip
    BUTTONS = True   
 else :
