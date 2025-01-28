@@ -186,8 +186,8 @@ def get_coordinates(geotags):
       return None
 
 def get_geo_name(exif) : #Obtain geographic names from service provider
-  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,language='es') 
-  
+  # geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,language='es') 
+  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,lang='es') 
   return geocoder
 
 def get_orientation(fname) : #extract orientation and capture date from EXIF data
@@ -409,8 +409,8 @@ def main(
     # Create GeoNames locator object www.geonames.org
     geoloc=None
     try:
-      #geoloc=GeoNames(username=geonamesuser)
-      geoloc=HereV7("7i1v4d3Guu2aduwUP5dQgYb4zynaZRqZdsRV4ionVKc")
+      geoloc=GeoNames(username=geonamesuser)
+      #geoloc=HereV7("7i1v4d3Guu2aduwUP5dQgYb4zynaZRqZdsRV4ionVKc")
     except:
       print("Geographic information server not available")
     
