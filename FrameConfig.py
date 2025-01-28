@@ -17,7 +17,8 @@ if uname.system == "Windows" :
    BUTTONS = False
 elif "aarch" == uname.machine or "armv7l" == uname.machine: 
    PI3DDEMO = '/usr/local/lib/pi3d_demos' # requires copying downloaded demos from https://github.com/pi3d/pi3d_demos/archive/master.zip
-   BUTTONS = True   
+   BUTTONS = True
+   from gpiozero import Button
 else :
    PI3DDEMO = '/home/victor/pi3d_demos' # assume in a Linux environment it will be located directly on user home
    BUTTONS = False

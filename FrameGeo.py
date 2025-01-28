@@ -54,7 +54,7 @@ import signal
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 import exif # Direct access to EXIF tags
-from geopy.geocoders import GeoNames,HereV7
+from geopy.geocoders import GeoNames
 
 import FrameConfig as config
 
@@ -132,7 +132,7 @@ Rotation=[{1:6,2:7,3:8,4:5,5:2,6:3,7:4,8:1},{1:8,2:5,3:6,4:7,5:4,6:1,7:2,8:3}] #
  """
 
 if config.BUTTONS:
-  from gpiozero import Button
+  
   Button.estado=0 #idle
 
   """
@@ -410,7 +410,7 @@ def main(
     geoloc=None
     try:
       geoloc=GeoNames(username=geonamesuser)
-      #geoloc=HereV7("7i1v4d3Guu2aduwUP5dQgYb4zynaZRqZdsRV4ionVKc")
+
     except:
       print("Geographic information server not available")
     
