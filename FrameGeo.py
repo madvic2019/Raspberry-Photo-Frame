@@ -54,7 +54,7 @@ import signal
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
 from PIL.ExifTags import GPSTAGS,TAGS
 import exif # Direct access to EXIF tags
-from geopy.geocoders import GeoNames
+from geopy.geocoders import GeoNames,HereV7
 
 import FrameConfig as config
 
@@ -186,7 +186,8 @@ def get_coordinates(geotags):
       return None
 
 def get_geo_name(exif) : #Obtain geographic names from service provider
-  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,lang='es') #use your country code for language selection
+  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,language='es') 
+  
   return geocoder
 
 def get_orientation(fname) : #extract orientation and capture date from EXIF data
@@ -408,7 +409,8 @@ def main(
     # Create GeoNames locator object www.geonames.org
     geoloc=None
     try:
-      geoloc=GeoNames(username=geonamesuser)
+      #geoloc=GeoNames(username=geonamesuser)
+      geoloc=HereV7("7i1v4d3Guu2aduwUP5dQgYb4zynaZRqZdsRV4ionVKc")
     except:
       print("Geographic information server not available")
     
