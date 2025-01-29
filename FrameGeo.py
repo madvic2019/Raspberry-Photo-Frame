@@ -381,11 +381,11 @@ def main(
     #print(backup_dir)
 
     if config.BUTTONS:
-      pause_button = Button(8, hold_time=5)
-      back_button = Button(9, hold_time=5)
-      forward_button = Button(4,hold_time=5)
-      rotateCW_button = Button(6, hold_time=5)
-      rotateCCW_button = Button(5, hold_time=5)
+      pause_button = Button(8,bounce_time=1, hold_time=6)
+      back_button = Button(9,bounce_time=1 hold_time=6)
+      forward_button = Button(4,bounce_time=1, hold_time=6)
+      rotateCW_button = Button(6,bounce_time=1, hold_time=6)
+      rotateCCW_button = Button(5,bounce_time=1, hold_time=6)
 
       pause_button.when_pressed = handle_press
       back_button.when_pressed = handle_press
@@ -396,7 +396,6 @@ def main(
 
       rotateCW_button.when_pressed= handle_press
       rotateCW_button.when_held=handle_hold
-      
       rotateCCW_button.when_pressed= handle_press
       rotateCCW_button.when_held=handle_hold
  
