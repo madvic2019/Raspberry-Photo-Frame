@@ -382,7 +382,7 @@ def main(
 
     if config.BUTTONS:
       pause_button = Button(8,bounce_time=1, hold_time=6)
-      back_button = Button(9,bounce_time=1 hold_time=6)
+      back_button = Button(9,bounce_time=1, hold_time=6)
       forward_button = Button(4,bounce_time=1, hold_time=6)
       rotateCW_button = Button(6,bounce_time=1, hold_time=6)
       rotateCCW_button = Button(5,bounce_time=1, hold_time=6)
