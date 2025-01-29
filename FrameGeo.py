@@ -132,7 +132,7 @@ Rotation=[{1:6,2:7,3:8,4:5,5:2,6:3,7:4,8:1},{1:8,2:5,3:6,4:7,5:4,6:1,7:2,8:3}] #
  """
 
 if config.BUTTONS:
-  
+  from gpiozero import Button
   Button.estado=0 #idle
 
   """
