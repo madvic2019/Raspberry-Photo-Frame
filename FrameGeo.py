@@ -157,7 +157,7 @@ def launchTiempo() :
   time.sleep(10)
   subprocess.Popen(['xdotool','key','Down','Down','Down','Down'])
   time.sleep(30)
-  os.killpg(os.getpgid(proc.pid), signal.SIGTERM) # kill all processes in the group
+  os.kill(os.getpgid(proc.pid), signal.SIGTERM)
 
   
   
