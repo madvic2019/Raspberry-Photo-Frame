@@ -152,17 +152,17 @@ if config.BUTTONS:
 
 last_file_change = 0
 
-def launchTiempo() :
+def launchTiempo(delay) :
   proc=subprocess.Popen(['firefox','--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   time.sleep(10)
   subprocess.Popen(['xdotool','key','Down','Down','Down','Down'])
-  time.sleep(30)
+  time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
 
-def launchSolar() :
+def launchSolar(delay) :
   proc=subprocess.Popen(['firefox','--kiosk','http://pi4.local:1880/ui'])
   
-  time.sleep(30)
+  time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
   
   
@@ -437,13 +437,8 @@ def main(
     slide = pi3d.Sprite(camera=CAMERA, w=DISPLAY.width, h=DISPLAY.height, z=5.0)
     slide.set_shader(shader)
     slide.unif[47] = config.EDGE_ALPHA
-    # test of subprocess
-    print("Launching Tiempo")
-    launchTiempo()
-    print("finished launching tiempo")
-    print("Launching Solar")
-    launchSolar()
-    print("finished launching solar")
+
+
     
     
     if KEYBOARD:
@@ -515,7 +510,12 @@ def main(
     
       previous = tm # record previous time value, used to make cursor blink
       tm = time.time()
-    
+      # check if at the top of the hour
+      if (time.localtime(tm).tm_min == 0) : 
+        launchTiempo(300) #show weather forecast for 5 minutes
+      elif (time.localtime(tm).tm_min == 30) :
+        launchSolar(180) # show status of solar production for 3 minutes
+    # after that, continue with slide show
       if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) : #blink dot
         time_dot = not(time_dot)
       
