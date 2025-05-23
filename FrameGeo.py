@@ -155,7 +155,7 @@ last_file_change = 0
 def launchTiempo() :
   subprocess.Popen(['firefox','--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   time.sleep(10)
-  subprocess.Popen('xdotool',args=['key','Down','Down','Down','Down'])
+  subprocess.Popen(['xdotool','key','Down','Down','Down','Down'])
   time.sleep(300)
   os.killpg(os.getpgid(), signal.SIGTERM) # kill all processes in the group
 
