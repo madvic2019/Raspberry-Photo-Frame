@@ -152,6 +152,15 @@ if config.BUTTONS:
 
 last_file_change = 0
 
+def launchTiempo() :
+  subprocess.Popen('firefox',args=['--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
+  time.sleep(10)
+  subprocess.Popen('xdotool',args=['key','Down','Down','Down','Down'])
+  time.sleep(300)
+  os.killpg(os.getpgid(), signal.SIGTERM) # kill all processes in the group
+
+  
+  
 
 def get_geotagging(exif): # extract EXIF geographical information
   geotagging = {}
@@ -422,7 +431,11 @@ def main(
     slide = pi3d.Sprite(camera=CAMERA, w=DISPLAY.width, h=DISPLAY.height, z=5.0)
     slide.set_shader(shader)
     slide.unif[47] = config.EDGE_ALPHA
-
+    # test of subprocess
+    print("Launching Tiempo")
+    launchTiempo()
+    print("finished launching tiempo")
+    
     if KEYBOARD:
       kbd = pi3d.Keyboard()
 
