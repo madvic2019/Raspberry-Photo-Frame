@@ -159,6 +159,12 @@ def launchTiempo() :
   time.sleep(30)
   os.kill(os.getpgid(proc.pid), signal.SIGTERM)
 
+def launchSolar() :
+  proc=subprocess.Popen(['firefox','--kiosk','https://pi4.local:1880/ui'])
+  
+  time.sleep(30)
+  os.kill(os.getpgid(proc.pid), signal.SIGTERM)
+  
   
   
 
@@ -435,6 +441,10 @@ def main(
     print("Launching Tiempo")
     launchTiempo()
     print("finished launching tiempo")
+    print("Launching Solar")
+    launchSolar()
+    print("finished launching solar")
+    
     
     if KEYBOARD:
       kbd = pi3d.Keyboard()
