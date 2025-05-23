@@ -157,13 +157,13 @@ def launchTiempo() :
   time.sleep(10)
   subprocess.Popen(['xdotool','key','Down','Down','Down','Down'])
   time.sleep(30)
-  os.kill(os.getpgid(proc.pid), signal.SIGTERM)
+  os.kill(proc.pid, signal.SIGTERM)
 
 def launchSolar() :
   proc=subprocess.Popen(['firefox','--kiosk','http://pi4.local:1880/ui'])
   
   time.sleep(30)
-  os.kill(os.getpgid(proc.pid), signal.SIGTERM)
+  os.kill(proc.pid, signal.SIGTERM)
   
   
   
