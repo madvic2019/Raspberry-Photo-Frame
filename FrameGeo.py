@@ -154,7 +154,7 @@ last_file_change = 0
 
 def launchTiempo(delay) :
   proc=subprocess.Popen(['firefox','--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
-  time.sleep(10)
+  time.sleep(30)
   subprocess.Popen(['xdotool','key','Down','Down','Down','Down'])
   time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
