@@ -511,7 +511,7 @@ def main(
       previous = tm # record previous time value, used to make cursor blink
       tm = time.time()
       # check if at the top of the hour
-      if (time.localtime(tm).tm_min == 0) : 
+      if (time.localtime(tm).tm_min == 54) : 
         launchTiempo(300) #show weather forecast for 5 minutes
       elif (time.localtime(tm).tm_min == 30) :
         launchSolar(180) # show status of solar production for 3 minutes
