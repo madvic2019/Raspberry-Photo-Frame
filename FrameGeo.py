@@ -384,7 +384,8 @@ def main(
     interval,                      # Seconds between images
     shuffle,                       # True or False
     geonamesuser,                  # User name for GeoNames server www.geonames.org
-    check_dirs                     # Interval between checking folders in seconds
+    check_dirs,                    # Interval between checking folders in seconds
+    weathertime                    # Time to show weather forecast in seconds
     ) :
 
     global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES,screen
@@ -437,6 +438,8 @@ def main(
     slide = pi3d.Sprite(camera=CAMERA, w=DISPLAY.width, h=DISPLAY.height, z=5.0)
     slide.set_shader(shader)
     slide.unif[47] = config.EDGE_ALPHA
+    CMD_SCREEN_ON #turn screen on
+    
 
 
     
@@ -512,9 +515,9 @@ def main(
       tm = time.time()
       # check if at the top of the hour
       if (time.localtime(tm).tm_min == 54) : 
-        launchTiempo(300) #show weather forecast for 5 minutes
+        launchTiempo(weathertime) #show weather forecast for weathertime seconds
       elif (time.localtime(tm).tm_min == 30) :
-        launchSolar(180) # show status of solar production for 3 minutes
+        launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
     # after that, continue with slide show
       if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) : #blink dot
         time_dot = not(time_dot)
@@ -821,6 +824,7 @@ def main(
     if KEYBOARD:
       kbd.close()
     DISPLAY.destroy()
+    print("End of slideshow")
 # end of main function    
 
 if __name__ == '__main__':
@@ -875,6 +879,14 @@ if __name__ == '__main__':
         action='store',
         default=config.CHECK_DIR_TM,
         help='Interval between check directories'
+        )
+    parser.add_argument(
+        '--weather-time',
+        type=int,
+        dest='weathertime',
+        action='store',
+        default=config.SHOW_WEATHER_TIME,
+        help='Time to show weather forecast in seconds'
         )
 
     args = parser.parse_args()
