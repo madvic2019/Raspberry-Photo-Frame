@@ -31,7 +31,7 @@ GEONAMESUSER = ''
 DEFAULT_CONFIG_FILE = './.photo-frame'
 PIC_DIR = './examples' #change this to your images default location folder
 BKUP_DIR = '.backup-MarcoFotos' # This will be used to store modified or deleted image files. Must exist
-CHECK_DIR_TM = 3600.0 # Time to check for directory changes
+CHECK_DIR_TM = 3600 # Time to check for directory changes
 NUMBEROFROUNDS = 1 # number of rounds before re-fetching images 0 means after one pass
 SHOW_WEATHER_TIME = 300 # time to show weather info in seconds
 

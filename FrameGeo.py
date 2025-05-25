@@ -874,7 +874,7 @@ if __name__ == '__main__':
         )
     parser.add_argument(
         '--dir-check',
-        type=float,
+        type=int,
         dest='dirchecktm',
         action='store',
         default=config.CHECK_DIR_TM,
@@ -897,7 +897,8 @@ if __name__ == '__main__':
       interval=args.waittime,
       shuffle=args.shuffle,
       geonamesuser=args.geouser,
-      check_dirs=args.dirchecktm
+      check_dirs=args.dirchecktm,
+      weathertime=args.weathertime
       )
 
 
