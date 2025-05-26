@@ -517,7 +517,7 @@ def main(
       if (time.localtime(tm).tm_min == 54) : 
         launchTiempo(weathertime) #show weather forecast for weathertime seconds
       elif (time.localtime(tm).tm_min == 30) :
-        launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
+        launchSolar(weathertime) # show status of solar production for (weathertime/2) seconds
     # after that, continue with slide show
       if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) : #blink dot
         time_dot = not(time_dot)
