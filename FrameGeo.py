@@ -153,14 +153,14 @@ if config.BUTTONS:
 last_file_change = 0
 
 def launchTiempo(delay) :
-  proc=subprocess.Popen(['firefox','--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
+  proc=subprocess.Popen(['surf','-F','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   time.sleep(30)
   subprocess.Popen(['xdotool','key','Down','Down','Down','Down'])
   time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
 
 def launchSolar(delay) :
-  proc=subprocess.Popen(['firefox','--kiosk','http://pi4.local:1880/ui'])
+  proc=subprocess.Popen(['surf','-F','http://pi4.local:1880/ui'])
   
   time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
