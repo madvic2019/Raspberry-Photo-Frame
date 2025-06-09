@@ -393,21 +393,28 @@ def main(
     debug = False,              # Debug mode
     ) :
 
-    logger = logging.getLogger(__name__)
     if debug:
-        logger.setlevel(logging.DEBUG)
+        loglevel=logging.DEBUG
     else:
-        logger.setlevel(logging.INFO)
-           
-    logger.
+        loglevel=logging.INFO
+    # Set up logging   
+    logging.basicConfig(
+    filename=logfile,  # Save logs to a file
     level=loglevel,  # Set the logging level
     format=''%(asctime)s - %(levelname)s:%(message)s'  # Customize log format
     )
-
+    logging.info("Starting FrameGeo with parameters: startdir=%s\nconfig_file=%s\ninterval=%d\nshuffle=%s\ngeonamesuser=%s\ncheck_dirs=%d\nweathertime=%d"\nlogfile=%s",
+                startdir,
+                config_file,
+                interval,
+                shuffle,
+                geonamesuser,
+                check_dirs,
+                weathertime,
+                logfile)
     
-    # backup_dir = os.path.abspath(os.path.join(startdir,config.BKUP_DIR))
     backup_dir = config.BKUP_DIR
-    logging.print(startdir)
+    logging.info(startdir)
     #print(config.BKUP_DIR)
     #print(backup_dir)
 
@@ -442,12 +449,12 @@ def main(
       geoloc=GeoNames(username=geonamesuser)
 
     except:
-      print("Geographic information server not available")
+      logging.error("Geographic information server not available")
     
-    print("Setting up display")
+    logging.info("Setting up display")
     DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
     CAMERA = pi3d.Camera(is_3d=False)
-    print(DISPLAY.opengl.gl_id)
+    logging.info(DISPLAY.opengl.gl_id)
     shader = pi3d.Shader(config.PI3DDEMO + "/shaders/blend_new")
     #shader = pi3d.Shader("/home/patrick/python/pi3d_demos/shaders/blend_new")
     slide = pi3d.Sprite(camera=CAMERA, w=DISPLAY.width, h=DISPLAY.height, z=5.0)
@@ -471,7 +478,7 @@ def main(
     sfg = None # slide for foreground
     sbg = None # slide for background
     if nFi == 0:
-      print('No files selected!')
+      logging.error('No files selected!')
       exit()
 
     # PointText and TextBlock. 
@@ -516,7 +523,7 @@ def main(
     
     if (next_check_tm < time.time()) :  #if stored check time is in the past, make it "now"
       next_check_tm = time.time()
-    print("Start time ",time.strftime(config.TIME_FORMAT,time.localtime()))
+    logging.info("Start time %s",time.strftime(config.TIME_FORMAT,time.localtime()))
     print("Next Check time ",time.strftime(config.TIME_FORMAT,time.localtime(next_check_tm)))
     print("Starting with round number ",num_run_through)
     print("Starting with picture number ",next_pic_num)
