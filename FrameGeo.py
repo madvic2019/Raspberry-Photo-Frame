@@ -898,8 +898,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     logging.info(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
-    if not os.path.exists(startdir):
-      logging.error(f"Start directory '{startdir}' does not exist.")
+    if not os.path.exists(args.path):
+      logging.error(f"Start directory '{args.path}' does not exist.")
       exit(1)
     main(startdir=args.path,
       config_file=args.config,
