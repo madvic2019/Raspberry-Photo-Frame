@@ -48,6 +48,9 @@ import json
 import math
 import subprocess
 import signal
+import logging
+
+     
 
 
 
@@ -195,7 +198,7 @@ def get_coordinates(geotags):
     if geotags is not None :
       lat = get_decimal_from_dms(geotags['GPSLatitude'], geotags['GPSLatitudeRef'])
       lon = get_decimal_from_dms(geotags['GPSLongitude'], geotags['GPSLongitudeRef'])
-      print('coordinates=',lat,lon)
+      logging.info('coordinates=',lat,lon)
       return (lat,lon)
     else :
       return None
@@ -286,7 +289,7 @@ def check_changes(dir): #walk the folder structure to check if there are changes
           last_file_change = mod_tm
           update = True
     except:
-        print("Filesystem not available")
+        logging.error("Filesystem not available")
         
   return update
 
@@ -297,22 +300,22 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
   file_list = None
   extensions = ['.png','.jpg','.jpeg','.bmp'] # can add to these
   if os.path.exists(config_file) : # If there is a previous file list stored, just use it
-    print("Config file exists, open for reading",config_file)
+    logging.info("Config file exists, open for reading",config_file)
     with open(config_file, 'r') as f:
         try:
           file_list=json.load(f)
           if len(file_list)>0:
             if len(os.path.commonprefix((file_list[0],dir))) < len(dir) :
-              print("Directory is different from config file ",os.path.dirname(file_list[0]), " -- ",dir," reloading")
+              logging.info("Directory is different from config file ",os.path.dirname(file_list[0]), " -- ",dir," reloading")
               file_list=None
           else:
             file_list=None
         except:
-          print(config_file , 'Config File is not correct')   
+          logging.error(config_file , 'Config File is not correct')   
             
   if file_list is None :
-    print("Config File is not existing or corrupt")
-    print("Clean config file for numbers")
+    logging.info("Config File is not existing or corrupt")
+    logging.info("Clean config file for numbers")
     if os.path.exists(config_file+".num"):
       os.remove(config_file+".num")
     file_list=[]
@@ -326,7 +329,7 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
           file_path_name = os.path.join(root, filename)
           file_list.append(file_path_name) 
         if (len(file_list) % 1000 == 0) : # print every 1000 files detected
-          print(len(file_list)) 
+          logging.info(len(file_list)) 
     if shuffle:
       random.shuffle(file_list)
     else:
@@ -334,19 +337,19 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
     
     with open(config_file,'w') as f: #Store list in config file
       json.dump(file_list, f, sort_keys=True)
-      print("List written to ",config_file) 
+      logging.info("List written to ",config_file) 
 
-  print(len(file_list)," image files found")
+  logging.info(len(file_list)," image files found")
   return file_list, len(file_list) # tuple of file list, number of pictures
 
 def save_file(filename) : # Makes a copy of the file to a Backup folder
   stripped_filename = os.path.basename(filename)
   dest_filename = backup_dir + "/" + stripped_filename
   if not os.path.exists(backup_dir) : # create backup folder if it does not exist
-    print("Create Backup Folder:", backup_dir) 
+    logging.info("Create Backup Folder:", backup_dir) 
     os.mkdir(backup_dir)
   if not os.path.exists(dest_filename) :# check if there is already a copy saved in backup
-    print("copying "+ stripped_filename + " to " + config.BKUP_DIR)
+    logging.info("copying "+ stripped_filename + " to " + config.BKUP_DIR)
     shutil.copy2(filename,dest_filename)
     
 def timetostring(dot,ticks):
@@ -364,13 +367,13 @@ def timetostring(dot,ticks):
 
 
 def handle_press(btn) :
-    #print("Button pressed, estado actual ",btn.estado)
+    logging.debug("Button pressed, estado actual ",btn.estado)
     if btn.estado==0 or btn.estado == 2 :
       btn.estado=1
-     # print("Nuevo Estado ",btn.estado)
+    logging.debug("Nuevo Estado ",btn.estado)
    
 def handle_hold(btn) :
-    #print("button held")
+    logging.debug("button held")
     if btn.estado==0 or btn.estado == 1:
       btn.estado=2
       
@@ -392,9 +395,9 @@ def main(
     
     # backup_dir = os.path.abspath(os.path.join(startdir,config.BKUP_DIR))
     backup_dir = config.BKUP_DIR
-    print(startdir)
-    #print(config.BKUP_DIR)
-    #print(backup_dir)
+    logging.info(startdir)
+    #logging.info(config.BKUP_DIR)
+    #logging.info(backup_dir)
 
     if config.BUTTONS:
       pause_button = Button(8,bounce_time=0.3, hold_time=6)
@@ -427,12 +430,12 @@ def main(
       geoloc=GeoNames(username=geonamesuser)
 
     except:
-      print("Geographic information server not available")
+      logging.error("Geographic information server not available")
     
-    print("Setting up display")
+    logging.info("Setting up display")
     DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
     CAMERA = pi3d.Camera(is_3d=False)
-    print(DISPLAY.opengl.gl_id)
+    logging.info(DISPLAY.opengl.gl_id)
     shader = pi3d.Shader(config.PI3DDEMO + "/shaders/blend_new")
     #shader = pi3d.Shader("/home/patrick/python/pi3d_demos/shaders/blend_new")
     slide = pi3d.Sprite(camera=CAMERA, w=DISPLAY.width, h=DISPLAY.height, z=5.0)
@@ -456,7 +459,7 @@ def main(
     sfg = None # slide for foreground
     sbg = None # slide for background
     if nFi == 0:
-      print('No files selected!')
+      logging.error('No files selected!')
       exit()
 
     # PointText and TextBlock. 
@@ -501,10 +504,10 @@ def main(
     
     if (next_check_tm < time.time()) :  #if stored check time is in the past, make it "now"
       next_check_tm = time.time()
-    print("Start time ",time.strftime(config.TIME_FORMAT,time.localtime()))
-    print("Next Check time ",time.strftime(config.TIME_FORMAT,time.localtime(next_check_tm)))
-    print("Starting with round number ",num_run_through)
-    print("Starting with picture number ",next_pic_num)
+    logging.info("Start time ",time.strftime(config.TIME_FORMAT,time.localtime()))
+    logging.info("Next Check time ",time.strftime(config.TIME_FORMAT,time.localtime(next_check_tm)))
+    logging.info("Starting with round number ",num_run_through)
+    logging.info("Starting with picture number ",next_pic_num)
     
     tm=time.time()    
     pic_num=next_pic_num
@@ -528,7 +531,7 @@ def main(
       if nFi > 0:
         # If needed, display new photo
         if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
-          print("tm es ",tm," nexttm es ", nexttm, " la resta ", tm-nexttm)
+          logging.info("tm es ",tm," nexttm es ", nexttm, " la resta ", tm-nexttm)
           nexttm = tm + interval
           a = 0.0 # alpha - proportion front image to back
           sbg = sfg
@@ -552,9 +555,9 @@ def main(
             try:
               temp=time.time()
               im = Image.open(iFiles[pic_num])
-              print("foto numero ",pic_num," time ",time.time())
+              logging.info("foto numero ",pic_num," time ",time.time())
             except:
-              print("Error Opening File",iFiles[pic_num])
+              logging.error("Error Opening File",iFiles[pic_num])
               continue
             
               
@@ -581,7 +584,7 @@ def main(
             try:
               location = get_geo_name(exif_data)
             except Exception as e: # NB should really check error
-              print('Error preparing geoname: ', e)
+              logging.error('Error preparing geoname: ', e)
               location = None
             # Load and format image
             try:
@@ -622,15 +625,15 @@ def main(
           if SHOW_LOCATION: #(and/or month-year)
             if location is not None:
               overlay_text += tidy_name(str(location))
-              #print(overlay_text)
+              logging.debug(overlay_text)
             if datestruct is not None :
               overlay_text += " " + tidy_name(config.MES[datestruct.tm_mon - 1]) + "-" + str(datestruct.tm_year)
-              #print(overlay_text)
+              logging.debug(overlay_text)
             try:
               textblock.set_text(text_format="{}".format(overlay_text))
               text.regen()
             except :
-              #print("Wrong Overlay_text Format")
+              logging.error("Wrong Overlay_text Format")
               textblock.set_text(" ")
 
         # print time on screen, blink separator every second
@@ -657,19 +660,19 @@ def main(
         else: # Check if image files list has to be rebuilt (no transition on going, so no harm to image
           slide.set_textures([sfg, sfg])
           if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
-            print("Refreshing Files list")
+            logging.info("Refreshing Files list")
             next_check_tm = time.time() + check_dirs  # Set up the next interval
             try:
               if check_changes(startdir): #rebuild files list if changes happened
-                print("Re-Fetching images files, erase config file")
+                logging.info("Re-Fetching images files, erase config file")
                 with open(config_file,'w') as f :
                   json.dump('',f) # creates an empty config file, forces directory reload
                 iFiles, nFi = get_files(startdir,config_file,shuffle)
                 next_pic_num = 0
               else :
-                print("No directory changes: do nothing")
+                logging.info("No directory changes: do nothing")
             except:
-                print("Error refreshing file list, keep old one")
+                logging.error("Error refreshing file list, keep old one")
             num_run_through = 0
 #render the image        
         
@@ -688,19 +691,19 @@ def main(
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
-          print("Key pressed", tm-nexttm)
+          logging.debug("Key pressed", tm-nexttm)
           #nexttm = delta
           # print(tm - nexttm)
           if k==27 or quit: #ESC
             break
           if k==ord('b'):
-            print("Toggle Screen on/off")
+            logging.debug("Toggle Screen on/off")
             if screen:
               os.system(CMD_SCREEN_OFF)
             else:
               os.system(CMD_SCREEN_ON)
             screen=not screen
-            print("Screen ON ",screen)
+            logging.debug("Screen ON ",screen)
           if k==ord(' '):
             paused = not paused
           if k==ord('s'): # go back a picture
@@ -726,7 +729,7 @@ def main(
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
             except:
-                print("Error when rotating photo")
+                logging.error("Error when rotating photo")
             #    nexttm = delta
 
           if k==ord('t') and paused: # rotate picture (only if paused)
@@ -743,7 +746,7 @@ def main(
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
             except:
-                print("Error when rotating photo")
+                logging.error("Error when rotating photo")
 
 
             
@@ -765,7 +768,7 @@ def main(
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
             except:
-                print("Error when rotating photo")
+                logging.error("Error when rotating photo")
 
         if paused and (rotateCCW_button.estado == 1 or rotateCCW_button.estado == 2): # Need to be on pause 
             rotateCCW_button.estado = 0
@@ -782,7 +785,7 @@ def main(
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
             except:
-                print("Error when rotating photo")
+                logging.error("Error when rotating photo")
                 
         if pause_button.estado == 1: # or pause_button.estado == 2: # button was pressed
           #nexttm = delta
@@ -797,7 +800,7 @@ def main(
             os.system(CMD_SCREEN_ON)
           screen=not screen
           pause_button.estado = 0
-          print("Toggle Screen ON/OFF",screen)
+          logging.info("Toggle Screen ON/OFF",screen)
 
         if back_button.estado == 1 or back_button.estado == 2 : 
           nexttm = delta
@@ -822,14 +825,16 @@ def main(
     try:
       DISPLAY.loop_stop()
     except Exception as e:
-      print("this was going to fail if previous try failed!")
+      logging.warning("this was going to fail if previous try failed!")
     if KEYBOARD:
       kbd.close()
     DISPLAY.destroy()
-    print("End of slideshow")
+    logging.info("End of slideshow")
 # end of main function    
 
 if __name__ == '__main__':
+  # Set up logging 
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     parser = argparse.ArgumentParser(
         description='Recursively loads images '
         'from a directory, then displays them in a Slideshow.'
@@ -892,8 +897,10 @@ if __name__ == '__main__':
         )
 
     args = parser.parse_args()
-    print(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
-
+    logging.info(args.path,args.config,args.waittime,"Shuffle ",args.shuffle)
+    if not os.path.exists(startdir):
+      logging.error(f"Start directory '{startdir}' does not exist.")
+      exit(1)
     main(startdir=args.path,
       config_file=args.config,
       interval=args.waittime,
