@@ -439,6 +439,8 @@ def main(
     slide.set_shader(shader)
     slide.unif[47] = config.EDGE_ALPHA
     CMD_SCREEN_ON #turn screen on
+    launchTiempo(weathertime/2) # show weather forecast for weathertime seconds 
+    launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
     
 
 
@@ -514,10 +516,10 @@ def main(
       previous = tm # record previous time value, used to make cursor blink
       tm = time.time()
       # check if at the top of the hour
-      if (time.localtime(tm).tm_min == 50) : 
+      if (time.localtime(tm).tm_min == 60 - (weathertime // 60 + 1)) :
         launchTiempo(weathertime) #show weather forecast for weathertime seconds
-      elif (time.localtime(tm).tm_min == 30) :
-        launchSolar(weathertime) # show status of solar production for (weathertime/2) seconds
+      elif (time.localtime(tm).tm_min == 30 - (weathertime //60 + 1)) :
+        launchSolar(weathertime) # show status of solar production for weathertime seconds
     # after that, continue with slide show
       if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) : #blink dot
         time_dot = not(time_dot)
