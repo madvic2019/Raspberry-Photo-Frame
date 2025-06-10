@@ -394,16 +394,16 @@ def main(
     ) :
   
     global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES,screen
-  
+  # Set up logging  
     if debug:
         loglevel=logging.DEBUG
     else:
         loglevel=logging.INFO
-    # Set up logging   
+     
     logging.basicConfig(
     filename=logfile,  # Save logs to a file
     level=loglevel,  # Set the logging level
-    format='%(asctime)s - %(levelname)s:%(message)s'  # Customize log format
+    format='__name__: %(asctime)s - %(levelname)s:%(message)s'  # Customize log format
     )
     logging.info("Starting FrameGeo with parameters: startdir=%s,config_file=%s,interval=%d,shuffle=%s,geonamesuser=%s,check_dirs=%d,weathertime=%d,logfile=%s",
                 startdir,
