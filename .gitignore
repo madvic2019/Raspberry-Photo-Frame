@@ -11,9 +11,5 @@ __pycache__/*
 
 .*
 
-new 2.txt
-test.config
-test.config.num
 
-FrameGeo-alt.py
 framegeo.log
