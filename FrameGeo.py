@@ -938,8 +938,8 @@ if __name__ == '__main__':
       shuffle=args.shuffle,
       geonamesuser=args.geouser,
       check_dirs=args.dirchecktm,
-      weathertime=args.weathertime
-      logfile=args.logfile
+      weathertime=args.weathertime,
+      logfile=args.logfile,
       debug=args.debug
       )
 
