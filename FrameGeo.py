@@ -403,7 +403,7 @@ def main(
     logging.basicConfig(
     filename=logfile,  # Save logs to a file
     level=loglevel,  # Set the logging level
-    format='__name__: %(asctime)s - %(levelname)s:%(message)s'  # Customize log format
+    format='%(name)s: %(asctime)s - %(levelname)s:%(message)s'  # Customize log format
     )
     logging.info("Starting FrameGeo with parameters: startdir=%s,config_file=%s,interval=%d,shuffle=%s,geonamesuser=%s,check_dirs=%d,weathertime=%d,logfile=%s",
                 startdir,
