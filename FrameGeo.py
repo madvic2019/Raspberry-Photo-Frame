@@ -524,7 +524,7 @@ def main(
     if (next_check_tm < time.time()) :  #if stored check time is in the past, make it "now"
       next_check_tm = time.time()
     logging.info("Start time %s",time.strftime(config.TIME_FORMAT,time.localtime()))
-    logging.info("Next Check time %(asctime)s",time.strftime(config.TIME_FORMAT,time.localtime(next_check_tm)))
+    logging.info("Next Check time %s",time.strftime(config.TIME_FORMAT,time.localtime(next_check_tm)))
     logging.info("Starting with round number %d",num_run_through)
     logging.info("Starting with picture number %d",next_pic_num)
     
@@ -574,7 +574,7 @@ def main(
             try:
               temp=time.time()
               im = Image.open(iFiles[pic_num])
-              logging.info("foto numero %d %(asctime)s",pic_num,time.time())
+              logging.info("foto numero %d %s",pic_num,time.time())
             except:
               logging.warning("Error Opening File %s",iFiles[pic_num])
               continue
