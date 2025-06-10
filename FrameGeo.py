@@ -392,7 +392,9 @@ def main(
     logfile,                      # Log file name
     debug = False,              # Debug mode
     ) :
-
+  
+    global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES,screen
+  
     if debug:
         loglevel=logging.DEBUG
     else:
