@@ -43,11 +43,11 @@ import time
 import random
 import pi3d
 import argparse
-import stat
 import json
 import math
 import subprocess
 import signal
+import logging 
 
 
 
@@ -150,26 +150,22 @@ if config.BUTTONS:
 
 last_file_change = 0
 
-# setup logging
-import logging 
-
-
 
 def launchTiempo(delay) :
   proc=subprocess.Popen(['surf','-F','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
+  logging.info("Launch Weather Forecast with pid %d",proc.pid)
   time.sleep(30)
   subprocess.Popen(['xdotool','key','Down','Down','Down','Down'])
   time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
+  logging.info("%d process killed",proc.pid)
 
 def launchSolar(delay) :
   proc=subprocess.Popen(['surf','-F','http://pi4.local:1880/ui'])
-  
+  logging.info("Launch Solar Production with pid %d",proc.pid)
   time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
-  
-  
-  
+  logging.info("%d process killed",proc.pid)
 
 def get_geotagging(exif): # extract EXIF geographical information
   geotagging = {}
@@ -461,13 +457,11 @@ def main(
     slide.set_shader(shader)
     slide.unif[47] = config.EDGE_ALPHA
     CMD_SCREEN_ON #turn screen on
+    logging.info("Screen ON")
+    logging.info("launching weather forecast and solar production status")
     launchTiempo(weathertime/2) # show weather forecast for weathertime seconds 
     launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
-    
-
-
-    
-    
+       
     if KEYBOARD:
       kbd = pi3d.Keyboard()
 
@@ -488,8 +482,7 @@ def main(
     font = pi3d.Font(config.FONT_FILE, codepoints=config.CODEPOINTS, grid_size=grid_size, shadow_radius=4.0,shadow=(0,0,0,128))
     text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
     text2 = pi3d.PointText(font, CAMERA, max_chars=8, point_size=50)
-    
-    
+       
     #text = pi3d.PointText(font, CAMERA, max_chars=200, point_size=50)
     textblock = pi3d.TextBlock(x=-DISPLAY.width * 0.5 + 20, y=-DISPLAY.height * 0.4,
                               z=0.1, rot=0.0, char_count=199,
@@ -497,15 +490,12 @@ def main(
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text.add_text_block(textblock)
     
-
     timeblock = pi3d.TextBlock(x=DISPLAY.width*0.5 - 150, y=DISPLAY.height * 0.5 - 50,
                               z=0.1, rot=0.0, char_count=6,
                               text_format="{}".format(" "), size=0.65, 
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text2.add_text_block(timeblock)
-    
-   
-   
+       
     #Retrieve last image number to restart the slideshow from config.num file
     #Retrieve next directory check time
     
@@ -530,7 +520,6 @@ def main(
     
     tm=time.time()    
     pic_num=next_pic_num
-    
     # Main loop 
 
     while DISPLAY.loop_running():
@@ -539,8 +528,10 @@ def main(
       tm = time.time()
       # check if at the top of the hour
       if (time.localtime(tm).tm_min == 60 - (weathertime // 60 + 1)) :
+        logging.info("Launching weather forecast")
         launchTiempo(weathertime) #show weather forecast for weathertime seconds
       elif (time.localtime(tm).tm_min == 30 - (weathertime //60 + 1)) :
+        logging.info("Launching solar production status")
         launchSolar(weathertime) # show status of solar production for weathertime seconds
     # after that, continue with slide show
       if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) : #blink dot
