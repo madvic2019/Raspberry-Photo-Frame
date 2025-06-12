@@ -58,6 +58,18 @@ from geopy.geocoders import GeoNames
 
 import FrameConfig as config
 
+##################### SETUP SIGNAL HANDLING ########################
+# Set up signal handling to catch Ctrl-C and other signals
+def signal_handler(signal, frame):
+    logging.info("Signal %d received, exiting...", signal)
+    global quit
+    quit = True
+    
+signal.signal(signal.SIGINT, signal_handler)  # Catch Ctrl-C
+signal.signal(signal.SIGTERM, signal_handler)  # Catch termination signal
+#####################################################################
+
+
 CMD_SCREEN_OFF = 'xset -display :0 dpms force off'
 CMD_SCREEN_ON = 'xset -display :0 dpms force on'
 #############################
@@ -521,8 +533,8 @@ def main(
     tm=time.time()    
     pic_num=next_pic_num
     # Main loop 
-
-    while DISPLAY.loop_running():
+    quit = False # quit flag to exit loop
+    while DISPLAY.loop_running() and not quit:
     
       previous = tm # record previous time value, used to make cursor blink
       tm = time.time()
@@ -567,7 +579,7 @@ def main(
               im = Image.open(iFiles[pic_num])
               logging.info("foto numero %d %s",pic_num,time.time())
             except:
-              logging.warning("Error Opening File %s",iFiles[pic_num])
+              logging.error("Error Opening File %s",iFiles[pic_num])
               continue
             
               
@@ -739,7 +751,7 @@ def main(
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
             except:
-                logging.warning("Error when rotating photo")
+                logging.error("Error when rotating photo")
             #    nexttm = delta
 
           if k==ord('t') and paused: # rotate picture (only if paused)
@@ -756,7 +768,7 @@ def main(
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
             except:
-                logging.warning("Error when rotating photo")
+                logging.error("Error when rotating photo")
 
 
             
@@ -778,7 +790,7 @@ def main(
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
             except:
-                logging.warning("Error when rotating photo")
+                logging.error("Error when rotating photo")
 
         if paused and (rotateCCW_button.estado == 1 or rotateCCW_button.estado == 2): # Need to be on pause 
             rotateCCW_button.estado = 0
@@ -795,7 +807,7 @@ def main(
                       tmp_file.write(tmp_im.get_file())
                     next_pic_num -=1 # force reload on screen
             except:
-                logging.warning("Error when rotating photo")
+                logging.error("Error when rotating photo")
                 
         if pause_button.estado == 1: # or pause_button.estado == 2: # button was pressed
           #nexttm = delta
@@ -844,6 +856,10 @@ def main(
 
 
 ###next block parses command line arguments and invokes main function
+
+
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Recursively loads images '
