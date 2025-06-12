@@ -62,11 +62,13 @@ import FrameConfig as config
 # Set up signal handling to catch Ctrl-C and other signals
 def signal_handler(signal, frame):
     logging.info("Signal %d received, exiting...", signal)
-    global quit
-    quit = True
+    exit(0)
     
 signal.signal(signal.SIGINT, signal_handler)  # Catch Ctrl-C
 signal.signal(signal.SIGTERM, signal_handler)  # Catch termination signal
+signal.signal(signal.SIGHUP, signal_handler)  # Catch hangup signal
+signal.signal(signal.SIGQUIT, signal_handler)  # Catch quit signal
+
 #####################################################################
 
 
@@ -533,8 +535,8 @@ def main(
     tm=time.time()    
     pic_num=next_pic_num
     # Main loop 
-    quit = False # quit flag to exit loop
-    while DISPLAY.loop_running() and not quit:
+    
+    while DISPLAY.loop_running() :
     
       previous = tm # record previous time value, used to make cursor blink
       tm = time.time()
