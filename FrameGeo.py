@@ -419,7 +419,7 @@ def main(
     level=loglevel,  # Set the logging level
     format='%(pathname)s: %(asctime)s - %(levelname)s:%(message)s',  # Customize log format
             datefmt='%m/%d/%Y %I:%M:%S %p',
-    handlers=[rotating_handler, logging.StreamHandler()]  # Add both file and console handlers)
+    handlers=[rotating_handler]) 
     logging.info("Starting FrameGeo with parameters: startdir=%s,config_file=%s,interval=%d,shuffle=%s,geonamesuser=%s,check_dirs=%d,weathertime=%d,logfile=%s",
                 startdir,
                 config_file,
