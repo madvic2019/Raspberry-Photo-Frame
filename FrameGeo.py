@@ -407,7 +407,7 @@ def main(
   
     global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES,screen
   # Set up logging  
-    rotating_handler = RotatingFileHandler(logfile,maxBytes=1024*1024*10,backupCount=3)
+    #rotating_handler = RotatingFileHandler(logfile,maxBytes=1024*1024*10,backupCount=3)
     
     if debug:
         loglevel=logging.DEBUG
@@ -418,8 +418,8 @@ def main(
     filename=logfile,  # Save logs to a file
     level=loglevel,  # Set the logging level
     format='%(pathname)s: %(asctime)s - %(levelname)s:%(message)s',  # Customize log format
-            datefmt='%m/%d/%Y %I:%M:%S %p',
-    handlers=[rotating_handler]) 
+            datefmt='%m/%d/%Y %I:%M:%S %p')
+    #handlers=[rotating_handler]) 
     logging.info("Starting FrameGeo with parameters: startdir=%s,config_file=%s,interval=%d,shuffle=%s,geonamesuser=%s,check_dirs=%d,weathertime=%d,logfile=%s",
                 startdir,
                 config_file,
