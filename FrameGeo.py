@@ -48,9 +48,6 @@ import math
 import subprocess
 import signal
 import logging 
-from logging.handlers import RotatingFileHandler
-
-
 
 
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
@@ -168,7 +165,8 @@ last_file_change = 0
 
 
 def launchTiempo(delay) :
-  proc=subprocess.Popen(['surf','-F','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
+  #proc=subprocess.Popen(['surf','-F','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
+  proc=subprocess.Popen(['chromium-browser','--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   logging.info("Launch Weather Forecast with pid %d",proc.pid)
   time.sleep(30)
   subprocess.Popen(['xdotool','key','Down','Down','Down','Down'])
@@ -177,7 +175,7 @@ def launchTiempo(delay) :
   logging.info("%d process killed",proc.pid)
 
 def launchSolar(delay) :
-  proc=subprocess.Popen(['surf','-F','http://pi4.local:1880/ui'])
+  proc=subprocess.Popen(['chromium-browser','--kiosk','http://pi4.local:1880/ui'])
   logging.info("Launch Solar Production with pid %d",proc.pid)
   time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
