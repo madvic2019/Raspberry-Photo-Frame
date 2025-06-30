@@ -1,5 +1,4 @@
 #--coding: utf-8 --
-#!/usr/bin/python3
 from __future__ import absolute_import, division, print_function, unicode_literals
 ''' Simplified slideshow system using ImageSprite and without threading for background
 loading of images (so may show delay for v large images).
