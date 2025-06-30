@@ -47,7 +47,8 @@ import json
 import math
 import subprocess
 import signal
-import logging 
+import logging
+import setproctitle # to set process title
 
 
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
@@ -56,6 +57,10 @@ import exif # Direct access to EXIF tags
 from geopy.geocoders import GeoNames
 
 import FrameConfig as config
+
+# Set process title
+setproctitle.setproctitle("FrameGeo")
+
 
 ##################### SETUP SIGNAL HANDLING ########################
 # Set up signal handling to catch Ctrl-C and other signals
