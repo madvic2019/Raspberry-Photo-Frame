@@ -1,5 +1,4 @@
 #--coding: utf-8 --
-#!/usr/bin/python3
 from __future__ import absolute_import, division, print_function, unicode_literals
 ''' Simplified slideshow system using ImageSprite and without threading for background
 loading of images (so may show delay for v large images).
@@ -47,8 +46,8 @@ import json
 import math
 import subprocess
 import signal
-import logging 
-
+import logging
+import setproctitle # to set process title
 
 
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
@@ -57,6 +56,10 @@ import exif # Direct access to EXIF tags
 from geopy.geocoders import GeoNames
 
 import FrameConfig as config
+
+# Set process title
+setproctitle.setproctitle("FrameGeo")
+
 
 ##################### SETUP SIGNAL HANDLING ########################
 # Set up signal handling to catch Ctrl-C and other signals
@@ -166,7 +169,8 @@ last_file_change = 0
 
 
 def launchTiempo(delay) :
-  proc=subprocess.Popen(['surf','-F','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
+  #proc=subprocess.Popen(['surf','-F','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
+  proc=subprocess.Popen(['chromium-browser','--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   logging.info("Launch Weather Forecast with pid %d",proc.pid)
   time.sleep(30)
   subprocess.Popen(['xdotool','key','Down','Down','Down','Down'])
@@ -175,7 +179,7 @@ def launchTiempo(delay) :
   logging.info("%d process killed",proc.pid)
 
 def launchSolar(delay) :
-  proc=subprocess.Popen(['surf','-F','http://pi4.local:1880/ui'])
+  proc=subprocess.Popen(['chromium-browser','--kiosk','http://pi4.local:1880/ui'])
   logging.info("Launch Solar Production with pid %d",proc.pid)
   time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
@@ -405,6 +409,8 @@ def main(
   
     global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES,screen
   # Set up logging  
+    #rotating_handler = RotatingFileHandler(logfile,maxBytes=1024*1024*10,backupCount=3)
+    
     if debug:
         loglevel=logging.DEBUG
     else:
@@ -415,6 +421,7 @@ def main(
     level=loglevel,  # Set the logging level
     format='%(pathname)s: %(asctime)s - %(levelname)s:%(message)s',  # Customize log format
             datefmt='%m/%d/%Y %I:%M:%S %p')
+    #handlers=[rotating_handler]) 
     logging.info("Starting FrameGeo with parameters: startdir=%s,config_file=%s,interval=%d,shuffle=%s,geonamesuser=%s,check_dirs=%d,weathertime=%d,logfile=%s",
                 startdir,
                 config_file,
