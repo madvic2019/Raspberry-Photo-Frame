@@ -9,7 +9,7 @@ import FrameConfig as config
 
   
 parser = argparse.ArgumentParser(
-        description='Converts to readablie time information in Picture Frame config file '
+        description='Converts to readable time information in Picture Frame config file '
         )
         
 parser.add_argument(
