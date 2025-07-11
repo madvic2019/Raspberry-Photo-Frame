@@ -588,7 +588,7 @@ def main(
             try:
               temp=time.time()
               im = Image.open(iFiles[pic_num])
-              logging.info("foto numero %d %s",pic_num,time.time())
+              logging.info("foto numero %d %s",pic_num,iFiles[pic_num])
             except:
               logging.error("Error Opening File %s",iFiles[pic_num])
               continue
