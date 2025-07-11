@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export DISPLAY=:0
+xset dpms force on s off
 pgrep 'FrameGeo'
 if [ $? != 0 ]
 then
