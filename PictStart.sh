@@ -2,7 +2,7 @@
 
 export DISPLAY=:0
 xset dpms force on s off
-xset dpms 3600 3600 3600
+xset dpms 20000 20000 20000
 pgrep 'FrameGeo'
 if [ $? != 0 ]
 then
