@@ -75,8 +75,9 @@ signal.signal(signal.SIGQUIT, signal_handler)  # Catch quit signal
 #####################################################################
 
 
-CMD_SCREEN_OFF = 'xset -display :0 dpms force off'
-CMD_SCREEN_ON = 'xset -display :0 dpms force on'
+CMD_SCREEN_OFF = 'xset -d :0 dpms force off ; xset -d :0 dpms 60 300 300'
+CMD_SCREEN_ON = 'xset -d :0 dpms force on s off ; xset -d :0 dpms 20000 20000 20000'
+
 #############################
 SHOW_LOCATION = True
 
