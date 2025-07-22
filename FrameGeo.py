@@ -479,9 +479,9 @@ def main(
     slide = pi3d.Sprite(camera=CAMERA, w=DISPLAY.width, h=DISPLAY.height, z=5.0)
     slide.set_shader(shader)
     slide.unif[47] = config.EDGE_ALPHA
-    CMD_SCREEN_ON #turn screen on
+    os.system(CMD_SCREEN_ON) #turn screen on
+    logging.info("Screen ON")
     if weathertime != 0:
-      logging.info("Screen ON")
       logging.info("launching weather forecast and solar production status")
       launchTiempo(weathertime/2) # show weather forecast for weathertime seconds 
       launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
