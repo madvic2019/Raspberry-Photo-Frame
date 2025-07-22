@@ -65,6 +65,7 @@ setproctitle.setproctitle("FrameGeo")
 # Set up signal handling to catch Ctrl-C and other signals
 def signal_handler(signal, frame):
     logging.info("Signal %d received, exiting...", signal)
+    os.system(CMD_SCREEN_OFF)  # turn screen off
     exit(0)
     
 signal.signal(signal.SIGINT, signal_handler)  # Catch Ctrl-C
