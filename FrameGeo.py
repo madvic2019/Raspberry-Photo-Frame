@@ -864,6 +864,8 @@ def main(
       logging.error("this was going to fail if previous try failed!")
     if KEYBOARD:
       kbd.close()
+    os.system(CMD_SCREEN_OFF) # turn screen off
+    logging.info("Screen OFF")
     DISPLAY.destroy()
     logging.info("End of slideshow")
 # end of main function    
