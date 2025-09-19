@@ -34,6 +34,9 @@ arguments:
   --geouser GEOUSER     User Name for GeoNames server (Default '', it won't retrieve geo names)
   
   --dir-check DIRCHECKTM Interval between check directories (Default 3600 seconds)
+  --weather-time seconds Time fpr displaying weather and solar plant information (0 for no display)
+  --debug               Increase logging level 
+  --logfile             Log file name
   
   ImagePath    Root directory where images will be found (default ./examples)
   
