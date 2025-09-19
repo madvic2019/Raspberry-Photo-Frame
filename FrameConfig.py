@@ -23,7 +23,7 @@ else :
    PI3DDEMO = '/home/victor/pi3d_demos' # assume in a Linux environment it will be located directly on user home
    BUTTONS = False
    
-print (PI3DDEMO)
+
 
 
 # Default values
@@ -31,8 +31,11 @@ GEONAMESUSER = ''
 DEFAULT_CONFIG_FILE = './.photo-frame'
 PIC_DIR = './examples' #change this to your images default location folder
 BKUP_DIR = '.backup-MarcoFotos' # This will be used to store modified or deleted image files. Must exist
-CHECK_DIR_TM = 3600.0 # Time to check for directory changes
+CHECK_DIR_TM = 3600 # Time to check for directory changes
 NUMBEROFROUNDS = 1 # number of rounds before re-fetching images 0 means after one pass
+SHOW_WEATHER_TIME = 300 # time to show weather info in seconds
+LOG_FILE = 'framegeo.log' # log file name
+LOG_LEVEL = 'INFO' # DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 FPS = 20
 FIT = True
