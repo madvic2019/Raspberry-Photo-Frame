@@ -5,11 +5,5 @@ libEGL.dll
 __pycache__/*
 
 .vscode/launch.json
-.vscode/launch.json
-.vscode/launch.json
-.vscode/launch.json
-
-.*
-
 
 framegeo.log
