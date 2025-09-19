@@ -19,6 +19,8 @@ Finally, I added command line options that override the defaults embedded in the
 usage: python3 FrameGeo.py [-h] [--config-file CONFIG] [--waittime WAITTIME]
                    [--shuffle True|False] [--geouser GEOUSER]
                    [--dir-check DIRCHECKTM]
+                   [--weather-time seconds]
+                   [--logfile LOGFILE --debug TRUE|FALSE]
                    [ImagePath]
 
 
