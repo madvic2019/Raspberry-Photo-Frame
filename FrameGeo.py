@@ -410,7 +410,7 @@ def main(
     debug = False,              # Debug mode
     ) :
   
-    global backup_dir,paused,geoloc,last_file_change,kb_up,FIT,BLUR_EDGES,screen
+    global backup_dir,paused,geoloc,last_file_change,kb_up,screen
   # Set up logging  
     #rotating_handler = RotatingFileHandler(logfile,maxBytes=1024*1024*10,backupCount=3)
     
