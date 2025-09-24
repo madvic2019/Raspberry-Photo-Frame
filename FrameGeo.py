@@ -439,7 +439,7 @@ def main(
     logging.info(backup_dir)
 
     if config.BUTTONS:
-      pause_button = Button(8,bounce_time=0.3, hold_time=6)
+      pause_button = Button(8,bounce_time=0.3, hold_time=20)
       back_button = Button(9,bounce_time=0.3, hold_time=6)
       forward_button = Button(4,bounce_time=0.3, hold_time=6)
       rotateCW_button = Button(6,bounce_time=0.3, hold_time=6)
@@ -805,6 +805,8 @@ def main(
                     next_pic_num -=1 # force reload on screen
             except:
                 logging.error("Error when rotating photo")
+        else :
+            rotateCW_button.estado = 0
 
         if paused and (rotateCCW_button.estado == 1 or rotateCCW_button.estado == 2): # Need to be on pause 
             rotateCCW_button.estado = 0
@@ -822,6 +824,8 @@ def main(
                     next_pic_num -=1 # force reload on screen
             except:
                 logging.error("Error when rotating photo")
+        else :
+            rotateCCW_button.estado = 0
                 
         if pause_button.estado == 1: # or pause_button.estado == 2: # button was pressed
           #nexttm = delta
