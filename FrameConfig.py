@@ -34,7 +34,7 @@ BKUP_DIR = '.backup-MarcoFotos' # This will be used to store modified or deleted
 CHECK_DIR_TM = 3600 # Time to check for directory changes
 NUMBEROFROUNDS = 1 # number of rounds before re-fetching images 0 means after one pass
 SHOW_WEATHER_TIME = 300 # time to show weather info in seconds
-LOG_FILE = 'stdout' # log file name
+LOG_FILE = 'framegeo.log' # log file name
 LOG_LEVEL = 'INFO' # DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 FPS = 20
