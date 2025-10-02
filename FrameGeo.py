@@ -827,20 +827,18 @@ def main(
         else :
             rotateCCW_button.estado = 0
                 
-        if pause_button.estado == 1 or pause_button.estado == 2: # button was pressed
-          if paused :
-            nexttm = delta
+        if pause_button.estado == 1 : # button was pressed
           paused = not paused
           pause_button.estado = 0
 	
-          if pause_button.estado == 2: # pause button held: toggle screen on/off
-            if screen:
-              os.system(CMD_SCREEN_OFF)
-            else:
-              os.system(CMD_SCREEN_ON)
+        if pause_button.estado == 2: # pause button held: toggle screen on/off
+          if screen:
+            os.system(CMD_SCREEN_OFF)
+          else:
+            os.system(CMD_SCREEN_ON)
             screen=not screen
-            pause_button.estado = 0
-            logging.info("Toggle Screen ON/OFF %s",screen)
+          pause_button.estado = 0
+          logging.info("Toggle Screen ON/OFF %s",screen)
 
         if back_button.estado == 1 or back_button.estado == 2 : 
           nexttm = delta
