@@ -829,7 +829,7 @@ def main(
                 
         if pause_button.estado == 1 or pause_button.estado == 2: # button was pressed
           if paused :
-            #nexttm = delta
+            nexttm = delta
           paused = not paused
           pause_button.estado = 0
 	
