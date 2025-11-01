@@ -1,7 +1,6 @@
 #!/bin/bash
 
 export DISPLAY=:0
-xrandr --output HDMI-1 --mode 1920x1080
 xset dpms force on s off
 xset dpms 20000 20000 20000
 pgrep 'FrameGeo'
