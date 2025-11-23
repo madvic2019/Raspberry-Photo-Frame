@@ -384,20 +384,17 @@ def timetostring(dot,ticks):
 
 
 def handle_press(btn) :
-    logging.debug("Button pressed, estado actual %r",btn.estado)
-    if btn.estado==0 or btn.estado == 2 :
+    logging.info("Button pressed, estado actual %r",btn.estado)
+    if btn.estado==0 :
       btn.estado=1
-      logging.debug("Nuevo Estado %r",btn.estado)
+      logging.info("Nuevo Estado %r",btn.estado)
    
 def handle_hold(btn) :
-    logging.debug("button held")
+    logging.info("button held, estado actual %r",btn.estado)
     if btn.estado==0 or btn.estado == 1:
       btn.estado=2
+      logging.info("Nuevo Estado %r",btn.estado)
       
-
-
- 
-
 def main(
     startdir,                      # Root folder for images, with recursive search
     config_file,                   # File with list of file names (for fast restart)  
@@ -439,11 +436,11 @@ def main(
     logging.info(backup_dir)
 
     if config.BUTTONS:
-      pause_button = Button(8,bounce_time=0.3, hold_time=20)
-      back_button = Button(9,bounce_time=0.3, hold_time=6)
-      forward_button = Button(4,bounce_time=0.3, hold_time=6)
-      rotateCW_button = Button(6,bounce_time=0.3, hold_time=6)
-      rotateCCW_button = Button(5,bounce_time=0.3, hold_time=6)
+      pause_button = Button(8, hold_time=20)
+      back_button = Button(9,hold_time=6)
+      forward_button = Button(4,hold_time=6)
+      rotateCW_button = Button(6,hold_time=6)
+      rotateCCW_button = Button(5,hold_time=6)
 
       pause_button.when_pressed = handle_press
       back_button.when_pressed = handle_press
@@ -566,7 +563,7 @@ def main(
       #check if there are file to display  
       if nFi > 0:
         # If needed, display new photo
-        if (tm > nexttm and not paused) or (tm - nexttm) >= 86400.0: # this must run first iteration of loop
+        if (tm > nexttm and not paused) or ((tm - nexttm) >= check_dirs): # this must run first iteration of loop
           logging.debug("tm es %d; nexttm es %d; la resta %d",tm,nexttm,tm-nexttm)
           nexttm = tm + interval
           a = 0.0 # alpha - proportion front image to back
