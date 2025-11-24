@@ -15,13 +15,19 @@ uname=platform.uname() # tuple with (system, node, release, version, machine, pr
 if uname.system == "Windows" :
    PI3DDEMO = os.environ['HOMEPATH']+'/pi3d_demos-master'
    BUTTONS = False
+   BROWSER='chrome'
+   KEYCOMM='true'
 elif "aarch64" == uname.machine or "armv7l" == uname.machine: 
    PI3DDEMO = '/usr/local/lib/pi3d_demos' # requires copying downloaded demos from https://github.com/pi3d/pi3d_demos/archive/master.zip
    BUTTONS = True
+   BROWSER='chromium-browser'
+   KEYCOMM='xdotool'
    from gpiozero import Button
 else :
    PI3DDEMO = '/home/victor/pi3d_demos' # assume in a Linux environment it will be located directly on user home
    BUTTONS = False
+   BROWSER='chromium'
+   KEYCOMM='true'
    
 
 

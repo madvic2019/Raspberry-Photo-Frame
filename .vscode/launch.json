@@ -12,6 +12,7 @@
             "args": ["--config-file","~/.photo-frame",
                      "--waittime", "20",
                      "--geouser","madvic",
+                     "--weather-time","0",
                      "/mnt/frodomedia/photo/Fotos"],
             "env": {"DISPLAY": ":0"}
          }

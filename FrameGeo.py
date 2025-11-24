@@ -172,17 +172,17 @@ last_file_change = 0
 
 def launchTiempo(delay) :
   #proc=subprocess.Popen(['surf','-F','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
-  proc=subprocess.Popen(['chromium-browser','--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
+  proc=subprocess.Popen([config.BROWSER,'--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   logging.info("Launch Weather Forecast with pid %d",proc.pid)
   time.sleep(30)
-  subprocess.Popen(['xdotool','key','Down','Down','Down','Down','mousemove','0','0'])
+  subprocess.Popen([config.KEYCOMM,'key','Down','Down','Down','Down','mousemove','0','0'])
   time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
   logging.info("%d process killed",proc.pid)
 
 def launchSolar(delay) :
-  proc=subprocess.Popen(['chromium-browser','--kiosk','http://pi4.local:1880/ui'])
-  subprocess.Popen(['xdotool','mousemove','0','0'])
+  proc=subprocess.Popen([config.BROWSER,'--kiosk','http://pi4.local:1880/ui'])
+  subprocess.Popen([config.KEYCOMM,'mousemove','0','0'])
   logging.info("Launch Solar Production with pid %d",proc.pid)
   time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
