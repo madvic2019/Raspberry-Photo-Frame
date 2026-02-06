@@ -441,11 +441,11 @@ def main(
     logger.info(backup_dir)
 
     if config.BUTTONS:
-      pause_button = Button(8, hold_time=20)
-      back_button = Button(9,hold_time=6)
-      forward_button = Button(4,hold_time=6)
-      rotateCW_button = Button(6,hold_time=6)
-      rotateCCW_button = Button(5,hold_time=6)
+      pause_button = Button(8, hold_time=20,bounce_time=3)
+      back_button = Button(9,hold_time=6,bounce_time=3)
+      forward_button = Button(4,hold_time=6,bounce_time=3)
+      rotateCW_button = Button(6,hold_time=6,bounce_time=3)
+      rotateCCW_button = Button(5,hold_time=6,bounce_time=3)
 
       pause_button.when_pressed = handle_press
       back_button.when_pressed = handle_press
