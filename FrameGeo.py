@@ -656,11 +656,11 @@ def main(
           slide.unif[os1] = (wh_rat - 1.0) * 0.5
           slide.unif[os2] = 0.0
           #transition 
-          if KENBURNS:
-              xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
-              slide.unif[48] = 0.0
-              slide.unif[49] = 0.0
-              kb_up = not kb_up
+          # if KENBURNS:
+          #     xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
+          #     slide.unif[48] = 0.0
+          #     slide.unif[49] = 0.0
+          #     kb_up = not kb_up
 # Prepare the different texts to be shown
           overlay_text= "" #this will host the text on screen 
           if SHOW_LOCATION: #(and/or month-year)
@@ -705,6 +705,11 @@ def main(
         case "transition":
             # manages transition
           if KENBURNS:
+            xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
+            slide.unif[48] = 0.0
+            slide.unif[49] = 0.0
+            kb_up = not kb_up
+          #if KENBURNS:
             t_factor = nexttm - tm
             if kb_up:
               t_factor = interval - t_factor
