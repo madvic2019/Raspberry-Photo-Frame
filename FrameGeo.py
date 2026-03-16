@@ -692,9 +692,9 @@ def main(
               t_factor = interval - t_factor
             slide.unif[48] = xstep * t_factor
             slide.unif[49] = ystep * t_factor
-          slide.draw()
           a += delta_alpha
           slide.unif[44] = a
+          slide.draw()
           if a >= 1.0:
             slide.set_textures([sfg, sfg])
             sbg = sfg
@@ -702,6 +702,7 @@ def main(
             logger.debug("Going to %s",slide_state)
           # State: DISPLAY
         case "display":
+          slide.draw()
           if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             logger.info("Refreshing Files list")
             next_check_tm = time.time() + check_dirs  # Set up the next interval
@@ -718,8 +719,7 @@ def main(
                 logger.warning("Error refreshing file list, keep old one")
             num_run_through = 0
 #render the image        
-          #slide.draw()
-#render the text
+      #render the text
           text.draw()
           text2.draw()
           if KEYBOARD:
