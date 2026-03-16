@@ -568,6 +568,7 @@ def main(
         timetext=timetostring(time_dot,tm)
       else :
         timetext="PAUSA"
+      # regardless of state, handle ujser input: Keyboard and Buttons
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
@@ -692,11 +693,13 @@ def main(
           nexttm = delta
           forward_button.estado = 0
 # All config.BUTTONS go to idle after processing them, regardless of state
+      #continue preparation
       timeblock.set_text(text_format="{}".format(timetext))
       if (tm > nexttm and not paused) or ((tm - nexttm) >= check_dirs): # this must run first iteration of loop
         logger.debug("tm es %d; nexttm es %d; la resta %d",tm,nexttm,tm-nexttm)
         slide_state="loading"
         logger.debug("Going to %s",slide_state)
+      # State machine implementation
       match slide_state :
         case "loading":
       #check if there are files to display  
@@ -705,8 +708,8 @@ def main(
           
           nexttm = tm + interval
           a = 0.0 # alpha - proportion front image to back
-          sbg = sfg
-          sfg = None
+          sbg = sfg # previous photo stored for transition
+          sfg = None #Next photo to be loaded
           attempts= 0
                     
           while sfg is None and attempts < 5: # keep going through until a usable picture is found 
@@ -714,7 +717,7 @@ def main(
             attempts += 1
             pic_num = next_pic_num
             next_pic_num += 1
-            if next_pic_num >= nFi:
+            if next_pic_num >= nFi: # detect if a refresh is needed on the file list
               num_run_through += 1
               next_pic_num = 0
             #update persistent cached data for restart
@@ -757,10 +760,12 @@ def main(
             # Load and format image
             try:
               sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-            except:
+            except: #loading texture failed: go to next picture
               sfg = None
+              logger.warning("Error loading texture")
               continue  
-            nexttm = tm+interval #Time points to next interval 
+            
+          nexttm = tm+interval #Time points to next interval 
           
   
 # Prepare the different texts to be shown
