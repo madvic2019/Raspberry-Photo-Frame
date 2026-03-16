@@ -676,7 +676,25 @@ def main(
             except :
               logger.warning("Wrong Overlay_text Format")
               textblock.set_text(" ")
-
+              
+          
+        #Prepare Image Rendering            
+          if sbg is None: # first time through
+            sbg = sfg
+          slide.set_textures([sfg, sbg])
+        
+          slide.unif[45:47] = slide.unif[42:44] # transfer front width and height factors to back
+          slide.unif[51:53] = slide.unif[48:50] # transfer front width and height offsets
+          wh_rat = (DISPLAY.width * sfg.iy) / (DISPLAY.height * sfg.ix)
+          if (wh_rat > 1.0 and FIT) or (wh_rat <= 1.0 and not FIT):
+            sz1, sz2, os1, os2 = 42, 43, 48, 49
+          else:
+            sz1, sz2, os1, os2 = 43, 42, 49, 48
+            wh_rat = 1.0 / wh_rat
+          slide.unif[sz1] = wh_rat
+          slide.unif[sz2] = 1.0
+          slide.unif[os1] = (wh_rat - 1.0) * 0.5
+          slide.unif[os2] = 0.0
           slide_state = "transition"
           logger.debug("Going to %s",slide_state)
         # else:
