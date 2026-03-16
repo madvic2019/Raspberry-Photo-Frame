@@ -695,6 +695,8 @@ def main(
           a += delta_alpha
           slide.unif[44] = a
           slide.draw()
+          text.draw()
+          text2.draw()
           if a >= 1.0:
             slide.set_textures([sfg, sfg])
             sbg = sfg
