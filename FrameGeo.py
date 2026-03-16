@@ -675,6 +675,7 @@ def main(
                   textblock.set_text(" ")
 
               slide_state = "transition"
+              logger.debug("Going to %s",slide_state)
               continue
           else:
             textblock.set_text("NO IMAGES SELECTED")
@@ -695,6 +696,7 @@ def main(
             slide.set_textures([sfg, sfg])
             sbg = sfg
             slide_state = "display"
+            logger.debug("Going to %s",slide_state)
           continue
           # State: DISPLAY
         case "display":
@@ -718,6 +720,8 @@ def main(
 #render the text
           text.draw()
           text2.draw()
+          slide_state = "loading"
+          logger.debug("Going to %s",slide_state)
           if KEYBOARD:
             k = kbd.read()
             if k != -1:
