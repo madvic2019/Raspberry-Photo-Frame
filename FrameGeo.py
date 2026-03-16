@@ -715,6 +715,7 @@ def main(
               t_factor = interval - t_factor
             slide.unif[48] = xstep * t_factor
             slide.unif[49] = ystep * t_factor
+          slide.set_textures([sfg, sbg])
           a += delta_alpha
           slide.unif[44] = a
           slide.draw()
