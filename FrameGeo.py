@@ -568,6 +568,130 @@ def main(
         timetext=timetostring(time_dot,tm)
       else :
         timetext="PAUSA"
+      if KEYBOARD:
+        k = kbd.read()
+        if k != -1:
+          logger.debug("Key pressed", tm-nexttm)
+          #nexttm = delta
+          # print(tm - nexttm)
+          if k==27 or quit: #ESC
+            break
+          if k==ord('b'):
+            logger.info("Toggle Screen on/off")
+            if screen:
+              os.system(CMD_SCREEN_OFF)
+            else:
+              os.system(CMD_SCREEN_ON)
+            screen=not screen
+            logger.info("Screen ON %s",screen)
+          if k==ord(' '):
+            paused = not paused
+          if k==ord('s'): # go back a picture
+            nexttm = 0
+            next_pic_num -= 2
+            if next_pic_num < -1:
+              next_pic_num = -1
+            nexttm = delta
+          if k==ord('q'): #go forward
+            nexttm = delta
+
+          if k==ord('r') and paused: # rotate picture (only if paused)
+            nexttm = delta
+            im.close() #close file on disk
+            try:
+                with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
+                  tmp_im = exif.Image(tmp_file)
+                  tmp_file.close() 
+                  if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+                    save_file(iFiles[pic_num]) # Copy file to Backup folder
+                    tmp_im.orientation = Rotation[CCW][tmp_im.orientation] # changes EXIF data orientation parameter              
+                    with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
+                      tmp_file.write(tmp_im.get_file())
+                    next_pic_num -=1 # force reload on screen
+            except:
+                logger.error("Error when rotating photo")
+            #    nexttm = delta
+
+          if k==ord('t') and paused: # rotate picture (only if paused)
+            nexttm = delta
+            im.close() #close file on disk
+            try:
+                with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
+                  tmp_im = exif.Image(tmp_file)
+                  tmp_file.close() 
+                  if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+                    save_file(iFiles[pic_num]) # Copy file to Backup folder
+                    tmp_im.orientation = Rotation[CW][tmp_im.orientation] # changes EXIF data orientation parameter              
+                    with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
+                      tmp_file.write(tmp_im.get_file())
+                    next_pic_num -=1 # force reload on screen
+            except:
+                logger.error("Error when rotating photo")
+    
+      if config.BUTTONS:
+  #Handling of config.BUTTONS goes here
+        if paused and (rotateCW_button.estado == 1 or rotateCW_button.estado == 2): # Need to be on pause 
+            rotateCW_button.estado = 0
+            nexttm = delta
+            im.close() #close file on disk
+            try:
+                with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
+                  tmp_im = exif.Image(tmp_file)
+                  tmp_file.close() 
+                  if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+                    save_file(iFiles[pic_num]) # Copy file to Backup folder
+                    tmp_im.orientation =  Rotation[CW][tmp_im.orientation] # changes EXIF data orientation parameter
+                    with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
+                      tmp_file.write(tmp_im.get_file())
+                    next_pic_num -=1 # force reload on screen
+            except:
+                logger.error("Error when rotating photo")
+        else :
+            rotateCW_button.estado = 0
+
+        if paused and (rotateCCW_button.estado == 1 or rotateCCW_button.estado == 2): # Need to be on pause 
+            rotateCCW_button.estado = 0
+            nexttm = delta
+            im.close() #close file on disk
+            try:
+                with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
+                  tmp_im = exif.Image(tmp_file)
+                  tmp_file.close() 
+                  if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
+                    save_file(iFiles[pic_num]) # Copy file to Backup folder
+                    tmp_im.orientation = Rotation[CCW][tmp_im.orientation] # changes EXIF data orientation parameter              
+                    with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
+                      tmp_file.write(tmp_im.get_file())
+                    next_pic_num -=1 # force reload on screen
+            except:
+                logger.error("Error when rotating photo")
+        else :
+            rotateCCW_button.estado = 0
+                
+        if pause_button.estado == 1 or pause_button.estado == 2: # button was pressed
+          paused = not paused
+          pause_button.estado = 0
+  
+        # if pause_button.estado == 2: # pause button held: toggle screen on/off
+        #   if screen:
+        #     os.system(CMD_SCREEN_OFF)
+        #   else:
+        #     os.system(CMD_SCREEN_ON)
+        #     screen=not screen
+        #   pause_button.estado = 0
+        #   logger.info("Toggle Screen ON/OFF %s",screen)
+
+        if back_button.estado == 1 or back_button.estado == 2 : 
+          nexttm = delta
+          next_pic_num -= 2
+          if next_pic_num < -1:
+            next_pic_num = -1
+          #nexttm = 0 #force reload
+          back_button.estado = 0
+        if forward_button.estado == 1 or forward_button.estado == 2 : 
+          nexttm = delta
+          forward_button.estado = 0
+# All config.BUTTONS go to idle after processing them, regardless of state
       timeblock.set_text(text_format="{}".format(timetext))
       if (tm > nexttm and not paused) or ((tm - nexttm) >= check_dirs): # this must run first iteration of loop
         logger.debug("tm es %d; nexttm es %d; la resta %d",tm,nexttm,tm-nexttm)
@@ -726,130 +850,7 @@ def main(
       #render the text
           text.draw()
           text2.draw()
-          if KEYBOARD:
-            k = kbd.read()
-            if k != -1:
-              logger.debug("Key pressed", tm-nexttm)
-              #nexttm = delta
-              # print(tm - nexttm)
-              if k==27 or quit: #ESC
-                break
-              if k==ord('b'):
-                logger.info("Toggle Screen on/off")
-                if screen:
-                  os.system(CMD_SCREEN_OFF)
-                else:
-                  os.system(CMD_SCREEN_ON)
-                screen=not screen
-                logger.info("Screen ON %s",screen)
-              if k==ord(' '):
-                paused = not paused
-              if k==ord('s'): # go back a picture
-                nexttm = 0
-                next_pic_num -= 2
-                if next_pic_num < -1:
-                  next_pic_num = -1
-                nexttm = delta
-              if k==ord('q'): #go forward
-                nexttm = delta
 
-              if k==ord('r') and paused: # rotate picture (only if paused)
-                nexttm = delta
-                im.close() #close file on disk
-                try:
-                    with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
-                      tmp_im = exif.Image(tmp_file)
-                      tmp_file.close() 
-                      if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
-                        save_file(iFiles[pic_num]) # Copy file to Backup folder
-                        tmp_im.orientation = Rotation[CCW][tmp_im.orientation] # changes EXIF data orientation parameter              
-                        with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
-                          tmp_file.write(tmp_im.get_file())
-                        next_pic_num -=1 # force reload on screen
-                except:
-                    logger.error("Error when rotating photo")
-                #    nexttm = delta
-
-              if k==ord('t') and paused: # rotate picture (only if paused)
-                nexttm = delta
-                im.close() #close file on disk
-                try:
-                    with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
-                      tmp_im = exif.Image(tmp_file)
-                      tmp_file.close() 
-                      if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
-                        save_file(iFiles[pic_num]) # Copy file to Backup folder
-                        tmp_im.orientation = Rotation[CW][tmp_im.orientation] # changes EXIF data orientation parameter              
-                        with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
-                          tmp_file.write(tmp_im.get_file())
-                        next_pic_num -=1 # force reload on screen
-                except:
-                    logger.error("Error when rotating photo")
-        
-          if config.BUTTONS:
-      #Handling of config.BUTTONS goes here
-            if paused and (rotateCW_button.estado == 1 or rotateCW_button.estado == 2): # Need to be on pause 
-                rotateCW_button.estado = 0
-                nexttm = delta
-                im.close() #close file on disk
-                try:
-                    with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
-                      tmp_im = exif.Image(tmp_file)
-                      tmp_file.close() 
-                      if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
-                        save_file(iFiles[pic_num]) # Copy file to Backup folder
-                        tmp_im.orientation =  Rotation[CW][tmp_im.orientation] # changes EXIF data orientation parameter
-                        with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
-                          tmp_file.write(tmp_im.get_file())
-                        next_pic_num -=1 # force reload on screen
-                except:
-                    logger.error("Error when rotating photo")
-            else :
-                rotateCW_button.estado = 0
-
-            if paused and (rotateCCW_button.estado == 1 or rotateCCW_button.estado == 2): # Need to be on pause 
-                rotateCCW_button.estado = 0
-                nexttm = delta
-                im.close() #close file on disk
-                try:
-                    with open(iFiles[pic_num],'rb') as tmp_file: #open file again to be used in exif context
-                      tmp_im = exif.Image(tmp_file)
-                      tmp_file.close() 
-                      if (tmp_im.has_exif) : # If it has exif data, rotate it if it does not, do nothing
-                        save_file(iFiles[pic_num]) # Copy file to Backup folder
-                        tmp_im.orientation = Rotation[CCW][tmp_im.orientation] # changes EXIF data orientation parameter              
-                        with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
-                          tmp_file.write(tmp_im.get_file())
-                        next_pic_num -=1 # force reload on screen
-                except:
-                    logger.error("Error when rotating photo")
-            else :
-                rotateCCW_button.estado = 0
-                    
-            if pause_button.estado == 1 or pause_button.estado == 2: # button was pressed
-              paused = not paused
-              pause_button.estado = 0
-      
-            # if pause_button.estado == 2: # pause button held: toggle screen on/off
-            #   if screen:
-            #     os.system(CMD_SCREEN_OFF)
-            #   else:
-            #     os.system(CMD_SCREEN_ON)
-            #     screen=not screen
-            #   pause_button.estado = 0
-            #   logger.info("Toggle Screen ON/OFF %s",screen)
-
-            if back_button.estado == 1 or back_button.estado == 2 : 
-              nexttm = delta
-              next_pic_num -= 2
-              if next_pic_num < -1:
-                next_pic_num = -1
-              #nexttm = 0 #force reload
-              back_button.estado = 0
-            if forward_button.estado == 1 or forward_button.estado == 2 : 
-              nexttm = delta
-              forward_button.estado = 0
-# All config.BUTTONS go to idle after processing them, regardless of state
           # Check if next slide is due now
          
 # Keyboard and button handling
