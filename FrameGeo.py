@@ -692,6 +692,7 @@ def main(
               t_factor = interval - t_factor
             slide.unif[48] = xstep * t_factor
             slide.unif[49] = ystep * t_factor
+          slide.draw()
           a += delta_alpha
           slide.unif[44] = a
           if a >= 1.0:
