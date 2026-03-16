@@ -737,7 +737,7 @@ def main(
             # define some default values
             orientation = 1 # unrotated
             dt=None         # will hold date from EXIF
-            datestruct=None # will hold formatted date
+            datestruct=None # will hold formatted date w
             # Format metadata
             try:
               exif_data = im._getexif()
