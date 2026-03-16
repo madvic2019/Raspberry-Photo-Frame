@@ -574,8 +574,7 @@ def main(
       #check if there are files to display  
           if nFi > 0:
             # If needed, display new photo
-            if (tm > nexttm and not paused) or ((tm - nexttm) >= check_dirs): # this must run first iteration of loop
-              logger.debug("tm es %d; nexttm es %d; la resta %d",tm,nexttm,tm-nexttm)
+            
               nexttm = tm + interval
               a = 0.0 # alpha - proportion front image to back
               sbg = sfg
@@ -720,8 +719,6 @@ def main(
 #render the text
           text.draw()
           text2.draw()
-          slide_state = "loading"
-          logger.debug("Going to %s",slide_state)
           if KEYBOARD:
             k = kbd.read()
             if k != -1:
@@ -846,7 +843,11 @@ def main(
               nexttm = delta
               forward_button.estado = 0
 # All config.BUTTONS go to idle after processing them, regardless of state
-      
+          if (tm > nexttm and not paused) or ((tm - nexttm) >= check_dirs): # this must run first iteration of loop
+              logger.debug("tm es %d; nexttm es %d; la resta %d",tm,nexttm,tm-nexttm)
+              slide_state = "loading"
+              logger.debug("Going to %s",slide_state)
+          
 # Keyboard and button handling
       #delta=time.time()-86400.0
       delta=0
