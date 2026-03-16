@@ -780,10 +780,7 @@ def main(
                         next_pic_num -=1 # force reload on screen
                 except:
                     logger.error("Error when rotating photo")
-
-
-                
-                
+        
           if config.BUTTONS:
       #Handling of config.BUTTONS goes here
             if paused and (rotateCW_button.estado == 1 or rotateCW_button.estado == 2): # Need to be on pause 
