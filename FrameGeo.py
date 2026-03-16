@@ -568,7 +568,11 @@ def main(
         timetext=timetostring(time_dot,tm)
       else :
         timetext="PAUSA"
-      timeblock.set_text(text_format="{}".format(timetext))   
+      timeblock.set_text(text_format="{}".format(timetext))
+      if (tm > nexttm and not paused) or ((tm - nexttm) >= check_dirs): # this must run first iteration of loop
+        logger.debug("tm es %d; nexttm es %d; la resta %d",tm,nexttm,tm-nexttm)
+        slide_state="loading"
+        logger.debug("Going to %s",slide_state)
       match slide_state :
         case "loading":
       #check if there are files to display  
@@ -842,10 +846,6 @@ def main(
               forward_button.estado = 0
 # All config.BUTTONS go to idle after processing them, regardless of state
           # Check if next slide is due now
-      if (tm > nexttm and not paused) or ((tm - nexttm) >= check_dirs): # this must run first iteration of loop
-        logger.debug("tm es %d; nexttm es %d; la resta %d",tm,nexttm,tm-nexttm)
-        slide_state = "loading"
-        logger.debug("Going to %s",slide_state)
          
 # Keyboard and button handling
       #delta=time.time()-86400.0
