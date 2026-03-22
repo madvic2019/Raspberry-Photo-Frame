@@ -404,7 +404,7 @@ def main(
     check_dirs,                    # Interval between checking folders in seconds
     weathertime,                    # Time to show weather forecast in seconds
     logfile,                      # Log file name
-    debug = False,              # Debug mode
+    debug,              # Debug mode
     ) :
     
     slide_state = "loading"
