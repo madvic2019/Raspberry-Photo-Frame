@@ -48,7 +48,6 @@ import subprocess
 import signal
 import logging
 import setproctitle # to set process title
-import threading
 
 
 from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
@@ -296,21 +295,20 @@ def tidy_name(path_name):
     name = ''.join([c for c in name if c in config.CODEPOINTS])
     return name
 
-#changed this funtion to work as an independent hread
-def check_changes(dir,delay,logger): #walk the folder structure to check if there are changes
-  global last_file_change,update
-  while True: #run forever every delay seconds
-    time.sleep(delay)
-    logger.info("Checking for changes")
-    update = False #this variable is checked by main thread
-    for root, _, _ in os.walk(dir):
-      try:
-         mod_tm = os.stat(root).st_mtime
-         if mod_tm > last_file_change:
+
+def check_changes(dir): #walk the folder structure to check if there are changes
+  global last_file_change
+  update = False
+  for root, _, _ in os.walk(dir):
+    try:
+        mod_tm = os.stat(root).st_mtime
+        if mod_tm > last_file_change:
           last_file_change = mod_tm
           update = True
-      except:
+    except:
         logger.error("Filesystem not available")
+        
+  return update
 
 
 def get_files(dir,config_file,shuffle): # Get image files names to show
@@ -410,10 +408,8 @@ def main(
     ) :
     
     slide_state = "loading"
-    global backup_dir,paused,geoloc,last_file_change,kb_up,screen,logger,update
-    
-    
-    # Set up logging      
+    global backup_dir,paused,geoloc,last_file_change,kb_up,screen,logger
+  # Set up logging      
     if debug:
         loglevel=logging.DEBUG
     else:
@@ -438,9 +434,7 @@ def main(
                 check_dirs,
                 weathertime,
                 logfile)
-    update=False
-    # launch dir check thread
-    threading.Thread(target=check_changes,args=(startdir,check_dirs,logger)).start()
+    
     backup_dir = config.BKUP_DIR
     
     logger.info(backup_dir)
@@ -842,18 +836,20 @@ def main(
           # State: DISPLAY
         case "display":
           slide.draw()
-          if (num_run_through > config.NUMBEROFROUNDS) :#or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
+          if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
             logger.info("Refreshing Files list")
-            #next_check_tm = time.time() + check_dirs  # Set up the next interval
-            if update:
-              logger.info("Re-Fetching images files, erase config file")
-              with open(config_file,'w') as f :
-                json.dump('',f) # creates an empty config file, forces directory reload
-              iFiles, nFi = get_files(startdir,config_file,shuffle)
-              next_pic_num = 0
-              update=False
-            else :
-              logger.info("No directory changes: do nothing")
+            next_check_tm = time.time() + check_dirs  # Set up the next interval
+            try:
+              if check_changes(startdir): #rebuild files list if changes happened
+                logger.info("Re-Fetching images files, erase config file")
+                with open(config_file,'w') as f :
+                  json.dump('',f) # creates an empty config file, forces directory reload
+                iFiles, nFi = get_files(startdir,config_file,shuffle)
+                next_pic_num = 0
+              else :
+                logger.info("No directory changes: do nothing")
+            except:
+                logger.warning("Error refreshing file list, keep old one")
             num_run_through = 0
 #render the image        
       #render the text
