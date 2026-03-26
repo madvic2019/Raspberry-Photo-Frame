@@ -297,10 +297,11 @@ def tidy_name(path_name):
     return name
 
 #changed this funtion to work as an independent hread
-def check_changes(dir,delay): #walk the folder structure to check if there are changes
+def check_changes(dir,delay,logger): #walk the folder structure to check if there are changes
   global last_file_change,update
   while True: #run forever every delay seconds
     time.sleep(delay)
+    logger.info("Checking for changes")
     update = False #this variable is checked by main thread
     for root, _, _ in os.walk(dir):
       try:
@@ -410,9 +411,7 @@ def main(
     
     slide_state = "loading"
     global backup_dir,paused,geoloc,last_file_change,kb_up,screen,logger,update
-    update=False
-    # launch dir check thread
-    threading.Thread(target=check_changes,args=(startdir,check_dirs)).start()
+    
     
     # Set up logging      
     if debug:
@@ -439,7 +438,9 @@ def main(
                 check_dirs,
                 weathertime,
                 logfile)
-    
+    update=False
+    # launch dir check thread
+    threading.Thread(target=check_changes,args=(startdir,check_dirs,logger)).start()
     backup_dir = config.BKUP_DIR
     
     logger.info(backup_dir)
