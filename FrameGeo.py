@@ -678,7 +678,7 @@ def main(
             os.system(CMD_SCREEN_OFF)
           else:
             os.system(CMD_SCREEN_ON)
-            screen=not screen
+          screen=not screen
           pause_button.estado = 0
           logger.info("Toggle Screen ON/OFF %s",screen)
 
