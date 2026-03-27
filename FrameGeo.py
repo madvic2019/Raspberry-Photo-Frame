@@ -1,5 +1,4 @@
-#--coding: utf-8 --
-from __future__ import absolute_import, division, print_function, unicode_literals
+#!/usr/bin/env python3
 ''' Simplified slideshow system using ImageSprite and without threading for background
 loading of images (so may show delay for v large images).
     Also has a minimal use of PointText and TextBlock system with reduced  codepoints
