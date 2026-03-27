@@ -36,24 +36,22 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMA
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
-import os
-import shutil
-import time 
-import random
-import pi3d
 import argparse
 import json
-import math
-import subprocess
-import signal
 import logging
-import setproctitle # to set process title
+import math
+import os
+import random
+import shutil
+import signal
+import subprocess
+import time
 
-
-from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
-from PIL.ExifTags import GPSTAGS,TAGS
-import exif # Direct access to EXIF tags
+import exif
 from geopy.geocoders import GeoNames
+from PIL import Image, ImageFilter  # these are needed for getting exif data from images
+import pi3d
+import setproctitle  # to set process title
 
 import FrameConfig as config
 
