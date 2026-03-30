@@ -63,6 +63,7 @@ setproctitle.setproctitle("FrameGeo")
 def signal_handler(signal, frame):
     logger.info("Signal %d received, exiting...", signal)
     os.system(CMD_SCREEN_OFF)  # turn screen off
+    save_geo_cache()
     exit(0)
     
 signal.signal(signal.SIGINT, signal_handler)  # Catch Ctrl-C
@@ -78,7 +79,9 @@ CMD_SCREEN_ON = 'xset -d :0 dpms force on s off ; xset -d :0 dpms 20000 20000 20
 
 #############################
 SHOW_LOCATION = True
-
+GEO_CACHE_FILE = "/tmp/framegeo_geocache.json"
+geo_cache = {}
+geo_cache_dirty = False
 #####################################################
 BLUR_EDGES = True # use blurred version of image to fill edges - will override FIT = False
 BLUR_AMOUNT = 12 # larger values than 12 will increase processing load quite a bit
@@ -185,6 +188,18 @@ def launchSolar(delay) :
   os.kill(proc.pid, signal.SIGTERM)
   logger.info("%d process killed",proc.pid)
 
+#########################################################
+# Geolocalization 
+def save_geo_cache() :
+  global geo_cache_dirty
+  if geo_cache_dirty:
+        try:
+            with open(GEO_CACHE_FILE, "w") as f:
+              json.dump(geo_cache, f, indent=2)
+              logger.info("Geo cache saved: %d entries", len(geo_cache))
+        except Exception as e:
+          logger.warning("Could not save geo cache: %s", str(e))
+
 def get_geotagging(exif): # extract EXIF geographical information
   geotagging = {}
   if config.EXIF_GPS not in exif:
@@ -212,15 +227,64 @@ def get_coordinates(geotags):
     if geotags is not None :
       lat = get_decimal_from_dms(geotags['GPSLatitude'], geotags['GPSLatitudeRef'])
       lon = get_decimal_from_dms(geotags['GPSLongitude'], geotags['GPSLongitudeRef'])
-      logger.info('coordinates= %d %d',lat,lon)
+      logger.info('coordinates= %f %f',lat,lon)
       return (lat,lon)
     else :
       return None
 
-def get_geo_name(exif) : #Obtain geographic names from service provider
-  # geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,language='es') 
-  geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,lang='es') 
-  return geocoder
+# def get_geo_name(exif) : #Obtain geographic names from service provider
+#   # geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,language='es') 
+#   geocoder=geoloc.reverse(get_coordinates(get_geotagging(exif)),timeout=10,lang='es') 
+#   return geocoder
+
+def get_geo_name(exif_data):
+    global geo_cache, geo_cache_dirty
+
+    coords = get_coordinates(get_geotagging(exif_data))
+    if coords is None or geoloc is None:
+        return None
+
+    # 🔑 normalización: ~100 m
+    lat = round(coords[0], 3)
+    lon = round(coords[1], 3)
+    key = f"{lat},{lon}"
+
+    # ✅ CACHE HIT
+    if key in geo_cache:
+        logger.debug("Geo cache hit: %s", key)
+        return geo_cache[key]
+
+    try:
+        loc = geoloc.reverse(
+            (lat, lon),
+            exactly_one=True,
+            timeout=10,
+            lang="es"
+        )
+        if not loc:
+            return None
+
+        raw = loc.raw or {}
+
+        # GeoNames devuelve campos planos
+        city = raw.get("name")
+        region = raw.get("adminName1")
+        country = raw.get("countryName")
+
+        parts = [p for p in (city, region, country) if p]
+        text = ", ".join(parts) if parts else None
+
+        if text:
+            geo_cache[key] = text
+            geo_cache_dirty = True
+
+        return text
+
+    except Exception as e:
+        logger.warning("GeoNames reverse failed: %s", str(e))
+        return None
+
+#################################################
 
 def get_orientation(fname) : #extract orientation and capture date from EXIF data
   orientation = 1 
@@ -233,9 +297,6 @@ def get_orientation(fname) : #extract orientation and capture date from EXIF dat
   except :  
     dt = os.path.getmtime(fname) # so use file last modified date
   return orientation,dt
-
-
-
 
 def tex_load(im, orientation, size):
     
@@ -461,14 +522,29 @@ def main(
     screen = True 
 
     ##############################################
-    # Create GeoNames locator object www.geonames.org
+    # Setup cache for gelocation information
+    global geo_cache, geo_cache_dirty
+
+    try:
+      if os.path.exists(GEO_CACHE_FILE):
+        with open(GEO_CACHE_FILE, "r") as f:
+            geo_cache = json.load(f)
+        logger.info("Geo cache loaded: %d entries", len(geo_cache))
+      else:
+        geo_cache = {}
+    except Exception as e:
+      logger.warning("Could not load geo cache: %s", str(e))
+    geo_cache = {}
+
+    geo_cache_dirty = False
+    # Create GeoNames locator object www.geonames.org    
     geoloc=None
     try:
       geoloc=GeoNames(username=geonamesuser)
-
     except:
       logger.error("Geographic information server not available")
-    
+    #####################################################
+        
     logger.info("Setting up display")
     DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
     CAMERA = pi3d.Camera(is_3d=False)
@@ -870,8 +946,9 @@ def main(
     os.system(CMD_SCREEN_OFF) # turn screen off
     logger.info("Screen OFF")
     DISPLAY.destroy()
+    save_geo_cache()
     logger.info("End of slideshow")
-# end of main function    
+    # end of main function    
 
 
 ###next block parses command line arguments and invokes main function
