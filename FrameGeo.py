@@ -614,29 +614,6 @@ def main(
     slide.unif[47] = config.EDGE_ALPHA
     os.system(CMD_SCREEN_ON) #turn screen on
     logger.info("Screen ON")
-    if weathertime != 0:
-      logger.info("launching weather forecast and solar production status")
-      launchTiempo(weathertime/2) # show weather forecast for weathertime/2 seconds 
-      launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
-       
-    if KEYBOARD:
-      kbd = pi3d.Keyboard()
-
-    # # images in iFiles list
-    # nexttm = 0.0
-    # iFiles, nFi = get_files(startdir,config_file,shuffle)
-    next_pic_num = 0
-    sfg = None # slide for foreground
-    sbg = None # slide for background
-    # if nFi == 0:
-    #   logger.error('No files selected!')
-    #   exit()
-    # images list (initially empty, filled by background scan)
-    nexttm = 0.0
-    iFiles = []
-    nFi = 0
-    next_pic_num = 0
-
     # Launch initial background scan
     scan_in_progress = True
     scan_thread = threading.Thread(
@@ -645,10 +622,46 @@ def main(
         daemon=True
     )
     scan_thread.start()
+    
+    if weathertime != 0:
+      logger.info("launching weather forecast and solar production status")
+      launchTiempo(weathertime/2) # show weather forecast for weathertime/2 seconds 
+      launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
+       
+    if KEYBOARD:
+      kbd = pi3d.Keyboard()
 
-    logger.info("Waiting for initial file scan to complete...")
-    scan_ready_event.wait()   # ⏸️ bloqueo controlado
-    logger.info("Initial file scan completed")
+
+      # Ensure initial scan has completed before slideshow starts
+    if not scan_ready_event.is_set():
+      logger.info("Waiting for initial file scan to complete after Firefox screens")
+      scan_ready_event.wait()
+
+    logger.info("Initial file scan completed, proceeding to slideshow")
+    nexttm = 0.0
+    iFiles = []
+    nFi = 0
+    next_pic_num = 0
+    sfg = None # slide for foreground
+    sbg = None # slide for background
+    
+    with scan_lock:
+      if scan_result is not None:
+        iFiles = scan_result
+        nFi = len(iFiles)
+        scan_result = None
+        current_fs_state = scan_fs_state
+        next_pic_num = 0
+        num_run_through = 0
+
+        logger.info("Initial file list applied: %d images", nFi)
+    # if nFi == 0:
+    #   logger.error('No files selected!')
+    #   exit()
+    # images list (initially empty, filled by background scan)
+   
+    
+  
     
     # PointText and TextBlock. 
     #font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(128,128,128,12))
