@@ -51,6 +51,15 @@ from geopy.geocoders import GeoNames
 from PIL import Image, ImageFilter  # these are needed for getting exif data from images
 import pi3d
 import setproctitle  # to set process title
+import threading
+
+scan_thread = None
+scan_in_progress = False
+scan_result = None
+scan_fs_state= None
+current_fs_state = None
+scan_lock = threading.Lock()
+
 
 import FrameConfig as config
 
@@ -368,7 +377,6 @@ def check_changes(dir): #walk the folder structure to check if there are changes
         
   return update
 
-
 def get_files(dir,config_file,shuffle): # Get image files names to show
   
   global last_file_change
@@ -416,6 +424,55 @@ def get_files(dir,config_file,shuffle): # Get image files names to show
 
   logger.info("%d image files found",len(file_list))
   return file_list, len(file_list) # tuple of file list, number of pictures
+####################################################
+# New scan files + fill files list on separate Thread
+#######################################################
+def scan_files_thread(startdir, shuffle):
+    global scan_result, scan_in_progress, scan_fs_state
+
+    logger.info("Background scan started")
+
+    new_files = []
+    dir_count = 0
+    file_count = 0
+    max_mtime = 0
+
+    extensions = ['.png', '.jpg', '.jpeg', '.bmp']
+
+    for root, _dirnames, filenames in os.walk(startdir):
+        dir_count += 1
+        try:
+            max_mtime = max(max_mtime, os.stat(root).st_mtime)
+        except:
+            pass
+
+        for filename in filenames:
+            ext = os.path.splitext(filename)[1].lower()
+            if ext in extensions and not filename.startswith('.') and '.AppleDouble' not in root:
+                path = os.path.join(root, filename)
+                new_files.append(path)
+                file_count += 1
+                try:
+                    max_mtime = max(max_mtime, os.stat(path).st_mtime)
+                except:
+                    pass
+
+    if shuffle:
+        random.shuffle(new_files)
+    else:
+        new_files.sort()
+
+    with scan_lock:
+        scan_result = new_files
+        scan_fs_state = (dir_count, file_count, max_mtime)
+        scan_in_progress = False
+
+    logger.info(
+        "Background scan finished: %d files, %d dirs",
+        file_count, dir_count
+    )
+    
+
 
 def save_file(filename) : # Makes a copy of the file to a Backup folder
   stripped_filename = os.path.basename(filename)
@@ -563,16 +620,29 @@ def main(
     if KEYBOARD:
       kbd = pi3d.Keyboard()
 
-    # images in iFiles list
+    # # images in iFiles list
+    # nexttm = 0.0
+    # iFiles, nFi = get_files(startdir,config_file,shuffle)
+    # next_pic_num = 0
+    # sfg = None # slide for foreground
+    # sbg = None # slide for background
+    # if nFi == 0:
+    #   logger.error('No files selected!')
+    #   exit()
+    # images list (initially empty, filled by background scan)
     nexttm = 0.0
-    iFiles, nFi = get_files(startdir,config_file,shuffle)
+    iFiles = []
+    nFi = 0
     next_pic_num = 0
-    sfg = None # slide for foreground
-    sbg = None # slide for background
-    if nFi == 0:
-      logger.error('No files selected!')
-      exit()
 
+    # Launch initial background scan
+    scan_in_progress = True
+    scan_thread = threading.Thread(
+        target=scan_files_thread,
+        args=(startdir, shuffle),
+        daemon=True
+    )
+    scan_thread.start()
     # PointText and TextBlock. 
     #font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(128,128,128,12))
     
@@ -597,17 +667,40 @@ def main(
     #Retrieve last image number to restart the slideshow from config.num file
     #Retrieve next directory check time
     
-    cacheddata=(0,0,last_file_change,next_check_tm)
+    # cacheddata=(0,0,last_file_change,next_check_tm)
+    # try:
+    #   with open(config_file+".num",'r') as f:
+    #     cacheddata=json.load(f)
+    #     num_run_through=cacheddata[0]
+    #     next_pic_num=cacheddata[1]
+    #     last_file_change=cacheddata[2]
+    #     next_check_tm=cacheddata[3]
+    # except:
+    #   num_run_through=0
+    #   next_pic_num=0    
+      
+    cacheddata = (0, 0, None, next_check_tm)
     try:
-      with open(config_file+".num",'r') as f:
-        cacheddata=json.load(f)
-        num_run_through=cacheddata[0]
-        next_pic_num=cacheddata[1]
-        last_file_change=cacheddata[2]
-        next_check_tm=cacheddata[3]
-    except:
-      num_run_through=0
-      next_pic_num=0      
+        with open(config_file + ".num", "r") as f:
+            cacheddata = json.load(f)
+
+        num_run_through = cacheddata[0]
+        next_pic_num = cacheddata[1]
+        current_fs_state = cacheddata[2]
+        next_check_tm = cacheddata[3]
+
+        logger.info(
+            "Restored state: run=%d pic=%d fs_state=%s",
+            num_run_through,
+            next_pic_num,
+            current_fs_state
+        )
+
+    except Exception as e:
+        logger.info("No previous state restored (%s)", str(e))
+        num_run_through = 0
+        next_pic_num = 0
+        current_fs_state = None
     
     if (next_check_tm < time.time()) :  #if stored check time is in the past, make it "now"
       next_check_tm = time.time()
@@ -794,10 +887,22 @@ def main(
               num_run_through += 1
               next_pic_num = 0
             #update persistent cached data for restart
-            cacheddata=(num_run_through,pic_num,last_file_change,next_check_tm)
-            with open(config_file+".num","w") as f:
-              json.dump(cacheddata,f,separators=(',',':'))
-                              
+            # cacheddata=(num_run_through,pic_num,last_file_change,next_check_tm)
+            # with open(config_file+".num","w") as f:
+            #   json.dump(cacheddata,f,separators=(',',':'))
+            cacheddata = (
+              num_run_through,
+              pic_num,
+              current_fs_state,
+              next_check_tm
+              )
+            try:
+              with open(config_file + ".num", "w") as f:
+                json.dump(cacheddata, f, separators=(',', ':'))
+            except:
+              logger.warning("Could not persist state")
+              pass
+                             
             # File Open and texture build 
             try:
               temp=time.time()
@@ -908,22 +1013,56 @@ def main(
             logger.debug("Going to %s",slide_state)
           # State: DISPLAY
         case "display":
-          slide.draw()
-          if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
-            logger.info("Refreshing Files list")
-            next_check_tm = time.time() + check_dirs  # Set up the next interval
-            try:
-              if check_changes(startdir): #rebuild files list if changes happened
-                logger.info("Re-Fetching images files, erase config file")
-                with open(config_file,'w') as f :
-                  json.dump('',f) # creates an empty config file, forces directory reload
-                iFiles, nFi = get_files(startdir,config_file,shuffle)
-                next_pic_num = 0
-              else :
-                logger.info("No directory changes: do nothing")
-            except:
-                logger.warning("Error refreshing file list, keep old one")
+          # Apply background scan result if ready
+          with scan_lock:
+            if scan_result is not None:
+              logger.info("Applying new file list from background scan")
+
+            iFiles = scan_result
+            nFi = len(iFiles)
+            scan_result = None
+            current_fs_state = scan_fs_state
+            next_pic_num = 0
             num_run_through = 0
+        # Persist state
+            cacheddata = (
+              num_run_through,
+              next_pic_num,
+              current_fs_state,
+              next_check_tm
+            )
+            try:
+              with open(config_file + ".num", "w") as f:
+                  json.dump(cacheddata, f, separators=(',', ':'))
+            except Exception as e:
+              logger.warning("Could not persist state: %s", str(e))
+          slide.draw()
+          # if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
+          #   logger.info("Refreshing Files list")
+          #   next_check_tm = time.time() + check_dirs  # Set up the next interval
+          #   try:
+          #     if check_changes(startdir): #rebuild files list if changes happened
+          #       logger.info("Re-Fetching images files, erase config file")
+          #       with open(config_file,'w') as f :
+          #         json.dump('',f) # creates an empty config file, forces directory reload
+          #       iFiles, nFi = get_files(startdir,config_file,shuffle)
+          #       next_pic_num = 0
+          #     else :
+          #       logger.info("No directory changes: do nothing")
+          #   except:
+          #       logger.warning("Error refreshing file list, keep old one")
+          #   num_run_through = 0
+          # Periodic background rescan (no filesystem access in main thread)
+          if time.time() > next_check_tm and not scan_in_progress:
+              logger.info("Launching periodic background scan")
+              scan_in_progress = True
+              threading.Thread(
+                  target=scan_files_thread,
+                  args=(startdir, shuffle),
+                  daemon=True
+              ).start()
+              next_check_tm = time.time() + check_dirs
+
 #render the image        
       #render the text
           text.draw()
