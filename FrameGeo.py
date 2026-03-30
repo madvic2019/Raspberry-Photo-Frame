@@ -446,7 +446,7 @@ def scan_files_thread(startdir, shuffle):
             max_mtime = max(max_mtime, os.stat(root).st_mtime)
         except:
             pass
-
+        logger.info("Scanning %s", root)
         for filename in filenames:
             ext = os.path.splitext(filename)[1].lower()
             if ext in extensions and not filename.startswith('.') and '.AppleDouble' not in root:
