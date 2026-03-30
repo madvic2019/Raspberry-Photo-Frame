@@ -59,6 +59,7 @@ scan_result = None
 scan_fs_state= None
 current_fs_state = None
 scan_lock = threading.Lock()
+scan_ready_event = threading.Event()
 
 
 import FrameConfig as config
@@ -466,6 +467,7 @@ def scan_files_thread(startdir, shuffle):
         scan_result = new_files
         scan_fs_state = (dir_count, file_count, max_mtime)
         scan_in_progress = False
+    scan_ready_event.set()
 
     logger.info(
         "Background scan finished: %d files, %d dirs",
@@ -643,6 +645,11 @@ def main(
         daemon=True
     )
     scan_thread.start()
+
+    logger.info("Waiting for initial file scan to complete...")
+    scan_ready_event.wait()   # ⏸️ bloqueo controlado
+    logger.info("Initial file scan completed")
+    
     # PointText and TextBlock. 
     #font = pi3d.Font(FONT_FILE, codepoints=CODEPOINTS, grid_size=7, shadow_radius=4.0,shadow=(128,128,128,12))
     
