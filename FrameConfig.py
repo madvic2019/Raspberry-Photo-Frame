@@ -22,6 +22,7 @@ elif "aarch64" == uname.machine or "armv7l" == uname.machine:
    BUTTONS = True
    BROWSER='chromium-browser'
    KEYCOMM='xdotool'
+   print("Running on Raspberry Pi")
    from gpiozero import Button
 else :
    PI3DDEMO = '/home/victor/pi3d_demos' # assume in a Linux environment it will be located directly on user home

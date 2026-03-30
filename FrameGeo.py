@@ -1,5 +1,4 @@
-#--coding: utf-8 --
-from __future__ import absolute_import, division, print_function, unicode_literals
+#!/usr/bin/env python3
 ''' Simplified slideshow system using ImageSprite and without threading for background
 loading of images (so may show delay for v large images).
     Also has a minimal use of PointText and TextBlock system with reduced  codepoints
@@ -36,24 +35,22 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMA
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
-import os
-import shutil
-import time 
-import random
-import pi3d
 import argparse
 import json
-import math
-import subprocess
-import signal
 import logging
-import setproctitle # to set process title
+import math
+import os
+import random
+import shutil
+import signal
+import subprocess
+import time
 
-
-from PIL import Image, ExifTags, ImageFilter # these are needed for getting exif data from images
-from PIL.ExifTags import GPSTAGS,TAGS
-import exif # Direct access to EXIF tags
+import exif
 from geopy.geocoders import GeoNames
+from PIL import Image, ImageFilter  # these are needed for getting exif data from images
+import pi3d
+import setproctitle  # to set process title
 
 import FrameConfig as config
 
@@ -92,7 +89,7 @@ KEYBOARD = True  # set to False when running headless to avoid curses error. Tru
 # these variables can be altered using MQTT messaging
 #####################################################
 TIME_DELAY = 15 # default timer between slides
-fade_time = 0.5
+fade_time = 0.3
 quit = False
 paused = False # NB must be set to True after the first iteration of the show!
 FPS = 20
@@ -404,13 +401,12 @@ def main(
     check_dirs,                    # Interval between checking folders in seconds
     weathertime,                    # Time to show weather forecast in seconds
     logfile,                      # Log file name
-    debug = False,              # Debug mode
+    debug,              # Debug mode
     ) :
-  
-    global backup_dir,paused,geoloc,last_file_change,kb_up,screen,logger
-  # Set up logging  
-    #rotating_handler = RotatingFileHandler(logfile,maxBytes=1024*1024*10,backupCount=3)
     
+    slide_state = "loading"
+    global backup_dir,paused,geoloc,last_file_change,kb_up,screen,logger
+  # Set up logging      
     if debug:
         loglevel=logging.DEBUG
     else:
@@ -441,11 +437,11 @@ def main(
     logger.info(backup_dir)
 
     if config.BUTTONS:
-      pause_button = Button(8, hold_time=20,bounce_time=3)
-      back_button = Button(9,hold_time=6,bounce_time=3)
-      forward_button = Button(4,hold_time=6,bounce_time=3)
-      rotateCW_button = Button(6,hold_time=6,bounce_time=3)
-      rotateCCW_button = Button(5,hold_time=6,bounce_time=3)
+      pause_button = Button(8, hold_time=20,bounce_time=2)
+      back_button = Button(9,hold_time=6,bounce_time=2)
+      forward_button = Button(4,hold_time=6,bounce_time=2)
+      rotateCW_button = Button(6,hold_time=6,bounce_time=2)
+      rotateCCW_button = Button(5,hold_time=6,bounce_time=2)
 
       pause_button.when_pressed = handle_press
       back_button.when_pressed = handle_press
@@ -478,7 +474,6 @@ def main(
     CAMERA = pi3d.Camera(is_3d=False)
     logger.info(DISPLAY.opengl.gl_id)
     shader = pi3d.Shader(config.PI3DDEMO + "/shaders/blend_new")
-    #shader = pi3d.Shader("/home/patrick/python/pi3d_demos/shaders/blend_new")
     slide = pi3d.Sprite(camera=CAMERA, w=DISPLAY.width, h=DISPLAY.height, z=5.0)
     slide.set_shader(shader)
     slide.unif[47] = config.EDGE_ALPHA
@@ -486,7 +481,7 @@ def main(
     logger.info("Screen ON")
     if weathertime != 0:
       logger.info("launching weather forecast and solar production status")
-      launchTiempo(weathertime/2) # show weather forecast for weathertime seconds 
+      launchTiempo(weathertime/2) # show weather forecast for weathertime/2 seconds 
       launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
        
     if KEYBOARD:
@@ -550,7 +545,7 @@ def main(
     # Main loop 
     
     while DISPLAY.loop_running() :
-    
+      # PREPARATION
       previous = tm # record previous time value, used to make cursor blink
       tm = time.time()
       if weathertime != 0 :
@@ -562,170 +557,15 @@ def main(
           logger.info("Launching solar production status")
           launchSolar(weathertime) # show status of solar production for weathertime seconds
       # after that, continue with slide show
-        if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) : #blink dot
-          time_dot = not(time_dot)
-      
-      #check if there are file to display  
-      if nFi > 0:
-        # If needed, display new photo
-        if (tm > nexttm and not paused) or ((tm - nexttm) >= check_dirs): # this must run first iteration of loop
-          logger.debug("tm es %d; nexttm es %d; la resta %d",tm,nexttm,tm-nexttm)
-          nexttm = tm + interval
-          a = 0.0 # alpha - proportion front image to back
-          sbg = sfg
-          sfg = None
-          
-          
-          while sfg is None: # keep going through until a usable picture is found TODO break out how?
-           # Calculate next picture index to be shown
-            pic_num = next_pic_num
-            next_pic_num += 1
-            if next_pic_num >= nFi:
-              num_run_through += 1
-              next_pic_num = 0
-            #update persistent cached data for restart
-            cacheddata=(num_run_through,pic_num,last_file_change,next_check_tm)
-            with open(config_file+".num","w") as f:
-              json.dump(cacheddata,f,separators=(',',':'))
-            
-                 
-            # File Open and texture build 
-            try:
-              temp=time.time()
-              im = Image.open(iFiles[pic_num])
-              logger.info("foto numero %d %s",pic_num,iFiles[pic_num])
-            except:
-              logger.error("Error Opening File %s",iFiles[pic_num])
-              continue
-            
-              
-            # EXIF data and geolocation analysis
-            
-            # define some default values
-            orientation = 1 # unrotated
-            dt=None         # will hold date from EXIF
-            datestruct=None # will hold formatted date
-            # Format metadata
-            try:
-              exif_data = im._getexif()
-            except:
-              exif_data=None
-            try:        
-              orientation = int(exif_data[config.EXIF_ORIENTATION])
-            except:
-              orientation = 1
-            try: 
-              dt = time.mktime(time.strptime(exif_data[config.EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
-              datestruct=time.localtime(dt)
-            except:
-              datestruct=None
-            try:
-              location = get_geo_name(exif_data)
-            except Exception as e: # NB should really check error
-              logger.warning('Error preparing geoname: %s',str(e))
-              location = None
-            # Load and format image
-            try:
-              sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-            except:
-              #next_pic_num += 1 
-              continue  
-            nexttm = tm+interval #Time points to next interval 
-            
-
-# Image Rendering            
-          if sbg is None: # first time through
-            sbg = sfg
-          slide.set_textures([sfg, sbg])
-          slide.unif[45:47] = slide.unif[42:44] # transfer front width and height factors to back
-          slide.unif[51:53] = slide.unif[48:50] # transfer front width and height offsets
-          wh_rat = (DISPLAY.width * sfg.iy) / (DISPLAY.height * sfg.ix)
-          if (wh_rat > 1.0 and FIT) or (wh_rat <= 1.0 and not FIT):
-            sz1, sz2, os1, os2 = 42, 43, 48, 49
-          else:
-            sz1, sz2, os1, os2 = 43, 42, 49, 48
-            wh_rat = 1.0 / wh_rat
-          slide.unif[sz1] = wh_rat
-          slide.unif[sz2] = 1.0
-          slide.unif[os1] = (wh_rat - 1.0) * 0.5
-          slide.unif[os2] = 0.0
-          #transition 
-          if KENBURNS:
-              xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
-              slide.unif[48] = 0.0
-              slide.unif[49] = 0.0
-              kb_up = not kb_up
- 
-              
-# Prepare the different texts to be shown
-
-          overlay_text= "" #this will host the text on screen 
-          if SHOW_LOCATION: #(and/or month-year)
-            if location is not None:
-              overlay_text += tidy_name(str(location))
-              logger.debug(overlay_text)
-            if datestruct is not None :
-              overlay_text += " " + tidy_name(config.MES[datestruct.tm_mon - 1]) + "-" + str(datestruct.tm_year)
-              logger.debug(overlay_text)
-            try:
-              textblock.set_text(text_format="{}".format(overlay_text))
-              text.regen()
-            except :
-              logger.warning("Wrong Overlay_text Format")
-              textblock.set_text(" ")
-
-        # print time on screen, blink separator every second
-        if not paused :
-          timetext=timetostring(time_dot,tm)
-        else :
-          timetext="PAUSA"
-        timeblock.set_text(text_format="{}".format(timetext))          
-
-# manages transition
-        if KENBURNS:
-          t_factor = nexttm - tm
-          if kb_up:
-            t_factor = interval - t_factor
-          slide.unif[48] = xstep * t_factor
-          slide.unif[49] = ystep * t_factor
-
-        
-        if a <= 1.0: # transition is happening
-            
-            a += delta_alpha
-            slide.unif[44] = a
-            
-        else: # Check if image files list has to be rebuilt (no transition on going, so no harm to image
-          slide.set_textures([sfg, sfg])
-          if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
-            logger.info("Refreshing Files list")
-            next_check_tm = time.time() + check_dirs  # Set up the next interval
-            try:
-              if check_changes(startdir): #rebuild files list if changes happened
-                logger.info("Re-Fetching images files, erase config file")
-                with open(config_file,'w') as f :
-                  json.dump('',f) # creates an empty config file, forces directory reload
-                iFiles, nFi = get_files(startdir,config_file,shuffle)
-                next_pic_num = 0
-              else :
-                logger.info("No directory changes: do nothing")
-            except:
-                logger.warning("Error refreshing file list, keep old one")
-            num_run_through = 0
-#render the image        
-        
-        slide.draw()
-#render the text
-        text.draw()
-        text2.draw()
-      else:
-        textblock.set_text("NO IMAGES SELECTED")
-        textblock.colouring.set_colour(alpha=1.0)
-        text.regen()
-        text.draw()
-# Keyboard and button handling
-      #delta=time.time()-86400.0
-      delta=0
+      # Solve time display 
+      # print time on screen, blink separator every second
+      if (time.localtime(previous).tm_sec < time.localtime(tm).tm_sec) : #blink dot
+        time_dot = not(time_dot)
+      if not paused :
+        timetext=timetostring(time_dot,tm)
+      else :
+        timetext="PAUSA"
+      # regardless of state, handle ujser input: Keyboard and Buttons
       if KEYBOARD:
         k = kbd.read()
         if k != -1:
@@ -785,10 +625,7 @@ def main(
                     next_pic_num -=1 # force reload on screen
             except:
                 logger.error("Error when rotating photo")
-
-
-            
-            
+    
       if config.BUTTONS:
   #Handling of config.BUTTONS goes here
         if paused and (rotateCW_button.estado == 1 or rotateCW_button.estado == 2): # Need to be on pause 
@@ -829,18 +666,18 @@ def main(
         else :
             rotateCCW_button.estado = 0
                 
-        if pause_button.estado == 1 or pause_button.estado == 2: # button was pressed
+        if pause_button.estado == 1: # button was pressed
           paused = not paused
           pause_button.estado = 0
-	
-        # if pause_button.estado == 2: # pause button held: toggle screen on/off
-        #   if screen:
-        #     os.system(CMD_SCREEN_OFF)
-        #   else:
-        #     os.system(CMD_SCREEN_ON)
-        #     screen=not screen
-        #   pause_button.estado = 0
-        #   logger.info("Toggle Screen ON/OFF %s",screen)
+  
+        if pause_button.estado == 2: # pause button held: toggle screen on/off
+          if screen:
+            os.system(CMD_SCREEN_OFF)
+          else:
+            os.system(CMD_SCREEN_ON)
+          screen=not screen
+          pause_button.estado = 0
+          logger.info("Toggle Screen ON/OFF %s",screen)
 
         if back_button.estado == 1 or back_button.estado == 2 : 
           nexttm = delta
@@ -853,6 +690,175 @@ def main(
           nexttm = delta
           forward_button.estado = 0
 # All config.BUTTONS go to idle after processing them, regardless of state
+      #continue preparation
+      timeblock.set_text(text_format="{}".format(timetext))
+      if (tm > nexttm and not paused) or ((tm - nexttm) >= check_dirs): # this must run first iteration of loop
+        logger.debug("tm es %d; nexttm es %d; la resta %d",tm,nexttm,tm-nexttm)
+        slide_state="loading"
+        logger.debug("Going to %s",slide_state)
+      # State machine implementation
+      match slide_state :
+        case "loading":
+      #check if there are files to display  
+          #if nFi > 0:
+          # If needed, display new photo
+          
+          nexttm = tm + interval
+          a = 0.0 # alpha - proportion front image to back
+          sbg = sfg # previous photo stored for transition
+          sfg = None #Next photo to be loaded
+          attempts= 0
+                    
+          while sfg is None and attempts < 5: # keep going through until a usable picture is found 
+        # Calculate next picture index to be shown
+            attempts += 1
+            pic_num = next_pic_num
+            next_pic_num += 1
+            if next_pic_num >= nFi: # detect if a refresh is needed on the file list
+              num_run_through += 1
+              next_pic_num = 0
+            #update persistent cached data for restart
+            cacheddata=(num_run_through,pic_num,last_file_change,next_check_tm)
+            with open(config_file+".num","w") as f:
+              json.dump(cacheddata,f,separators=(',',':'))
+                              
+            # File Open and texture build 
+            try:
+              temp=time.time()
+              im = Image.open(iFiles[pic_num])
+              logger.info("foto numero %d %s",pic_num,iFiles[pic_num])
+            except:
+              logger.error("Error Opening File %s",iFiles[pic_num])
+              continue
+            # EXIF data and geolocation analysis
+            # define some default values
+            orientation = 1 # unrotated
+            dt=None         # will hold date from EXIF
+            datestruct=None # will hold formatted date w
+            # Format metadata
+            try:
+              exif_data = im._getexif()
+            except:
+              exif_data=None
+            try:        
+              orientation = int(exif_data[config.EXIF_ORIENTATION])
+            except:
+              orientation = 1
+            try: 
+              dt = time.mktime(time.strptime(exif_data[config.EXIF_DATID], '%Y:%m:%d %H:%M:%S'))
+              datestruct=time.localtime(dt)
+            except:
+              datestruct=None
+            try:
+              location = get_geo_name(exif_data)
+            except Exception as e: # NB should really check error
+              logger.warning('Error preparing geoname: %s',str(e))
+              location = None
+            # Load and format image
+            try:
+              sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
+            except: #loading texture failed: go to next picture
+              sfg = None
+              logger.warning("Error loading texture")
+              continue  
+            
+          nexttm = tm+interval #Time points to next interval 
+          
+  
+# Prepare the different texts to be shown
+          overlay_text= "" #this will host the text on screen 
+          if SHOW_LOCATION: #(and/or month-year)
+            if location is not None:
+              overlay_text += tidy_name(str(location))
+              logger.debug(overlay_text)
+            if datestruct is not None :
+              overlay_text += " " + tidy_name(config.MES[datestruct.tm_mon - 1]) + "-" + str(datestruct.tm_year)
+              logger.debug(overlay_text)
+            try:
+              textblock.set_text(text_format="{}".format(overlay_text))
+              text.regen()
+            except :
+              logger.warning("Wrong Overlay_text Format")
+              textblock.set_text(" ")
+              
+          
+        #Prepare Image Rendering            
+          if sbg is None: # first time through
+            sbg = sfg
+          slide.set_textures([sfg, sbg])
+        
+          slide.unif[45:47] = slide.unif[42:44] # transfer front width and height factors to back
+          slide.unif[51:53] = slide.unif[48:50] # transfer front width and height offsets
+          wh_rat = (DISPLAY.width * sfg.iy) / (DISPLAY.height * sfg.ix)
+          if (wh_rat > 1.0 and FIT) or (wh_rat <= 1.0 and not FIT):
+            sz1, sz2, os1, os2 = 42, 43, 48, 49
+          else:
+            sz1, sz2, os1, os2 = 43, 42, 49, 48
+            wh_rat = 1.0 / wh_rat
+          slide.unif[sz1] = wh_rat
+          slide.unif[sz2] = 1.0
+          slide.unif[os1] = (wh_rat - 1.0) * 0.5
+          slide.unif[os2] = 0.0
+          slide_state = "transition"
+          logger.debug("Going to %s",slide_state)
+        # else:
+        #   textblock.set_text("NO IMAGES SELECTED")
+        #   textblock.colouring.set_colour(alpha=1.0)
+        #   text.regen()
+        #   text.draw()
+        case "transition":
+            # manages transition
+          if KENBURNS:
+            xstep, ystep = (slide.unif[i] * 2.0 / interval for i in (48, 49))
+            slide.unif[48] = 0.0
+            slide.unif[49] = 0.0
+            kb_up = not kb_up
+          #if KENBURNS:
+            t_factor = nexttm - tm
+            if kb_up:
+              t_factor = interval - t_factor
+            slide.unif[48] = xstep * t_factor
+            slide.unif[49] = ystep * t_factor
+          slide.set_textures([sfg, sbg])
+          a += delta_alpha
+          slide.unif[44] = a
+          slide.draw()
+          text.draw()
+          text2.draw()
+          if a >= 1.0:
+            slide.set_textures([sfg, sfg])
+            sbg = sfg
+            slide_state = "display"
+            logger.debug("Going to %s",slide_state)
+          # State: DISPLAY
+        case "display":
+          slide.draw()
+          if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
+            logger.info("Refreshing Files list")
+            next_check_tm = time.time() + check_dirs  # Set up the next interval
+            try:
+              if check_changes(startdir): #rebuild files list if changes happened
+                logger.info("Re-Fetching images files, erase config file")
+                with open(config_file,'w') as f :
+                  json.dump('',f) # creates an empty config file, forces directory reload
+                iFiles, nFi = get_files(startdir,config_file,shuffle)
+                next_pic_num = 0
+              else :
+                logger.info("No directory changes: do nothing")
+            except:
+                logger.warning("Error refreshing file list, keep old one")
+            num_run_through = 0
+#render the image        
+      #render the text
+          text.draw()
+          text2.draw()
+
+          # Check if next slide is due now
+         
+# Keyboard and button handling
+      #delta=time.time()-86400.0
+      delta=0
+
 # WHILE LOOP ends here       
  
     try:
