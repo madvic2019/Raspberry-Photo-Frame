@@ -623,9 +623,9 @@ def main(
     # # images in iFiles list
     # nexttm = 0.0
     # iFiles, nFi = get_files(startdir,config_file,shuffle)
-    # next_pic_num = 0
-    # sfg = None # slide for foreground
-    # sbg = None # slide for background
+    next_pic_num = 0
+    sfg = None # slide for foreground
+    sbg = None # slide for background
     # if nFi == 0:
     #   logger.error('No files selected!')
     #   exit()
