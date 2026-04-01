@@ -15,13 +15,19 @@ uname=platform.uname() # tuple with (system, node, release, version, machine, pr
 if uname.system == "Windows" :
    PI3DDEMO = os.environ['HOMEPATH']+'/pi3d_demos-master'
    BUTTONS = False
-   BROWSER='chrome'
+   BROWSER="C:\Program Files\Google\Chrome\Application\chrome.exe"
    KEYCOMM='true'
+   TEMPDIR='C:\\temp'
+   PLATFORM='Windows'
+   print("Running on Windows")
+
 elif "aarch64" == uname.machine or "armv7l" == uname.machine: 
    PI3DDEMO = '/usr/local/lib/pi3d_demos' # requires copying downloaded demos from https://github.com/pi3d/pi3d_demos/archive/master.zip
    BUTTONS = True
    BROWSER='chromium-browser'
    KEYCOMM='xdotool'
+   TEMPDIR='/frododata/temp'
+   PLATFORM='Raspberry Pi'
    print("Running on Raspberry Pi")
    from gpiozero import Button
 else :
@@ -29,13 +35,13 @@ else :
    BUTTONS = False
    BROWSER='chromium'
    KEYCOMM='true'
+   TEMPDIR='~/temp'
+   PLATFORM='Linux'
+   print("Running on Linux")
    
-
-
-
 # Default values
 GEONAMESUSER = ''
-DEFAULT_CONFIG_FILE = './.photo-frame'
+DEFAULT_CONFIG_FILE = '.photo-frame'
 PIC_DIR = './examples' #change this to your images default location folder
 BKUP_DIR = '.backup-MarcoFotos' # This will be used to store modified or deleted image files. Must exist
 CHECK_DIR_TM = 3600 # Time to check for directory changes

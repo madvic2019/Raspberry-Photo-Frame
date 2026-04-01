@@ -45,6 +45,7 @@ import shutil
 import signal
 import subprocess
 import time
+import tempfile
 
 import exif
 from geopy.geocoders import GeoNames
@@ -52,6 +53,32 @@ from PIL import Image, ImageFilter  # these are needed for getting exif data fro
 import pi3d
 import setproctitle  # to set process title
 import threading
+
+import FrameConfig as config
+
+def atomic_write_json(path, data):
+    """
+    Escribe un JSON de forma atómica:
+    - escribe en un fichero temporal en el mismo directorio
+    - fsync
+    - os.replace() sobre el destino
+    Así evitamos JSON corrupto si hay corte de luz o crash.
+    """
+    dir_name = os.path.dirname(path) or "."
+    fd, tmp_path = tempfile.mkstemp(dir=dir_name, prefix=".tmp_", suffix=".json")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(data, f, separators=(',', ':'))
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, path)
+    except Exception:
+        # Si algo va mal, intentamos eliminar el temporal
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
 scan_thread = None
 scan_in_progress = False
@@ -61,12 +88,8 @@ current_fs_state = None
 scan_lock = threading.Lock()
 scan_ready_event = threading.Event()
 
-
-import FrameConfig as config
-
 # Set process title
 setproctitle.setproctitle("FrameGeo")
-
 
 ##################### SETUP SIGNAL HANDLING ########################
 # Set up signal handling to catch Ctrl-C and other signals
@@ -83,13 +106,16 @@ signal.signal(signal.SIGQUIT, signal_handler)  # Catch quit signal
 
 #####################################################################
 
-
-CMD_SCREEN_OFF = 'xset -d :0 dpms force off ; xset -d :0 dpms 60 300 300'
-CMD_SCREEN_ON = 'xset -d :0 dpms force on s off ; xset -d :0 dpms 20000 20000 20000'
+if config.PLATFORM == "Raspberry Pi":
+  CMD_SCREEN_OFF = 'xset -d :0 dpms force off ; xset -d :0 dpms 60 300 300'
+  CMD_SCREEN_ON = 'xset -d :0 dpms force on s off ; xset -d :0 dpms 20000 20000 20000'
+else :
+  CMD_SCREEN_OFF = ''
+  CMD_SCREEN_ON = ''
 
 #############################
 SHOW_LOCATION = True
-GEO_CACHE_FILE = "/tmp/framegeo_geocache.json"
+GEO_CACHE_FILE = config.TEMPFILE + "/framegeo_geocache.json"
 geo_cache = {}
 geo_cache_dirty = False
 #####################################################
@@ -160,7 +186,7 @@ Rotation=[{1:6,2:7,3:8,4:5,5:2,6:3,7:4,8:1},{1:8,2:5,3:6,4:7,5:4,6:1,7:2,8:3}] #
       new_orientation = 3         # set to rotate 180
  """
 
-if config.BUTTONS:
+if config.BUTTONS and config.PLATFORM == "Raspberry Pi":
   from gpiozero import Button
   Button.estado=0 #idle
 
@@ -179,7 +205,6 @@ if config.BUTTONS:
 
 last_file_change = 0
 
-
 def launchTiempo(delay) :
   #proc=subprocess.Popen(['surf','-F','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   proc=subprocess.Popen([config.BROWSER,'--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
@@ -188,7 +213,7 @@ def launchTiempo(delay) :
   subprocess.Popen([config.KEYCOMM,'key','Down','Down','Down','Down','mousemove','0','0'])
   time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
-  logger.info("%d process killed",proc.pid)
+  logger.info("process %d killed",proc.pid)
 
 def launchSolar(delay) :
   proc=subprocess.Popen([config.BROWSER,'--kiosk','http://pi4.local:1880/ui'])
@@ -196,7 +221,7 @@ def launchSolar(delay) :
   logger.info("Launch Solar Production with pid %d",proc.pid)
   time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
-  logger.info("%d process killed",proc.pid)
+  logger.info("process %d killed",proc.pid)
 
 #########################################################
 # Geolocalization 
@@ -363,118 +388,125 @@ def tidy_name(path_name):
     name = ''.join([c for c in name if c in config.CODEPOINTS])
     return name
 
-
-def check_changes(dir): #walk the folder structure to check if there are changes
-  global last_file_change
-  update = False
-  for root, _, _ in os.walk(dir):
-    try:
-        mod_tm = os.stat(root).st_mtime
-        if mod_tm > last_file_change:
-          last_file_change = mod_tm
-          update = True
-    except:
-        logger.error("Filesystem not available")
-        
-  return update
-
-def get_files(dir,config_file,shuffle): # Get image files names to show
-  
-  global last_file_change
-  file_list = None
-  extensions = ['.png','.jpg','.jpeg','.bmp'] # can add to these
-  if os.path.exists(config_file) : # If there is a previous file list stored, just use it
-    logger.info("Config file exists, open for reading %s",config_file)
-    with open(config_file, 'r') as f:
-        try:
-          file_list=json.load(f)
-          if len(file_list)>0:
-            if len(os.path.commonprefix((file_list[0],dir))) < len(dir) :
-              logger.info("Directory is different from config file %s -- %s reloading",os.path.dirname(file_list[0]),dir)
-              file_list=None
-          else:
-            file_list=None
-        except:
-          logger.warning('%s Config File is not correct',config_file)   
-            
-  if file_list is None :
-    logger.info("Config File is not existing or corrupt")
-    logger.info("Clean config file for numbers")
-    if os.path.exists(config_file+".num"):
-      os.remove(config_file+".num")
-    file_list=[]
-    for root, _dirnames, filenames in os.walk(dir):
-      mod_tm = os.stat(root).st_mtime # time of alteration in a directory
-      if mod_tm > last_file_change:
-        last_file_change = mod_tm
-      for filename in filenames:
-        ext = os.path.splitext(filename)[1].lower()
-        if ext in extensions and not '.AppleDouble' in root and not filename.startswith('.'):
-          file_path_name = os.path.join(root, filename)
-          file_list.append(file_path_name) 
-        if (len(file_list) % 1000 == 0) : # print every 1000 files detected
-          logger.info("%s files",len(file_list)) 
-    if shuffle:
-      random.shuffle(file_list)
-    else:
-      file_list.sort() # if not shuffled; sort by name
-    
-    with open(config_file,'w') as f: #Store list in config file
-      json.dump(file_list, f, sort_keys=True)
-      logger.info("List written to %s",config_file) 
-
-  logger.info("%d image files found",len(file_list))
-  return file_list, len(file_list) # tuple of file list, number of pictures
 ####################################################
 # New scan files + fill files list on separate Thread
 #######################################################
-def scan_files_thread(startdir, shuffle):
+def scan_files_thread(startdir, shuffle, filelist_cache):
+    """
+    Hilo en background que:
+      - recorre el árbol de directorios
+      - construye la lista de imágenes (new_files)
+      - calcula fingerprint del FS (dir_count, file_count, max_mtime)
+      - persiste un snapshot coherente (fs + files) en filelist_cache
+      - deja el resultado en scan_result / scan_fs_state para que
+        el hilo principal haga el swap cuando quiera.
+    """
     global scan_result, scan_in_progress, scan_fs_state
 
-    logger.info("Background scan started")
+    logger.info("Background scan started in %s", startdir)
 
     new_files = []
     dir_count = 0
     file_count = 0
-    max_mtime = 0
+    max_mtime = 0.0
 
     extensions = ['.png', '.jpg', '.jpeg', '.bmp']
 
     for root, _dirnames, filenames in os.walk(startdir):
         dir_count += 1
+
+        # mtime del directorio
         try:
-            max_mtime = max(max_mtime, os.stat(root).st_mtime)
-        except:
+            mtime_dir = os.stat(root).st_mtime
+            if mtime_dir > max_mtime:
+                max_mtime = mtime_dir
+        except Exception:
             pass
-        logger.info("Scanning %s", root)
+
         for filename in filenames:
             ext = os.path.splitext(filename)[1].lower()
             if ext in extensions and not filename.startswith('.') and '.AppleDouble' not in root:
                 path = os.path.join(root, filename)
                 new_files.append(path)
                 file_count += 1
+
+                # mtime del fichero
                 try:
-                    max_mtime = max(max_mtime, os.stat(path).st_mtime)
-                except:
+                    mtime_file = os.stat(path).st_mtime
+                    if mtime_file > max_mtime:
+                        max_mtime = mtime_file
+                except Exception:
                     pass
 
+                # opcional: log de progreso si hay MUCHOS ficheros
+                if file_count % 1000 == 0:
+                    logger.info("Scanned %d image files so far...", file_count)
+
+    # Ordenación / shuffle
     if shuffle:
         random.shuffle(new_files)
     else:
         new_files.sort()
 
+    # Fingerprint del filesystem
+    fingerprint = (dir_count, file_count, max_mtime)
+
+    # Construir snapshot para persistir en disco
+    snapshot = {
+        "version": 1,
+        "created": time.time(),
+        "fs": {
+            "fingerprint": fingerprint
+        },
+        "files": new_files
+    }
+
+    # Persistencia atómica del snapshot
+    try:
+        atomic_write_json(filelist_cache, snapshot)
+        logger.info("File list snapshot written to %s", filelist_cache)
+    except Exception as e:
+        logger.warning("Could not write file list snapshot: %s", str(e))
+
+    # Publicar resultado en las variables compartidas
     with scan_lock:
         scan_result = new_files
-        scan_fs_state = (dir_count, file_count, max_mtime)
+        scan_fs_state = fingerprint
         scan_in_progress = False
+
+    # Señalar que (al menos) este scan ha terminado
     scan_ready_event.set()
 
     logger.info(
-        "Background scan finished: %d files, %d dirs",
-        file_count, dir_count
+        "Background scan finished: %d files, %d dirs, max_mtime=%.0f",
+        file_count, dir_count, max_mtime
     )
     
+def snapshot_is_usable(snapshot, fs_state, max_age_seconds):
+    """
+    Devuelve True si el snapshot puede reutilizarse:
+    - snapshot no es None
+    - fingerprint coincide
+    - snapshot no es demasiado viejo (opcional)
+    """
+    if not snapshot:
+        return False
+    if not fs_state:
+        return False
 
+    snap_fp = snapshot.get("fs", {}).get("fingerprint")
+    if snap_fp != fs_state.get("fingerprint"):
+        return False
+
+    # Comprobación opcional por antigüedad:
+    snap_time = snapshot.get("created")
+    if snap_time is None:
+        return False
+
+    if time.time() - snap_time > max_age_seconds:
+        return False
+
+    return True
 
 def save_file(filename) : # Makes a copy of the file to a Backup folder
   stripped_filename = os.path.basename(filename)
@@ -618,10 +650,34 @@ def main(
     scan_in_progress = True
     scan_thread = threading.Thread(
         target=scan_files_thread,
-        args=(startdir, shuffle),
+        args=(startdir, shuffle, config_file+"files.json"),
         daemon=True
     )
-    scan_thread.start()
+    file_snapshot = None
+    try:
+        with open(config_file+"files.json", "r") as f:
+            file_snapshot = json.load(f)
+        logger.info("Loaded file snapshot (%d entries)",
+                    len(file_snapshot.get("files", [])))
+    except Exception as e:
+        logger.info("No valid snapshot found: %s", e)
+    
+    # Configurable: cuánto tiempo confiar en el snapshot
+    
+    if snapshot_is_usable(file_snapshot, fs_state, check_dirs):
+        logger.info("Reusing existing iFiles snapshot")
+        iFiles = file_snapshot["files"]
+        nFi = len(iFiles)
+        next_pic_num = min(next_pic_num, nFi - 1)
+        skip_initial_scan = True
+    else:
+        logger.info("Snapshot invalid or outdated — initial scan required")
+        skip_initial_scan = False
+    
+    if skip_initial_scan:
+        scan_ready_event.set()
+    else:
+          scan_thread.start()
     
     if weathertime != 0:
       logger.info("launching weather forecast and solar production status")
