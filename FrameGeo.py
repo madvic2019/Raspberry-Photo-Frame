@@ -558,7 +558,7 @@ def main(
     ) :
     
     slide_state = "loading"
-    global backup_dir,paused,geoloc,last_file_change,kb_up,screen,logger
+    global backup_dir,paused,geoloc,last_file_change,kb_up,screen,logger,scan_result,scan_in_progress,scan_fs_state
   # Set up logging      
     if debug:
         loglevel=logging.DEBUG
@@ -651,6 +651,10 @@ def main(
     run_config_file = config_file + ".num"
     content_config_file = config_file + ".files.json"
     SNAPSHOT_MAX_AGE = 24 * 3600   # 24 horas
+    scan_result=None
+    nexttm=0
+    scan_fs_state=None
+    scan_in_progress=False  
     
     # 1) Leer estado persistente de ejecución + FS desde config_file + ".num"
     try:
@@ -1266,7 +1270,7 @@ if __name__ == '__main__':
         type=int,
         dest='weathertime',
         action='store',
-        default=config.SHOW_WEATHER_TIME,
+        default=0,
         help='Time to show weather forecast in seconds'
         )
     parser.add_argument(
