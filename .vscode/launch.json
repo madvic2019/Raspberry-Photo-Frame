@@ -22,7 +22,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["C:\\Users\\diazv\\OneDrive\\Pictures-Gandalf"],
+            "args": ["--geouser","madvic","examples"],
          }
    ]
 }

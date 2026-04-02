@@ -719,21 +719,22 @@ def main(
         scan_thread.start()
         
     logger.info("Setting up display")
-    if config.PLATFORM in ("Windows","Linux"):
+    # if config.PLATFORM in ("Windows"):
       
-      DISPLAY = pi3d.Display.create(
-          w=1280, h=720,
-          x=0, y=0,
-          frames_per_second=FPS,
-          window_title="FrameGeo",
-          display_config=pi3d.DISPLAY_CONFIG_DEFAULT,
-          background=BACKGROUND
-      )
-    else: 
-      DISPLAY = pi3d.Display.create(x=0, y=0, 
+    #   DISPLAY = pi3d.Display.create(
+    #       w=1280, h=720,
+    #       x=50, y=50,
+    #       frames_per_second=FPS,
+    #       window_title="FrameGeo",
+    #       display_config=pi3d.DISPLAY_CONFIG_DEFAULT,
+    #       background=BACKGROUND
+    #   )
+    # else: 
+    DISPLAY = pi3d.Display.create(x=0, y=0, 
                                     frames_per_second=FPS,
                                     display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR,
                                     background=BACKGROUND)
+    logger.info("DISPLAY size: %d x %d", DISPLAY.width, DISPLAY.height)
     CAMERA = pi3d.Camera(is_3d=False)
     logger.info(DISPLAY.opengl.gl_id)
     shader = pi3d.Shader(config.PI3DDEMO + "/shaders/blend_new")
@@ -1060,12 +1061,22 @@ def main(
               location = None
             # Load and format image
             try:
-              sfg = tex_load(im, orientation, (DISPLAY.width, DISPLAY.height))
-            except: #loading texture failed: go to next picture
-              sfg = None
-              logger.warning("Error loading texture")
-              continue  
-            
+              win_w = DISPLAY.width
+              win_h = DISPLAY.height
+
+              if win_w <= 0 or win_h <= 0:
+                  # Tamaño por defecto razonable para Windows
+                  win_w, win_h = 1280, 720
+                  logger.warning(
+                      "DISPLAY size reported as %d x %d, using fallback %d x %d",
+                      DISPLAY.width, DISPLAY.height, win_w, win_h
+                  )
+              sfg = tex_load(im, orientation, (win_w, win_h))
+            except Exception as e:
+                  sfg = None
+                  logger.warning("Error loading texture: %s", str(e))
+                  continue
+                         
           nexttm = tm+interval #Time points to next interval 
           
   
