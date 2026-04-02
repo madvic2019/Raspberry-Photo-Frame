@@ -98,11 +98,11 @@ def signal_handler(signal, frame):
     os.system(CMD_SCREEN_OFF)  # turn screen off
     save_geo_cache()
     exit(0)
-    
-signal.signal(signal.SIGINT, signal_handler)  # Catch Ctrl-C
-signal.signal(signal.SIGTERM, signal_handler)  # Catch termination signal
-signal.signal(signal.SIGHUP, signal_handler)  # Catch hangup signal
-signal.signal(signal.SIGQUIT, signal_handler)  # Catch quit signal
+if config.PLATFORM != "Windows":    
+  signal.signal(signal.SIGINT, signal_handler)  # Catch Ctrl-C
+  signal.signal(signal.SIGTERM, signal_handler)  # Catch termination signal
+  signal.signal(signal.SIGHUP, signal_handler)  # Catch hangup signal
+  signal.signal(signal.SIGQUIT, signal_handler)  # Catch quit signal
 
 #####################################################################
 
@@ -115,7 +115,7 @@ else :
 
 #############################
 SHOW_LOCATION = True
-GEO_CACHE_FILE = config.TEMPFILE + "/framegeo_geocache.json"
+GEO_CACHE_FILE = config.TEMPDIR + "/framegeo_geocache.json"
 geo_cache = {}
 geo_cache_dirty = False
 #####################################################
@@ -210,8 +210,9 @@ def launchTiempo(delay) :
   proc=subprocess.Popen([config.BROWSER,'--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   logger.info("Launch Weather Forecast with pid %d",proc.pid)
   time.sleep(30)
-  subprocess.Popen([config.KEYCOMM,'key','Down','Down','Down','Down','mousemove','0','0'])
-  time.sleep(delay)
+  if config.PLATFORM == "Raspberry Pi":
+    subprocess.Popen([config.KEYCOMM,'key','Down','Down','Down','Down','mousemove','0','0'])
+    time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
   logger.info("process %d killed",proc.pid)
 
@@ -625,7 +626,6 @@ def main(
         geo_cache = {}
     except Exception as e:
       logger.warning("Could not load geo cache: %s", str(e))
-    geo_cache = {}
 
     geo_cache_dirty = False
     # Create GeoNames locator object www.geonames.org    
@@ -634,10 +634,102 @@ def main(
       geoloc=GeoNames(username=geonamesuser)
     except:
       logger.error("Geographic information server not available")
+    
     #####################################################
+    # --- Estado inicial y lectura de persistencia ---
+
+    global current_fs_state, scan_in_progress, scan_thread
+
+    # Estado por defecto
+    iFiles = []
+    nFi = 0
+    num_run_through = 0
+    next_pic_num = 0
+    next_check_tm = time.time() + check_dirs
+    fs_state = None
+    file_snapshot = None
+    run_config_file = config_file + ".num"
+    content_config_file = config_file + ".files.json"
+    SNAPSHOT_MAX_AGE = 24 * 3600   # 24 horas
+    
+    # 1) Leer estado persistente de ejecución + FS desde config_file + ".num"
+    try:
+        with open(run_config_file, "r") as f:
+            data = json.load(f)
+            runtime_state = data.get("runtime", {})
+            fs_state = data.get("fs", None)
+
+            num_run_through = runtime_state.get("num_run_through", 0)
+            next_pic_num = runtime_state.get("next_pic_num", 0)
+            next_check_tm = runtime_state.get("next_check_tm", time.time() + check_dirs)
+
+            logger.info(
+                "Restored runtime state: run=%d pic=%d",
+                num_run_through,
+                next_pic_num,
+            )
+    except Exception as e:
+        logger.info("No previous runtime state restored (%s)", str(e))
+        fs_state = None
+
+    # 2) Leer snapshot de iFiles desde FILELIST_CACHE
+    try:
+        with open(content_config_file, "r") as f:
+            file_snapshot = json.load(f)
+        logger.info(
+            "Loaded file snapshot: %d entries",
+            len(file_snapshot.get("files", []))
+        )
+    except Exception as e:
+        logger.info("No valid file snapshot found (%s)", str(e))
+        file_snapshot = None
+
+    # 3) Decidir si reutilizar snapshot o hacer escaneo inicial
+    if snapshot_is_usable(file_snapshot, fs_state, SNAPSHOT_MAX_AGE):
+        logger.info("Reusing existing iFiles snapshot")
+        iFiles = file_snapshot["files"]
+        nFi = len(iFiles)
+        if nFi == 0:
+            logger.warning("Snapshot is empty, forcing initial scan")
+            reuse_snapshot = False
+        else:
+            # Asegurar que next_pic_num está dentro de rango
+            if next_pic_num < 0 or next_pic_num >= nFi:
+                next_pic_num = 0
+            reuse_snapshot = True
+            current_fs_state = fs_state
+    else:
+        logger.info("Snapshot invalid or outdated — initial scan required")
+        reuse_snapshot = False
+
+    # 4) Si no se puede reutilizar snapshot, lanzar escaneo inicial en background
+    if not reuse_snapshot:
+        logger.info("Launching initial background scan")
+        scan_in_progress = True
+        scan_ready_event.clear()
+        scan_thread = threading.Thread(
+            target=scan_files_thread,
+            args=(startdir, shuffle, content_config_file),
+            daemon=True
+        )
+        scan_thread.start()
         
     logger.info("Setting up display")
-    DISPLAY = pi3d.Display.create(x=0, y=0, frames_per_second=FPS,display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR, background=BACKGROUND)
+    if config.PLATFORM in ("Windows","Linux"):
+      
+      DISPLAY = pi3d.Display.create(
+          w=1280, h=720,
+          x=0, y=0,
+          frames_per_second=FPS,
+          window_title="FrameGeo",
+          display_config=pi3d.DISPLAY_CONFIG_DEFAULT,
+          background=BACKGROUND
+      )
+    else: 
+      DISPLAY = pi3d.Display.create(x=0, y=0, 
+                                    frames_per_second=FPS,
+                                    display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR,
+                                    background=BACKGROUND)
     CAMERA = pi3d.Camera(is_3d=False)
     logger.info(DISPLAY.opengl.gl_id)
     shader = pi3d.Shader(config.PI3DDEMO + "/shaders/blend_new")
@@ -646,76 +738,69 @@ def main(
     slide.unif[47] = config.EDGE_ALPHA
     os.system(CMD_SCREEN_ON) #turn screen on
     logger.info("Screen ON")
-    # Launch initial background scan
-    scan_in_progress = True
-    scan_thread = threading.Thread(
-        target=scan_files_thread,
-        args=(startdir, shuffle, config_file+"files.json"),
-        daemon=True
-    )
-    file_snapshot = None
-    try:
-        with open(config_file+"files.json", "r") as f:
-            file_snapshot = json.load(f)
-        logger.info("Loaded file snapshot (%d entries)",
-                    len(file_snapshot.get("files", [])))
-    except Exception as e:
-        logger.info("No valid snapshot found: %s", e)
-    
-    # Configurable: cuánto tiempo confiar en el snapshot
-    
-    if snapshot_is_usable(file_snapshot, fs_state, check_dirs):
-        logger.info("Reusing existing iFiles snapshot")
-        iFiles = file_snapshot["files"]
-        nFi = len(iFiles)
-        next_pic_num = min(next_pic_num, nFi - 1)
-        skip_initial_scan = True
-    else:
-        logger.info("Snapshot invalid or outdated — initial scan required")
-        skip_initial_scan = False
-    
-    if skip_initial_scan:
-        scan_ready_event.set()
-    else:
-          scan_thread.start()
     
     if weathertime != 0:
       logger.info("launching weather forecast and solar production status")
       launchTiempo(weathertime/2) # show weather forecast for weathertime/2 seconds 
       launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
-       
+    
+    # 5) Si hubo escaneo inicial en background, asegurarse de que ha terminado
+    if not reuse_snapshot:
+        if not scan_ready_event.is_set():
+            logger.info("Waiting for initial file scan to complete after Firefox screens")
+            scan_ready_event.wait()
+
+        # Aplicar resultado del escaneo inicial
+        with scan_lock:
+            if scan_result is not None:
+                iFiles = scan_result
+                nFi = len(iFiles)
+                current_fs_state = {"fingerprint": scan_fs_state}
+                scan_result = None
+                num_run_through = 0
+                next_pic_num = 0
+
+                logger.info("Initial file list applied: %d images", nFi)
+
+        # Persistir nuevo estado runtime + fs
+        try:
+            state_data = {
+                "runtime": {
+                    "num_run_through": num_run_through,
+                    "next_pic_num": next_pic_num,
+                    "next_check_tm": next_check_tm,
+                },
+                "fs": current_fs_state,
+            }
+            with open(run_config_file, "w") as f:
+                json.dump(state_data, f, separators=(',', ':'))
+            snapshot = {
+                        "version": 1,
+                        "created": time.time(),
+                        "fs": current_fs_state,
+                        "files": iFiles
+                        }
+            atomic_write_json(content_config_file, snapshot)
+            logger.info("Initial snapshot written (%d entries)", nFi)
+        except Exception as e:
+          logger.warning("Could not persist runtime/fs state: %s", str(e))
+    
+    kbd=None
     if KEYBOARD:
       kbd = pi3d.Keyboard()
 
 
       # Ensure initial scan has completed before slideshow starts
-    if not scan_ready_event.is_set():
-      logger.info("Waiting for initial file scan to complete after Firefox screens")
-      scan_ready_event.wait()
 
-    logger.info("Initial file scan completed, proceeding to slideshow")
-    nexttm = 0.0
-    iFiles = []
-    nFi = 0
-    next_pic_num = 0
     sfg = None # slide for foreground
     sbg = None # slide for background
     
-    with scan_lock:
-      if scan_result is not None:
-        iFiles = scan_result
-        nFi = len(iFiles)
-        scan_result = None
-        current_fs_state = scan_fs_state
-        next_pic_num = 0
-        num_run_through = 0
-
-        logger.info("Initial file list applied: %d images", nFi)
-    # if nFi == 0:
-    #   logger.error('No files selected!')
-    #   exit()
-    # images list (initially empty, filled by background scan)
-   
+   # 6) Comprobar que hay imágenes
+    if nFi == 0:
+        logger.error('No image files found!')
+        os.system(CMD_SCREEN_OFF)
+        DISPLAY.destroy()
+        return
     
   
     
@@ -740,44 +825,6 @@ def main(
                               spacing="F", space=0.02, colour=(1.0, 1.0, 1.0, 1.0))
     text2.add_text_block(timeblock)
        
-    #Retrieve last image number to restart the slideshow from config.num file
-    #Retrieve next directory check time
-    
-    # cacheddata=(0,0,last_file_change,next_check_tm)
-    # try:
-    #   with open(config_file+".num",'r') as f:
-    #     cacheddata=json.load(f)
-    #     num_run_through=cacheddata[0]
-    #     next_pic_num=cacheddata[1]
-    #     last_file_change=cacheddata[2]
-    #     next_check_tm=cacheddata[3]
-    # except:
-    #   num_run_through=0
-    #   next_pic_num=0    
-      
-    cacheddata = (0, 0, None, next_check_tm)
-    try:
-        with open(config_file + ".num", "r") as f:
-            cacheddata = json.load(f)
-
-        num_run_through = cacheddata[0]
-        next_pic_num = cacheddata[1]
-        current_fs_state = cacheddata[2]
-        next_check_tm = cacheddata[3]
-
-        logger.info(
-            "Restored state: run=%d pic=%d fs_state=%s",
-            num_run_through,
-            next_pic_num,
-            current_fs_state
-        )
-
-    except Exception as e:
-        logger.info("No previous state restored (%s)", str(e))
-        num_run_through = 0
-        next_pic_num = 0
-        current_fs_state = None
-    
     if (next_check_tm < time.time()) :  #if stored check time is in the past, make it "now"
       next_check_tm = time.time()
     logger.info("Start time %s",time.strftime(config.TIME_FORMAT,time.localtime()))
@@ -941,6 +988,18 @@ def main(
         logger.debug("tm es %d; nexttm es %d; la resta %d",tm,nexttm,tm-nexttm)
         slide_state="loading"
         logger.debug("Going to %s",slide_state)
+      
+      # Lanzar rescan periódico si toca
+      if time.time() > next_check_tm and not scan_in_progress:
+          logger.info("Launching periodic background scan")
+          scan_in_progress = True
+          scan_ready_event.clear()   # opcional
+          threading.Thread(
+              target=scan_files_thread,
+              args=(startdir, shuffle, content_config_file),
+              daemon=True
+          ).start()
+          
       # State machine implementation
       match slide_state :
         case "loading":
@@ -962,23 +1021,7 @@ def main(
             if next_pic_num >= nFi: # detect if a refresh is needed on the file list
               num_run_through += 1
               next_pic_num = 0
-            #update persistent cached data for restart
-            # cacheddata=(num_run_through,pic_num,last_file_change,next_check_tm)
-            # with open(config_file+".num","w") as f:
-            #   json.dump(cacheddata,f,separators=(',',':'))
-            cacheddata = (
-              num_run_through,
-              pic_num,
-              current_fs_state,
-              next_check_tm
-              )
-            try:
-              with open(config_file + ".num", "w") as f:
-                json.dump(cacheddata, f, separators=(',', ':'))
-            except:
-              logger.warning("Could not persist state")
-              pass
-                             
+     
             # File Open and texture build 
             try:
               temp=time.time()
@@ -1089,62 +1132,56 @@ def main(
             logger.debug("Going to %s",slide_state)
           # State: DISPLAY
         case "display":
-          # Apply background scan result if ready
+          # --- Actualización periódica: aplicar nuevo snapshot si el scan terminó ---
           with scan_lock:
             if scan_result is not None:
-              logger.info("Applying new file list from background scan")
+                logger.info("Applying background rescan result")
 
-            iFiles = scan_result
-            nFi = len(iFiles)
-            scan_result = None
-            current_fs_state = scan_fs_state
-            next_pic_num = 0
-            num_run_through = 0
-        # Persist state
-            cacheddata = (
-              num_run_through,
-              next_pic_num,
-              current_fs_state,
-              next_check_tm
-            )
-            try:
-              with open(config_file + ".num", "w") as f:
-                  json.dump(cacheddata, f, separators=(',', ':'))
-            except Exception as e:
-              logger.warning("Could not persist state: %s", str(e))
+                # 1. Swap de la nueva lista
+                iFiles = scan_result
+                nFi = len(iFiles)
+                scan_result = None
+
+                # Reiniciar posicionamiento para que slideshow sea coherente
+                next_pic_num = 0
+                num_run_through = 0
+
+                # 2. Actualizar fingerprint del filesystem
+                current_fs_state = {"fingerprint": scan_fs_state}
+
+                # 3. Persistir runtime + FS en .num
+                try:
+                    state_data = {
+                        "runtime": {
+                            "num_run_through": num_run_through,
+                            "next_pic_num": next_pic_num,
+                            "next_check_tm": next_check_tm,
+                        },
+                        "fs": current_fs_state,
+                    }
+                    with open(run_config_file, "w") as f:
+                        json.dump(state_data, f, separators=(',', ':'))
+                except Exception as e:
+                    logger.warning("Could not persist .num state after rescan: %s", str(e))
+
+                # 4. Persistir snapshot de iFiles (atómico)
+                try:
+                    snapshot = {
+                        "version": 1,
+                        "created": time.time(),
+                        "fs": {"fingerprint": scan_fs_state},
+                        "files": iFiles
+                    }
+                    atomic_write_json(content_config_file, snapshot)
+                    logger.info("Updated file snapshot (%d entries)", nFi)
+                except Exception as e:
+                    logger.warning("Could not persist snapshot after rescan: %s", str(e))
+
+#render the image
           slide.draw()
-          # if (num_run_through > config.NUMBEROFROUNDS) or (time.time() > next_check_tm) : #re-load images after running through them or exceeded time
-          #   logger.info("Refreshing Files list")
-          #   next_check_tm = time.time() + check_dirs  # Set up the next interval
-          #   try:
-          #     if check_changes(startdir): #rebuild files list if changes happened
-          #       logger.info("Re-Fetching images files, erase config file")
-          #       with open(config_file,'w') as f :
-          #         json.dump('',f) # creates an empty config file, forces directory reload
-          #       iFiles, nFi = get_files(startdir,config_file,shuffle)
-          #       next_pic_num = 0
-          #     else :
-          #       logger.info("No directory changes: do nothing")
-          #   except:
-          #       logger.warning("Error refreshing file list, keep old one")
-          #   num_run_through = 0
-          # Periodic background rescan (no filesystem access in main thread)
-          if time.time() > next_check_tm and not scan_in_progress:
-              logger.info("Launching periodic background scan")
-              scan_in_progress = True
-              threading.Thread(
-                  target=scan_files_thread,
-                  args=(startdir, shuffle),
-                  daemon=True
-              ).start()
-              next_check_tm = time.time() + check_dirs
-
-#render the image        
       #render the text
           text.draw()
           text2.draw()
-
-          # Check if next slide is due now
          
 # Keyboard and button handling
       #delta=time.time()-86400.0
