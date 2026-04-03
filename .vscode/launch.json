@@ -23,6 +23,14 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": ["--geouser","madvic","examples"],
+         },
+                           {
+            "name": "Run in Linux",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["--geouser","madvic","examples"],
          }
    ]
 }

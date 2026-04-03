@@ -731,6 +731,7 @@ def main(
     #   )
     # else: 
     DISPLAY = pi3d.Display.create(x=0, y=0, 
+                                    w=640,h=480,
                                     frames_per_second=FPS,
                                     display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR,
                                     background=BACKGROUND)
