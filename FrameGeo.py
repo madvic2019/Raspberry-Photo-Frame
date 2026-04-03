@@ -1004,7 +1004,7 @@ def main(
               args=(startdir, shuffle, content_config_file),
               daemon=True
           ).start()
-          
+      location=None    
       # State machine implementation
       match slide_state :
         case "loading":
