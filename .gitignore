@@ -5,7 +5,7 @@ libEGL.dll
 __pycache__/*
 
 .vscode/launch.json
-venv/*
+venv*/*
 framegeo.log
 .photo-frame
 .backup-MarcoFotos
