@@ -1004,7 +1004,7 @@ def main(
               args=(startdir, shuffle, content_config_file),
               daemon=True
           ).start()
-      location=None    
+        
       # State machine implementation
       match slide_state :
         case "loading":
@@ -1017,7 +1017,8 @@ def main(
           sbg = sfg # previous photo stored for transition
           sfg = None #Next photo to be loaded
           attempts= 0
-                    
+          location=None  
+          datestruct=None         
           while sfg is None and attempts < 5: # keep going through until a usable picture is found 
         # Calculate next picture index to be shown
             attempts += 1

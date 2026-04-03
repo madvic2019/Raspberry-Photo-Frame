@@ -7,5 +7,6 @@ __pycache__/*
 .vscode/launch.json
 venv*/*
 framegeo.log
-.photo-frame
+.photo-frame*
 .backup-MarcoFotos
+.tmp*
