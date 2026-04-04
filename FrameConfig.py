@@ -35,7 +35,7 @@ else :
    BUTTONS = False
    BROWSER='chromium'
    KEYCOMM='true'
-   TEMPDIR='~/temp'
+   TEMPDIR='/tmp'
    PLATFORM='Linux'
    print("Running on Linux")
    

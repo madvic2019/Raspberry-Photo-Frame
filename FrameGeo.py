@@ -450,7 +450,7 @@ def scan_files_thread(startdir, shuffle, filelist_cache):
         new_files.sort()
 
     # Fingerprint del filesystem
-    fingerprint = (dir_count, file_count, max_mtime)
+    fingerprint = (startdir,dir_count, file_count, max_mtime)
 
     # Construir snapshot para persistir en disco
     snapshot = {
@@ -483,12 +483,13 @@ def scan_files_thread(startdir, shuffle, filelist_cache):
         file_count, dir_count, max_mtime
     )
     
-def snapshot_is_usable(snapshot, fs_state, max_age_seconds):
+def snapshot_is_usable(snapshot, fs_state, rootfolder, max_age_seconds):
     """
     Devuelve True si el snapshot puede reutilizarse:
     - snapshot no es None
     - fingerprint coincide
     - snapshot no es demasiado viejo (opcional)
+    - coincide el directorio de los archivos con el snapshot
     """
     if not snapshot:
         return False
@@ -498,7 +499,9 @@ def snapshot_is_usable(snapshot, fs_state, max_age_seconds):
     snap_fp = snapshot.get("fs", {}).get("fingerprint")
     if snap_fp != fs_state.get("fingerprint"):
         return False
-
+    # Comprueba que el snapshot apunta al mismo directorio que los parámetros
+    if snap_fp[0] != rootfolder:
+      return False
     # Comprobación opcional por antigüedad:
     snap_time = snapshot.get("created")
     if snap_time is None:
@@ -689,7 +692,7 @@ def main(
         file_snapshot = None
 
     # 3) Decidir si reutilizar snapshot o hacer escaneo inicial
-    if snapshot_is_usable(file_snapshot, fs_state, SNAPSHOT_MAX_AGE):
+    if snapshot_is_usable(file_snapshot, fs_state, startdir, SNAPSHOT_MAX_AGE):
         logger.info("Reusing existing iFiles snapshot")
         iFiles = file_snapshot["files"]
         nFi = len(iFiles)
@@ -729,8 +732,7 @@ def main(
                 background=BACKGROUND
                 )
     else: 
-      DISPLAY = pi3d.Display.create(x=0, y=0, 
-                                    w=640,h=480,
+      DISPLAY = pi3d.Display.create(x=0, y=0,
                                     frames_per_second=FPS,
                                     display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR,
                                     background=BACKGROUND)
@@ -1055,6 +1057,8 @@ def main(
               datestruct=None
             try:
               location = get_geo_name(exif_data)
+              save_geo_cache()
+            
             except Exception as e: # NB should really check error
               logger.warning('Error preparing geoname: %s',str(e))
               location = None
@@ -1115,11 +1119,7 @@ def main(
           slide.unif[os2] = 0.0
           slide_state = "transition"
           logger.debug("Going to %s",slide_state)
-        # else:
-        #   textblock.set_text("NO IMAGES SELECTED")
-        #   textblock.colouring.set_colour(alpha=1.0)
-        #   text.regen()
-        #   text.draw()
+
         case "transition":
             # manages transition
           if KENBURNS:
@@ -1146,6 +1146,11 @@ def main(
             logger.debug("Going to %s",slide_state)
           # State: DISPLAY
         case "display":
+          #render the image
+          slide.draw()
+          #render the text
+          text.draw()
+          text2.draw()
           # --- Actualización periódica: aplicar nuevo snapshot si el scan terminó ---
           with scan_lock:
             if scan_result is not None:
@@ -1191,11 +1196,7 @@ def main(
                 except Exception as e:
                     logger.warning("Could not persist snapshot after rescan: %s", str(e))
 
-#render the image
-          slide.draw()
-      #render the text
-          text.draw()
-          text2.draw()
+
          
 # Keyboard and button handling
       #delta=time.time()-86400.0
