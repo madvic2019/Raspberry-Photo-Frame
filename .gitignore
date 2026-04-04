@@ -7,5 +7,5 @@ __pycache__/*
 .vscode/launch.json
 venv*/*
 .tmp*
-.frame*
+.photo-frame*
 framegeo.log
