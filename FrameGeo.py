@@ -719,18 +719,17 @@ def main(
         scan_thread.start()
         
     logger.info("Setting up display")
-    # if config.PLATFORM in ("Windows"):
-      
-    #   DISPLAY = pi3d.Display.create(
-    #       w=1280, h=720,
-    #       x=50, y=50,
-    #       frames_per_second=FPS,
-    #       window_title="FrameGeo",
-    #       display_config=pi3d.DISPLAY_CONFIG_DEFAULT,
-    #       background=BACKGROUND
-    #   )
-    # else: 
-    DISPLAY = pi3d.Display.create(x=0, y=0, 
+    if config.PLATFORM in ("Linux","Windows"):
+      DISPLAY = pi3d.Display.create(
+                w=640, h=480,
+                x=0, y=0,
+                frames_per_second=FPS,
+                window_title="FrameGeo",
+                display_config=pi3d.DISPLAY_CONFIG_DEFAULT,
+                background=BACKGROUND
+                )
+    else: 
+      DISPLAY = pi3d.Display.create(x=0, y=0, 
                                     w=640,h=480,
                                     frames_per_second=FPS,
                                     display_config=pi3d.DISPLAY_CONFIG_HIDE_CURSOR,
@@ -868,8 +867,6 @@ def main(
         k = kbd.read()
         if k != -1:
           logger.debug("Key pressed", tm-nexttm)
-          #nexttm = delta
-          # print(tm - nexttm)
           if k==27 or quit: #ESC
             break
           if k==ord('b'):
