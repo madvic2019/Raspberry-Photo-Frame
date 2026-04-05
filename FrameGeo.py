@@ -287,7 +287,7 @@ def get_geo_name(exif_data):
 
     # ✅ CACHE HIT
     if key in geo_cache:
-        logger.debug("Geo cache hit: %s", key)
+        logger.info("Geo cache hit: %s", key)
         return geo_cache[key]
 
     try:
@@ -388,6 +388,8 @@ def tidy_name(path_name):
     name = os.path.basename(path_name).upper()
     name = ''.join([c for c in name if c in config.CODEPOINTS])
     return name
+  
+
 
 ####################################################
 # New scan files + fill files list on separate Thread
@@ -559,7 +561,7 @@ def main(
     logfile,                      # Log file name
     debug,              # Debug mode
     ) :
-    
+        
     slide_state = "loading"
     global backup_dir,paused,geoloc,last_file_change,kb_up,screen,logger,scan_result,scan_in_progress,scan_fs_state
   # Set up logging      
@@ -724,7 +726,7 @@ def main(
     logger.info("Setting up display")
     if config.PLATFORM in ("Linux","Windows"):
       DISPLAY = pi3d.Display.create(
-                w=640, h=480,
+                w=1280, h=1080,
                 x=0, y=0,
                 frames_per_second=FPS,
                 window_title="FrameGeo",
@@ -766,7 +768,7 @@ def main(
                 scan_result = None
                 num_run_through = 0
                 next_pic_num = 0
-
+                next_check_tm=time.time()+check_dirs
                 logger.info("Initial file list applied: %d images", nFi)
 
         # Persistir nuevo estado runtime + fs
@@ -833,7 +835,7 @@ def main(
     text2.add_text_block(timeblock)
        
     if (next_check_tm < time.time()) :  #if stored check time is in the past, make it "now"
-      next_check_tm = time.time()
+      next_check_tm = time.time()+check_dirs
     logger.info("Start time %s",time.strftime(config.TIME_FORMAT,time.localtime()))
     logger.info("Next Check time %s",time.strftime(config.TIME_FORMAT,time.localtime(next_check_tm)))
     logger.info("Starting with round number %d",num_run_through)
@@ -1019,6 +1021,7 @@ def main(
           attempts= 0
           location=None  
           datestruct=None         
+          im=None
           while sfg is None and attempts < 5: # keep going through until a usable picture is found 
         # Calculate next picture index to be shown
             attempts += 1
@@ -1033,8 +1036,8 @@ def main(
               temp=time.time()
               im = Image.open(iFiles[pic_num])
               logger.info("foto numero %d %s",pic_num,iFiles[pic_num])
-            except:
-              logger.error("Error Opening File %s",iFiles[pic_num])
+            except Exception as e:
+              logger.error("Error Opening File: %s: %s",e,iFiles[pic_num])
               continue
             # EXIF data and geolocation analysis
             # define some default values
@@ -1079,7 +1082,10 @@ def main(
                   sfg = None
                   logger.warning("Error loading texture: %s", str(e))
                   continue
-                         
+          if im is None: #Failed to load after 5 attempts, move on
+            logger.error("Error Opening File %s",iFiles[pic_num])
+            continue
+               
           nexttm = tm+interval #Time points to next interval 
           
   
@@ -1195,6 +1201,7 @@ def main(
                     logger.info("Updated file snapshot (%d entries)", nFi)
                 except Exception as e:
                     logger.warning("Could not persist snapshot after rescan: %s", str(e))
+                next_check_tm=time.time()+check_dirs #update next check time
 
 
          
