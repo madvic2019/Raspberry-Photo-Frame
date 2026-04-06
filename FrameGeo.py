@@ -753,7 +753,10 @@ def main(
       while True:  # stay with weather and solar production until scanner finishes
         launchTiempo(weathertime/2) # show weather forecast for weathertime/2 seconds 
         launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
-        if not reuse_snapshot and scan_ready_event.is_set():
+        if not reuse_snapshot:
+          if scan_ready_event.wait():
+            break
+        else:
           break
     
     # 5) Si hubo escaneo inicial en background, asegurarse de que ha terminado
