@@ -205,28 +205,52 @@ if config.BUTTONS and config.PLATFORM == "Raspberry Pi":
 
 last_file_change = 0
 
-def launchTiempo(delay,scanner={"scanner",None},wait={"wait",None}) :
+def launchTiempo(delay,scanner=None,wait=None) :
+  global scan_in_progress
+  poll_interval=0.1
   #proc=subprocess.Popen(['surf','-F','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   proc=subprocess.Popen([config.BROWSER,'--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   logger.info("Launch Weather Forecast with pid %d",proc.pid)
-  time.sleep(30)
+  
   if config.PLATFORM == "Raspberry Pi":
+    time.sleep(30)
     subprocess.Popen([config.KEYCOMM,'key','Down','Down','Down','Down','mousemove','0','0'])
-    if scanner is not None:
-      scanner.join(wait)
-    else:
-      time.sleep(delay)
+  
+  if scanner is not None:
+    start=time.monotonic()
+    while True:
+      if not scan_in_progress:
+        break
+      if wait is not None:
+        elapsed=time.monotonic()-start
+        if elapsed > wait:
+          break
+      time.sleep(poll_interval)
+  else:
+    time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
   logger.info("process %d killed",proc.pid)
 
-def launchSolar(delay,scanner={"scanner",None},wait={"wait",None}) :
+def launchSolar(delay,scanner=None,wait=None) :
+  global scan_in_progress
+  poll_interval=0.1
   proc=subprocess.Popen([config.BROWSER,'--kiosk','http://pi4.local:1880/ui'])
   subprocess.Popen([config.KEYCOMM,'mousemove','0','0'])
   logger.info("Launch Solar Production with pid %d",proc.pid)
+  
   if scanner is not None:
-    scanner.join(wait)
-  else:  
+    start=time.monotonic()
+    while True:
+      if not scan_in_progress:
+        break
+      if wait is not None:
+        elapsed=time.monotonic()-start
+        if elapsed > wait:
+          break
+      time.sleep(poll_interval)
+  else:
     time.sleep(delay)
+    
   os.kill(proc.pid, signal.SIGTERM)
   logger.info("process %d killed",proc.pid)
 
@@ -411,7 +435,7 @@ def scan_files_thread(startdir, shuffle, filelist_cache):
         el hilo principal haga el swap cuando quiera.
     """
     global scan_result, scan_in_progress, scan_fs_state
-
+    scan_in_progress = True
     logger.info("Background scan started in %s", startdir)
 
     new_files = []
