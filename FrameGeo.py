@@ -205,22 +205,28 @@ if config.BUTTONS and config.PLATFORM == "Raspberry Pi":
 
 last_file_change = 0
 
-def launchTiempo(delay) :
+def launchTiempo(delay,scanner={"scanner",None},wait={"wait",None}) :
   #proc=subprocess.Popen(['surf','-F','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   proc=subprocess.Popen([config.BROWSER,'--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   logger.info("Launch Weather Forecast with pid %d",proc.pid)
   time.sleep(30)
   if config.PLATFORM == "Raspberry Pi":
     subprocess.Popen([config.KEYCOMM,'key','Down','Down','Down','Down','mousemove','0','0'])
-    time.sleep(delay)
+    if scanner is not None:
+      scanner.join(wait)
+    else:
+      time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
   logger.info("process %d killed",proc.pid)
 
-def launchSolar(delay) :
+def launchSolar(delay,scanner={"scanner",None},wait={"wait",None}) :
   proc=subprocess.Popen([config.BROWSER,'--kiosk','http://pi4.local:1880/ui'])
   subprocess.Popen([config.KEYCOMM,'mousemove','0','0'])
   logger.info("Launch Solar Production with pid %d",proc.pid)
-  time.sleep(delay)
+  if scanner is not None:
+    scanner.join(wait)
+  else:  
+    time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
   logger.info("process %d killed",proc.pid)
 
@@ -750,15 +756,10 @@ def main(
     
     if weathertime != 0:
       logger.info("launching weather forecast and solar production status")
-      while True:  # stay with weather and solar production until scanner finishes
-        launchTiempo(weathertime/2) # show weather forecast for weathertime/2 seconds 
-        launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
-        if not reuse_snapshot:
-          if scan_ready_event.wait():
-            break
-        else:
-          break
-    
+      launchTiempo(weathertime/2,scanner=scan_thread,wait=weathertime) # show weather forecast for weathertime/2 seconds 
+      launchSolar(weathertime/2,scanner=scan_thread) # show status of solar production for (weathertime/2) seconds
+        
+          
     # 5) Si hubo escaneo inicial en background, asegurarse de que ha terminado
     if not reuse_snapshot:
         if not scan_ready_event.is_set():
