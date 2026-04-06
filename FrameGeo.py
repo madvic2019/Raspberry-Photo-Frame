@@ -226,8 +226,7 @@ def launchTiempo(delay,scanner=None,wait=None) :
         if elapsed > wait:
           break
       time.sleep(poll_interval)
-  else:
-    time.sleep(delay)
+  time.sleep(delay)
   os.kill(proc.pid, signal.SIGTERM)
   logger.info("process %d killed",proc.pid)
 
@@ -248,8 +247,7 @@ def launchSolar(delay,scanner=None,wait=None) :
         if elapsed > wait:
           break
       time.sleep(poll_interval)
-  else:
-    time.sleep(delay)
+  time.sleep(delay)
     
   os.kill(proc.pid, signal.SIGTERM)
   logger.info("process %d killed",proc.pid)
