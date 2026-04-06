@@ -751,8 +751,8 @@ def main(
     if weathertime != 0:
       logger.info("launching weather forecast and solar production status")
       while True:  # stay with weather and solar production until scanner finishes
-        launchTiempo(wait=weathertime/2,scanning=scan_thread) # show weather forecast for weathertime/2 seconds 
-        launchSolar(wait=weathertime/2,scanning=scan_thread) # show status of solar production for (weathertime/2) seconds
+        launchTiempo(weathertime/2) # show weather forecast for weathertime/2 seconds 
+        launchSolar(weathertime/2) # show status of solar production for (weathertime/2) seconds
         if not reuse_snapshot and scan_ready_event.is_set():
           break
     
