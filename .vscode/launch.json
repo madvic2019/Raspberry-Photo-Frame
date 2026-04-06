@@ -30,7 +30,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["--geouser","madvic","--dir-check","300","/mnt/c/Users/diazv/OneDrive/Fotos Para Subir/Semana Santa 2026"],
+            "args": ["--geouser","madvic","--dir-check","300","~/OneDrive/Fotos Para Subir/Semana Santa 2026"],
          }
    ]
 }

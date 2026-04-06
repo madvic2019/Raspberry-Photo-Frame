@@ -26,7 +26,7 @@ elif "aarch64" == uname.machine or "armv7l" == uname.machine:
    BUTTONS = True
    BROWSER='chromium-browser'
    KEYCOMM='xdotool'
-   TEMPDIR='/frododata/temp'
+   TEMPDIR='/mnt/frododata/temp'
    PLATFORM='Raspberry Pi'
    print("Running on Raspberry Pi")
    from gpiozero import Button
