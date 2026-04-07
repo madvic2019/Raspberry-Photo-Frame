@@ -1026,10 +1026,11 @@ def main(
         logger.debug("Going to %s",slide_state)
       
       # Lanzar rescan periódico si toca
-      if time.time() > next_check_tm and not scan_in_progress:
+      if tm > next_check_tm and not scan_in_progress:
           logger.info("Launching periodic background scan")
           scan_in_progress = True
           scan_ready_event.clear()   # opcional
+          next_check_tm = tm+check_dirs
           threading.Thread(
               target=scan_files_thread,
               args=(startdir, shuffle, content_config_file),
@@ -1113,10 +1114,7 @@ def main(
                   continue
           if im is None: #Failed to load after 5 attempts, move on
             logger.error("Error Opening File %s",iFiles[pic_num])
-            continue
-               
-          nexttm = tm+interval #Time points to next interval 
-          
+            continue          
   
 # Prepare the different texts to be shown
           overlay_text= "" #this will host the text on screen 
@@ -1187,6 +1185,7 @@ def main(
           text.draw()
           text2.draw()
           # --- Actualización periódica: aplicar nuevo snapshot si el scan terminó ---
+          
           with scan_lock:
             if scan_result is not None:
                 logger.info("Applying background rescan result")
