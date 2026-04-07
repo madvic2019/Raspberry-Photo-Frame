@@ -1202,21 +1202,6 @@ def main(
                 # 2. Actualizar fingerprint del filesystem
                 current_fs_state = {"fingerprint": scan_fs_state}
 
-                # 3. Persistir runtime + FS en .num
-                try:
-                    state_data = {
-                        "runtime": {
-                            "num_run_through": num_run_through,
-                            "next_pic_num": next_pic_num,
-                            "next_check_tm": next_check_tm,
-                        },
-                        "fs": current_fs_state,
-                    }
-                    with open(run_config_file, "w") as f:
-                        json.dump(state_data, f, separators=(',', ':'))
-                except Exception as e:
-                    logger.warning("Could not persist .num state after rescan: %s", str(e))
-
                 # 4. Persistir snapshot de iFiles (atómico)
                 try:
                     snapshot = {
@@ -1230,6 +1215,20 @@ def main(
                 except Exception as e:
                     logger.warning("Could not persist snapshot after rescan: %s", str(e))
                 next_check_tm=time.time()+check_dirs #update next check time
+          # Persistir runtime + FS en .num          
+          try:
+              state_data = {
+                  "runtime": {
+                      "num_run_through": num_run_through,
+                      "next_pic_num": next_pic_num,
+                      "next_check_tm": next_check_tm,
+                  },
+                  "fs": current_fs_state,
+              }
+              with open(run_config_file, "w") as f:
+                  json.dump(state_data, f, separators=(',', ':'))
+          except Exception as e:
+              logger.warning("Could not persist .num state after rescan: %s", str(e))
 
 
          

@@ -30,7 +30,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["--geouser","madvic","--dir-check","300","--weather-time","10","~/frodomedia/photo/Fotos/iPhone-Marivi"],
+            "args": ["--geouser","madvic","--dir-check","300","--weather-time","10","/mnt/c/Users/victor/OneDrive/Pictures-Gandalf"],
          }
    ]
 }
