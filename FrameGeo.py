@@ -683,7 +683,7 @@ def main(
     file_snapshot = None
     run_config_file = config_file + ".num"
     content_config_file = config_file + ".files.json"
-    SNAPSHOT_MAX_AGE = 24 * 3600   # 24 horas
+    SNAPSHOT_MAX_AGE = 7 * 24 * 3600   # una  semana
     scan_result=None
     nexttm=0
     scan_fs_state=None
@@ -933,7 +933,7 @@ def main(
                     tmp_im.orientation = Rotation[CCW][tmp_im.orientation] # changes EXIF data orientation parameter              
                     with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                       tmp_file.write(tmp_im.get_file())
-                    next_pic_num -=1 # force reload on screen
+                    next_pic_num = pic_num # force reload on screen
             except:
                 logger.error("Error when rotating photo")
             #    nexttm = delta
@@ -950,7 +950,7 @@ def main(
                     tmp_im.orientation = Rotation[CW][tmp_im.orientation] # changes EXIF data orientation parameter              
                     with open(iFiles[pic_num],'wb') as tmp_file: # Write the file with new exif orientation
                       tmp_file.write(tmp_im.get_file())
-                    next_pic_num -=1 # force reload on screen
+                    next_pic_num = pic_num # force reload on screen
             except:
                 logger.error("Error when rotating photo")
     
