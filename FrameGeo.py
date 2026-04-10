@@ -703,8 +703,7 @@ def main(
         class ChangeHandler(FileSystemEventHandler):
             def on_any_event(self, event):
                 nonlocal needs_rescan
-                if not event.is_directory:
-                    needs_rescan = True
+                needs_rescan = True
 
         observer = Observer()
         observer.schedule(ChangeHandler(), startdir, recursive=True)
