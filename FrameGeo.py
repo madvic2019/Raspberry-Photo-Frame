@@ -55,7 +55,13 @@ import setproctitle  # to set process title
 import threading
 
 import FrameConfig as config
-
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
+    HAS_WATCHDOG = True
+except ImportError:
+    HAS_WATCHDOG = False
+    
 def atomic_write_json(path, data):
     """
     Escribe un JSON de forma atómica:
@@ -687,7 +693,26 @@ def main(
     scan_result=None
     nexttm=0
     scan_fs_state=None
-    scan_in_progress=False  
+    scan_in_progress=False
+    needs_rescan=False
+    
+    #####################################################
+    # Setup wathdog to capture inodes notifications
+    #####################################################
+    if HAS_WATCHDOG:
+        class ChangeHandler(FileSystemEventHandler):
+            def on_any_event(self, event):
+                nonlocal needs_rescan
+                if not event.is_directory:
+                    needs_rescan = True
+
+        observer = Observer()
+        observer.schedule(ChangeHandler(), startdir, recursive=True)
+        observer.start()
+        logger.info("Inotify observer started for: %s", startdir)
+    else:
+        logger.warning("watchdog library not found; falling back to periodic polling only")
+
     
     # 1) Leer estado persistente de ejecución + FS desde config_file + ".num"
     try:
@@ -1026,8 +1051,9 @@ def main(
         logger.debug("Going to %s",slide_state)
       
       # Lanzar rescan periódico si toca
-      if tm > next_check_tm and not scan_in_progress:
-          logger.info("Launching periodic background scan")
+      if (tm > next_check_tm or needs_rescan) and not scan_in_progress:
+          logger.info("Launching background scan (Trigger: %s)", "Inotify" if needs_rescan else "Timer")
+          needs_rescan = False
           scan_in_progress = True
           scan_ready_event.clear()   # opcional
           next_check_tm = tm+check_dirs
@@ -1248,6 +1274,9 @@ def main(
     logger.info("Screen OFF")
     DISPLAY.destroy()
     save_geo_cache()
+    if HAS_WATCHDOG:
+        observer.stop()
+        observer.join()
     logger.info("End of slideshow")
     # end of main function    
 

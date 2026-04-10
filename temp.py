@@ -7,14 +7,7 @@ try:
     HAS_WATCHDOG = True
 except ImportError:
     HAS_WATCHDOG = False
-
-import exif
-from geopy.geocoders import GeoNames
-    weathertime,                    # Time to show weather forecast in seconds
-    logfile,                      # Log file name
-    debug,              # Debug mode
-    ) :
-        
+    
     slide_state = "loading"
     next_check_tm = time.time() + check_dirs
     time_dot=True
