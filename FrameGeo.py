@@ -704,6 +704,7 @@ def main(
             def on_any_event(self, event):
                 nonlocal needs_rescan
                 needs_rescan = True
+                logger.warning("Detected a change in folder %s",event.dest_path)
 
         observer = Observer()
         observer.schedule(ChangeHandler(), startdir, recursive=True)
