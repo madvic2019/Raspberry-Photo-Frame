@@ -703,24 +703,20 @@ def main(
     if HAS_WATCHDOG:
         class ChangeHandler(FileSystemEventHandler):
             def on_created(self, event):
-                nonlocal needs_rescan
-                needs_rescan = True
+                needs_rescan_event.set()
                 logger.warning("Detected a creation in folder %s",event.src_path)
             def on_deleted(self, event):
-                nonlocal needs_rescan
-                needs_rescan = True
+                needs_rescan_event.set()
                 logger.warning("Detected a deletion in folder %s",event.src_path)
             def on_modified(self, event):
-                nonlocal needs_rescan
-                needs_rescan = True
+                needs_rescan_event.set()
                 logger.warning("Detected a modification in folder %s",event.src_path)
             def on_moved(self, event):
-                nonlocal needs_rescan
-                needs_rescan = True
+                needs_rescan_event.set()
                 logger.warning("Detected a move from folder %s to %s",event.src_path,event.dest_path)
 
         
-        logger.warning("About to start observer (polling) on %s (recursive=%s)", startdir, True)
+        logger.warning("About to start observer on %s (recursive=%s)", startdir, True)
         t0 = time.monotonic()
 
         observer = Observer(timeout=1.0)
@@ -1068,8 +1064,8 @@ def main(
         logger.debug("Going to %s",slide_state)
       
       # Lanzar rescan periódico si toca
-      if (tm > next_check_tm or needs_rescan) and not scan_in_progress:
-          logger.info("Launching background scan (Trigger: %s)", "Inotify" if needs_rescan else "Timer")
+      if (tm > next_check_tm or needs_rescan_event.is_set()) and not scan_in_progress:
+          logger.info("Launching background scan (Trigger: %s)", "Inotify" if needs_rescan_event.is_set() else "Timer")
           needs_rescan = False
           scan_in_progress = True
           scan_ready_event.clear()   # opcional
