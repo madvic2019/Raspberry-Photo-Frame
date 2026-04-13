@@ -1067,19 +1067,23 @@ def main(
       if (tm > next_check_tm or needs_rescan_event.is_set()) and not scan_in_progress:
           logger.info("Launching background scan (Trigger: %s)", "Inotify" if needs_rescan_event.is_set() else "Timer")
           needs_rescan_event.clear()
-      nexttm = tm + interval
-      a = 0.0 # alpha - proportion front image to back
-      sbg = sfg # previous photo stored for transition
-      sfg = None #Next photo to be loaded
-      attempts= 0
-      location=None  
-      datestruct=None         
-      im=None
+      
+
       # State machine implementation
       match slide_state :
+
         case "loading":
+          nexttm = tm + interval
+          a = 0.0 # alpha - proportion front image to back
+          sbg = sfg # previous photo stored for transition
+          sfg = None #Next photo to be loaded
+          attempts= 0
+          location=None  
+          datestruct=None         
+          im=None
           while sfg is None and attempts < 5: # keep going through until a usable picture is found 
         # Calculate next picture index to be shown
+
             attempts += 1
             pic_num = next_pic_num
             next_pic_num += 1
