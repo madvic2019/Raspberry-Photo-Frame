@@ -701,10 +701,22 @@ def main(
     #####################################################
     if HAS_WATCHDOG:
         class ChangeHandler(FileSystemEventHandler):
-            def on_any_event(self, event):
+            def on_created(self, event):
                 nonlocal needs_rescan
                 needs_rescan = True
-                logger.warning("Detected a change in folder %s",event.dest_path)
+                logger.warning("Detected a creation in folder %s",event.dest_path)
+            def on_deleted(self, event):
+                nonlocal needs_rescan
+                needs_rescan = True
+                logger.warning("Detected a deletion in folder %s",event.dest_path)
+            def on_modified(self, event):
+                nonlocal needs_rescan
+                needs_rescan = True
+                logger.warning("Detected a modification in folder %s",event.dest_path)
+            def on_moved(self, event):
+                nonlocal needs_rescan
+                needs_rescan = True
+                logger.warning("Detected a move in folder %s",event.dest_path)
 
         observer = Observer()
         observer.schedule(ChangeHandler(), startdir, recursive=True)
