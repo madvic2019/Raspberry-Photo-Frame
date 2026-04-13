@@ -56,7 +56,7 @@ import threading
 
 import FrameConfig as config
 try:
-    from watchdog.observers import Observer
+    from watchdog.observers.polling import PollingObserver as Observer
     from watchdog.events import FileSystemEventHandler
     HAS_WATCHDOG = True
 except ImportError:
