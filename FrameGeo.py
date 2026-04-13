@@ -56,7 +56,7 @@ import threading
 
 import FrameConfig as config
 try:
-    from watchdog.observers.polling import PollingObserver as Observer
+    from watchdog.observers.inotify import InotifyObserver as Observer
     from watchdog.events import FileSystemEventHandler
     HAS_WATCHDOG = True
 except ImportError:
@@ -694,7 +694,8 @@ def main(
     nexttm=0
     scan_fs_state=None
     scan_in_progress=False
-    needs_rescan=False
+    needs_rescan_event=threading.Event()
+    observer=None
     
     #####################################################
     # Setup wathdog to capture inodes notifications
@@ -704,24 +705,28 @@ def main(
             def on_created(self, event):
                 nonlocal needs_rescan
                 needs_rescan = True
-                logger.warning("Detected a creation in folder %s",event.dest_path)
+                logger.warning("Detected a creation in folder %s",event.src_path)
             def on_deleted(self, event):
                 nonlocal needs_rescan
                 needs_rescan = True
-                logger.warning("Detected a deletion in folder %s",event.dest_path)
+                logger.warning("Detected a deletion in folder %s",event.src_path)
             def on_modified(self, event):
                 nonlocal needs_rescan
                 needs_rescan = True
-                logger.warning("Detected a modification in folder %s",event.dest_path)
+                logger.warning("Detected a modification in folder %s",event.src_path)
             def on_moved(self, event):
                 nonlocal needs_rescan
                 needs_rescan = True
-                logger.warning("Detected a move in folder %s",event.dest_path)
+                logger.warning("Detected a move from folder %s to %s",event.src_path,event.dest_path)
 
-        observer = Observer()
+        
+        logger.warning("About to start observer (polling) on %s (recursive=%s)", startdir, True)
+        t0 = time.monotonic()
+
+        observer = Observer(timeout=1.0)
         observer.schedule(ChangeHandler(), startdir, recursive=True)
         observer.start()
-        logger.info("Inotify observer started for: %s", startdir)
+        logger.info("Inotify observer started in %.2fs for: %s",time.monotonic() - t0, startdir)
     else:
         logger.warning("watchdog library not found; falling back to periodic polling only")
 
