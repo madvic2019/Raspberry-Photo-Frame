@@ -1066,31 +1066,18 @@ def main(
       # Lanzar rescan periódico si toca
       if (tm > next_check_tm or needs_rescan_event.is_set()) and not scan_in_progress:
           logger.info("Launching background scan (Trigger: %s)", "Inotify" if needs_rescan_event.is_set() else "Timer")
-          needs_rescan = False
-          scan_in_progress = True
-          scan_ready_event.clear()   # opcional
-          next_check_tm = tm+check_dirs
-          threading.Thread(
-              target=scan_files_thread,
-              args=(startdir, shuffle, content_config_file),
-              daemon=True
-          ).start()
-        
+          needs_rescan_event.clear()
+      nexttm = tm + interval
+      a = 0.0 # alpha - proportion front image to back
+      sbg = sfg # previous photo stored for transition
+      sfg = None #Next photo to be loaded
+      attempts= 0
+      location=None  
+      datestruct=None         
+      im=None
       # State machine implementation
       match slide_state :
         case "loading":
-      #check if there are files to display  
-          #if nFi > 0:
-          # If needed, display new photo
-          
-          nexttm = tm + interval
-          a = 0.0 # alpha - proportion front image to back
-          sbg = sfg # previous photo stored for transition
-          sfg = None #Next photo to be loaded
-          attempts= 0
-          location=None  
-          datestruct=None         
-          im=None
           while sfg is None and attempts < 5: # keep going through until a usable picture is found 
         # Calculate next picture index to be shown
             attempts += 1
