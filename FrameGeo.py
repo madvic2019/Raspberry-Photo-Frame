@@ -700,32 +700,70 @@ def main(
     #####################################################
     # Setup wathdog to capture inodes notifications
     #####################################################
-    if HAS_WATCHDOG:
-        class ChangeHandler(FileSystemEventHandler):
-            def on_created(self, event):
-                needs_rescan_event.set()
-                logger.warning("Detected a creation in folder %s",event.src_path)
-            def on_deleted(self, event):
-                needs_rescan_event.set()
-                logger.warning("Detected a deletion in folder %s",event.src_path)
-            def on_modified(self, event):
-                needs_rescan_event.set()
-                logger.warning("Detected a modification in folder %s",event.src_path)
-            def on_moved(self, event):
-                needs_rescan_event.set()
-                logger.warning("Detected a move from folder %s to %s",event.src_path,event.dest_path)
+    # if HAS_WATCHDOG:
+    #     class ChangeHandler(FileSystemEventHandler):
+    #         def on_created(self, event):
+    #             needs_rescan_event.set()
+    #             logger.warning("Detected a creation in folder %s",event.src_path)
+    #         def on_deleted(self, event):
+    #             needs_rescan_event.set()
+    #             logger.warning("Detected a deletion in folder %s",event.src_path)
+    #         def on_modified(self, event):
+    #             needs_rescan_event.set()
+    #             logger.warning("Detected a modification in folder %s",event.src_path)
+    #         def on_moved(self, event):
+    #             needs_rescan_event.set()
+    #             logger.warning("Detected a move from folder %s to %s",event.src_path,event.dest_path)
 
         
-        logger.warning("About to start observer on %s (recursive=%s)", startdir, True)
-        t0 = time.monotonic()
+    #     logger.warning("About to start observer on %s (recursive=%s)", startdir, True)
+    #     t0 = time.monotonic()
 
-        observer = Observer(timeout=1.0)
-        observer.schedule(ChangeHandler(), startdir, recursive=True)
-        observer.start()
-        logger.info("Inotify observer started in %.2fs for: %s",time.monotonic() - t0, startdir)
+    #     observer = Observer(timeout=1.0)
+    #     observer.schedule(ChangeHandler(), startdir, recursive=True)
+    #     observer.start()
+    #     logger.info("Inotify observer started in %.2fs for: %s",time.monotonic() - t0, startdir)
+    # else:
+    #     logger.warning("watchdog library not found; falling back to periodic polling only")
+
+      
+    observer = None
+    observer_ready = threading.Event()
+
+    def start_watchdog_thread():
+        global observer
+        try:
+            from watchdog.observers.inotify import InotifyObserver
+            observer = InotifyObserver()
+            observer.schedule(ChangeHandler(), startdir, recursive=True)
+
+            t0 = time.monotonic()
+            observer.start()        # <-- aquí tarda ~138s en tu caso
+            dt = time.monotonic() - t0
+
+            logger.warning(
+                "InotifyObserver started in %.1f seconds for %s",
+                dt, startdir
+            )
+            observer_ready.set()
+
+        except Exception as e:
+            logger.error("Failed to start watchdog observer: %s", e)
+
+
+    # Lanzar el watchdog en background
+    if HAS_WATCHDOG:
+        threading.Thread(
+            target=start_watchdog_thread,
+            name="watchdog-observer",
+            daemon=True
+        ).start()
+        logger.info("Watchdog observer thread launched (non-blocking)")
     else:
-        logger.warning("watchdog library not found; falling back to periodic polling only")
-
+        logger.warning("watchdog library not found; falling back to periodic polling")
+    
+    
+    
     
     # 1) Leer estado persistente de ejecución + FS desde config_file + ".num"
     try:
