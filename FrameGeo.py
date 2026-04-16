@@ -1104,7 +1104,6 @@ def main(
       # Lanzar rescan periódico si toca
       if (tm > next_check_tm or needs_rescan_event.is_set()) and not scan_in_progress:
           logger.info("Launching background scan (Trigger: %s)", "Inotify" if needs_rescan_event.is_set() else "Timer")
-          logger.info("Launching initial background scan")
           needs_rescan_event.clear()
           scan_in_progress = True
           scan_ready_event.clear()
