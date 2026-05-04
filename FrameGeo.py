@@ -716,9 +716,9 @@ def main(
             def on_deleted(self, event):
                 needs_rescan_event.set()
                 logger.warning("Detected a deletion in folder %s",event.src_path)
-            # def on_modified(self, event):
-            #     needs_rescan_event.set()
-            #     logger.warning("Detected a modification in folder %s",event.src_path)
+            def on_modified(self, event):
+                needs_rescan_event.set()
+                logger.warning("Detected a modification in folder %s",event.src_path)
             def on_moved(self, event):
                 needs_rescan_event.set()
                 logger.warning("Detected a move from folder %s to %s",event.src_path,event.dest_path)
