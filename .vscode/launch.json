@@ -30,7 +30,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["--geouser","madvic","--dir-check","30000","--weather-time","10","/mnt/c/Users/diazv/OneDrive/Pictures-Gandalf"],
+            "args": ["--geouser","madvic","--dir-check","30000","--weather-time","10","/mnt/y/photo/Backup"],
          }
    ]
 }
