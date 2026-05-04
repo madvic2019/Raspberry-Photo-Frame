@@ -535,16 +535,20 @@ def snapshot_is_usable(snapshot, fs_state, rootfolder, max_age_seconds):
 
     snap_fp = snapshot.get("fs", {}).get("fingerprint")
     if snap_fp != fs_state.get("fingerprint"):
+        logger.warning("Rescan due to wrong fingerprint")
         return False
     # Comprueba que el snapshot apunta al mismo directorio que los parámetros
     if snap_fp[0] != rootfolder:
+      logger.warning("rescan due to different folder")
       return False
     # Comprobación opcional por antigüedad:
     snap_time = snapshot.get("created")
     if snap_time is None:
+        logger.warning("Rescan due to snapshot missing")
         return False
 
     if time.time() - snap_time > max_age_seconds:
+        logger.warning("Rescan due to snapshot age")
         return False
 
     return True
@@ -655,7 +659,9 @@ def main(
 
     ##############################################
     # Setup cache for gelocation information
-    global geo_cache, geo_cache_dirty
+    global geo_cache, geo_cache_dirty, geo_cache_hits, geo_requests
+    geo_cache_hits = 0
+    geo_requests = 0
 
     try:
       if os.path.exists(GEO_CACHE_FILE):
@@ -678,7 +684,7 @@ def main(
     #####################################################
     # --- Estado inicial y lectura de persistencia ---
 
-    global current_fs_state, scan_in_progress, scan_thread, geo_cache_hits, geo_requests
+    global current_fs_state, scan_in_progress, scan_thread
 
     # Estado por defecto
     iFiles = []
@@ -697,8 +703,7 @@ def main(
     scan_in_progress=False
     needs_rescan_event=threading.Event()
     observer=None
-    geo_cache_hits = 0
-    geo_requests = 0
+
     
     #####################################################
     # Setup wathdog to capture inodes notifications
