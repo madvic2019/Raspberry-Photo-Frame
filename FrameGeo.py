@@ -218,9 +218,8 @@ def launchTiempo(delay,scanner=None,wait=None) :
   proc=subprocess.Popen([config.BROWSER,
                          '--kiosk', 
                          '--disable-gpu',
-                         '--disable-software-rasterizer',
-                         '--disable-gpu-compositing',
                          '--no-sandbox',
+                         '--log-lvel=3',
                          'https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   logger.info("Launch Weather Forecast with pid %d",proc.pid)
   
@@ -248,10 +247,9 @@ def launchSolar(delay,scanner=None,wait=None) :
   proc=subprocess.Popen([config.BROWSER,
                          '--kiosk', 
                          '--disable-gpu',
-                         '--disable-software-rasterizer',
-                         '--disable-gpu-compositing',
                          '--no-sandbox',
                          '--kiosk',
+                         '--log-level=3',
                          'http://pi4.local:1880/ui'])
   subprocess.Popen([config.KEYCOMM,'mousemove','0','0'])
   logger.info("Launch Solar Production with pid %d",proc.pid)
