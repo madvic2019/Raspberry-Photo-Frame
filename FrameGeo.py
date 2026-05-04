@@ -321,7 +321,7 @@ def get_geo_name(exif_data):
     geo_requests += 1
     # ✅ CACHE HIT
     if key in geo_cache:
-        logger.info("Geo cache hit: %s", key)
+        #logger.info("Geo cache hit: %s", key)
         geo_cache_hits += 1
         return geo_cache[key]
     
