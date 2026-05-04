@@ -24,7 +24,7 @@ if uname.system == "Windows" :
 elif "aarch64" == uname.machine or "armv7l" == uname.machine: 
    PI3DDEMO = '/usr/local/lib/pi3d_demos' # requires copying downloaded demos from https://github.com/pi3d/pi3d_demos/archive/master.zip
    BUTTONS = True
-   BROWSER='chromium-browser'
+   BROWSER='chromium-browser --disable-gpu --disable-software-rasterizer --disable-gpu-compositing --no-sandbox'
    KEYCOMM='xdotool'
    TEMPDIR='/mnt/frododata/temp'
    PLATFORM='Raspberry Pi'
@@ -33,7 +33,7 @@ elif "aarch64" == uname.machine or "armv7l" == uname.machine:
 else :
    PI3DDEMO = '/home/victor/pi3d_demos' # assume in a Linux environment it will be located directly on user home
    BUTTONS = False
-   BROWSER='chromium'
+   BROWSER="chromium"
    KEYCOMM='true'
    TEMPDIR='/tmp'
    PLATFORM='Linux'
