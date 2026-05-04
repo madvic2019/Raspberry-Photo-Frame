@@ -1177,7 +1177,7 @@ def main(
               location = get_geo_name(exif_data)
               save_geo_cache()
               if geo_requests > 0:
-                logger.info("Geo Cache hit rate: %d %",(geo_cache_hits/geo_requests)*100)
+                logger.info("Geo Cache hit rate: %d \%",(geo_cache_hits/geo_requests)*100)
             
             except Exception as e: # NB should really check error
               logger.warning('Error preparing geoname: %s',str(e))
