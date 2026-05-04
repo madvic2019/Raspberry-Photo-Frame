@@ -1335,9 +1335,9 @@ def main(
     logger.info("Screen OFF")
     DISPLAY.destroy()
     save_geo_cache()
-    if HAS_WATCHDOG:
-        observer.stop()
-        observer.join()
+    # if HAS_WATCHDOG:
+    #     #observer.stop()
+    #     observer.join()
     logger.info("End of slideshow")
     # end of main function    
 
