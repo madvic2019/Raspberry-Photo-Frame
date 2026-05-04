@@ -308,7 +308,7 @@ def get_coordinates(geotags):
 #   return geocoder
 
 def get_geo_name(exif_data):
-    global geo_cache, geo_cache_dirty
+    global geo_cache, geo_cache_dirty, geo_cache_hits, geo_requests
 
     coords = get_coordinates(get_geotagging(exif_data))
     if coords is None or geoloc is None:
@@ -322,8 +322,9 @@ def get_geo_name(exif_data):
     # ✅ CACHE HIT
     if key in geo_cache:
         logger.info("Geo cache hit: %s", key)
+        geo_cache_hits += 1
         return geo_cache[key]
-
+    geo_requests += 1
     try:
         loc = geoloc.reverse(
             (lat, lon),
@@ -677,7 +678,7 @@ def main(
     #####################################################
     # --- Estado inicial y lectura de persistencia ---
 
-    global current_fs_state, scan_in_progress, scan_thread
+    global current_fs_state, scan_in_progress, scan_thread, geo_cache_hits, geo_requests
 
     # Estado por defecto
     iFiles = []
@@ -696,6 +697,8 @@ def main(
     scan_in_progress=False
     needs_rescan_event=threading.Event()
     observer=None
+    geo_cache_hits = 0
+    geo_requests = 0
     
     #####################################################
     # Setup wathdog to capture inodes notifications
@@ -1168,6 +1171,8 @@ def main(
             try:
               location = get_geo_name(exif_data)
               save_geo_cache()
+              if geo_requests > 0:
+                logger.info("Geo Cache hit rate: ",round(geo_cache_hits/geo_requests,2))
             
             except Exception as e: # NB should really check error
               logger.warning('Error preparing geoname: %s',str(e))
