@@ -318,13 +318,13 @@ def get_geo_name(exif_data):
     lat = round(coords[0], 3)
     lon = round(coords[1], 3)
     key = f"{lat},{lon}"
-
+    geo_requests += 1
     # ✅ CACHE HIT
     if key in geo_cache:
         logger.info("Geo cache hit: %s", key)
         geo_cache_hits += 1
         return geo_cache[key]
-    geo_requests += 1
+    
     try:
         loc = geoloc.reverse(
             (lat, lon),
