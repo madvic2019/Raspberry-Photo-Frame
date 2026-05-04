@@ -837,7 +837,7 @@ def main(
                 x=0, y=0,
                 frames_per_second=FPS,
                 window_title="FrameGeo",
-                display_config=pi3d.DISPLAY_CONFIG_DEFAULT,
+                display_config=pi3d.DISPLAY_CONFIG_FULLSCREEN,
                 background=BACKGROUND
                 )
     else: 
