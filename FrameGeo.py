@@ -215,7 +215,13 @@ def launchTiempo(delay,scanner=None,wait=None) :
   global scan_in_progress
   poll_interval=0.1
   #proc=subprocess.Popen(['surf','-F','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
-  proc=subprocess.Popen([config.BROWSER,'--kiosk','https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
+  proc=subprocess.Popen([config.BROWSER,
+                         '--kiosk', 
+                         '--disable-gpu',
+                         '--disable-software-rasterizer',
+                         '--disable-gpu-compositing',
+                         '--no-sandbox',
+                         'https://www.aemet.es/es/eltiempo/prediccion/municipios/alcala-de-henares-id28005'])
   logger.info("Launch Weather Forecast with pid %d",proc.pid)
   
   if config.PLATFORM == "Raspberry Pi":
@@ -239,7 +245,14 @@ def launchTiempo(delay,scanner=None,wait=None) :
 def launchSolar(delay,scanner=None,wait=None) :
   global scan_in_progress
   poll_interval=0.1
-  proc=subprocess.Popen([config.BROWSER,'--kiosk','http://pi4.local:1880/ui'])
+  proc=subprocess.Popen([config.BROWSER,
+                         '--kiosk', 
+                         '--disable-gpu',
+                         '--disable-software-rasterizer',
+                         '--disable-gpu-compositing',
+                         '--no-sandbox',
+                         '--kiosk',
+                         'http://pi4.local:1880/ui'])
   subprocess.Popen([config.KEYCOMM,'mousemove','0','0'])
   logger.info("Launch Solar Production with pid %d",proc.pid)
   
