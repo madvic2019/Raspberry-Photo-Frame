@@ -831,7 +831,7 @@ def main(
             reuse_snapshot = True
             current_fs_state = fs_state
     else:
-        logger.info("Snapshot invalid or outdated — initial scan required")
+        logger.info("Snapshot invalid or outdated  initial scan required")
         reuse_snapshot = False
 
     # 4) Si no se puede reutilizar snapshot, lanzar escaneo inicial en background
